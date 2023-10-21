@@ -1,0 +1,9 @@
+{
+  "custom_sound": {
+    "category": "master",
+    "sounds": [
+      "disx_sounds:custom_sound"
+    ]
+  }
+
+}

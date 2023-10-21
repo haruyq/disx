@@ -1,0 +1,92 @@
+plugins {
+    id "architectury-plugin" version "3.4-SNAPSHOT"
+    id "dev.architectury.loom" version "1.1-SNAPSHOT" apply false
+}
+
+architectury {
+    minecraft = rootProject.minecraft_version
+}
+
+subprojects {
+    apply plugin: "dev.architectury.loom"
+
+    loom {
+        silentMojangMappingsLicense()
+    }
+
+    repositories {
+
+    }
+
+    dependencies {
+        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+        // The following line declares the mojmap mappings, you may use other mappings as well
+        mappings loom.officialMojangMappings()
+        // The following line declares the yarn mappings you may select this one as well.
+        // mappings "net.fabricmc:yarn:1.19.4+build.2:v2"
+
+
+    }
+}
+
+allprojects {
+    apply plugin: "java"
+    apply plugin: "architectury-plugin"
+    apply plugin: "maven-publish"
+
+    archivesBaseName = rootProject.archives_base_name
+    version = rootProject.mod_version
+    group = rootProject.maven_group
+
+    repositories {
+        maven { url 'https://jitpack.io' }
+
+        mavenCentral()
+
+        maven {url 'https://mvnrepository.com/artifact/org.json/json'}
+
+        maven { url 'https://jitpack.io' }
+
+        maven { url 'https://mvnrepository.com/artifact/com.github.sealedtx/java-youtube-downloader'}
+
+        maven{ url "https://maven.arbjerg.dev/releases" }
+    }
+
+    dependencies{
+        implementation 'dev.arbjerg:lavaplayer:2.0.2'
+        implementation group: 'org.json', name: 'json', version: '20230618'
+        implementation group: 'com.github.sealedtx', name: 'java-youtube-downloader', version: '3.2.3'
+        implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+        implementation "dev.arbjerg:lavadsp:0.7.8"
+        /*
+        include 'com.alibaba:fastjson:1.2.83'
+        include 'com.fasterxml.jackson.core:jackson-annotations:2.10.0'
+        include 'com.fasterxml.jackson.core:jackson-core:2.10.0'
+        include 'com.fasterxml.jackson.core:jackson-databind:2.10.0'
+        include 'com.github.oshi:oshi-core:6.2.2'
+        include 'com.google.code.gson:gson:2.10'
+        include 'com.github.walkyst.JAADec-fork:jaadec-ext-aac:0.1.3'
+        include 'com.github.walkyst:lavaplayer-fork:1.4.3'
+        include 'com.github.walkyst.lavaplayer-fork:lava-common:1.4.3'
+        include 'com.github.walkyst.lavaplayer-fork:lavaplayer:1.4.3'
+        include 'com.github.walkyst.lavaplayer-fork:lavaplayer-ext-format-xm:1.4.3'
+        include 'com.github.walkyst.lavaplayer-fork:lavaplayer-ext-youtube-rotator:1.4.3'
+        include 'com.github.walkyst.lavaplayer-fork:lavaplayer-stream-merger:1.4.3'
+        include 'com.github.walkyst.lavaplayer-fork:lavaplayer-test-samples:1.4.3'
+        include 'com.github.walkyst:ibxm-fork:a75'
+        include 'com.github.walkyst:lavaplayer-natives-fork:1.0.2'
+        include group: 'org.json', name: 'json', version: '20230618'
+        include group: 'com.github.sealedtx', name: 'java-youtube-downloader', version: '3.2.3'
+        include 'org.junit.jupiter:junit-jupiter:5.8.1'
+        include 'org.mozilla:rhino:1.7.14'
+        include 'org.mozilla:rhino-engine:1.7.14'*/
+    }
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+        options.release = 17
+    }
+
+    java {
+        withSourcesJar()
+    }
+}
