@@ -1,7 +1,6 @@
 package com.aviatorrob06.disx.client_only;
 
-import com.sedmelluq.discord.lavaplayer.filter.PcmFilterFactory;
-import com.sedmelluq.discord.lavaplayer.filter.volume.VolumePostProcessor;
+import com.mojang.authlib.minecraft.TelemetrySession;
 import com.sedmelluq.discord.lavaplayer.format.AudioDataFormat;
 import com.sedmelluq.discord.lavaplayer.format.AudioPlayerInputStream;
 import com.sedmelluq.discord.lavaplayer.player.*;
@@ -9,12 +8,11 @@ import com.sedmelluq.discord.lavaplayer.player.event.AudioEvent;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
-import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
+import com.sedmelluq.discord.lavaplayer.track.*;
 import com.sedmelluq.discord.lavaplayer.track.playback.AllocatingAudioFrameBuffer;
 import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrameBuffer;
 import com.sedmelluq.discord.lavaplayer.track.playback.AudioProcessingContext;
+import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
@@ -22,6 +20,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
@@ -41,10 +40,12 @@ import static com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats.C
 @Environment(EnvType.CLIENT)
 public class DisxAudioPlayer {
 
+    Logger logger = LoggerFactory.getLogger("Disx");
+
     AudioDataFormat format = COMMON_PCM_S16_BE;
     AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
 
-    AudioPlayer player = playerManager.createPlayer();;
+    AudioPlayer player = playerManager.createPlayer();
     Line.Info info;
     SourceDataLine line;
     FloatControl volumeControl;
@@ -64,7 +65,11 @@ public class DisxAudioPlayer {
     boolean dynamicVolumeCalculations = false;
     boolean fromSoundCommand = false;
 
+    boolean playerCanHear = false;
+
     boolean dynamicDistanceCalculations = false;
+
+    YoutubeAudioSourceManager youtube;
 
 
 
@@ -94,8 +99,8 @@ public class DisxAudioPlayer {
         } catch (LineUnavailableException e) {
             throw new RuntimeException(e);
         }
-
-        AudioSourceManagers.registerRemoteSources(playerManager);
+        youtube = new YoutubeAudioSourceManager();
+        playerManager.registerSourceManager(youtube);
     }
 
 
@@ -138,18 +143,26 @@ public class DisxAudioPlayer {
                 double volumeConfig = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.RECORDS).get();
                 double volumeConfigMaster = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.MASTER).get();
                 if (volumeConfig != 0.0){
-                    if (volumeCalc > -80f){
+                    if (volumeCalc > -80f && volumeConfig != 0 && volumeConfigMaster != 0){
                         try {
-                            Minecraft.getInstance().getMusicManager().stopPlaying();
+                            if (Minecraft.getInstance().getMusicManager().isPlayingMusic(Minecraft.getInstance().getSituationalMusic())){
+                                Minecraft.getInstance().getMusicManager().stopPlaying();
+                            }
                         } catch (NullPointerException e){
-
+                            logger.error("Audio Player at " + blockPos.toString() + " was unsuccessful in pausing client music. Error: " + e);
                         }
                     }
                 }
                 volumeConfig *= volumeConfigMaster;
                 volumeConfig *= 100;
+                int volumeConfigInt = (int) volumeConfig;
+                player.setVolume(volumeConfigInt);
+                if (volumeConfigInt <= 0){
+                    playerCanHear = false;
+                } else {
+                    playerCanHear = true;
+                }
 
-                player.setVolume((int) volumeConfig);
                 /*try {
                     Vec3d relativePos = new Vec3d(blockPos.getX() - currentpos.x,
                             blockPos.getY() - currentpos.y,
@@ -222,6 +235,7 @@ public class DisxAudioPlayer {
     public String playTrack(String videoId, int seconds){
         String url = "https://www.youtube.com/watch?v=" + videoId;
         final String[] exceptionStr = {null};
+        AudioItem audItem = youtube.loadItem(playerManager, new AudioReference(videoId, ""));
         playerManager.loadItem(url, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
@@ -230,8 +244,7 @@ public class DisxAudioPlayer {
                 System.out.println(seconds);
                 System.out.println((long) seconds);
                 player.playTrack(track);
-                DisxClientPacketIndex.ClientPackets.playerSuccessStatus("Success", blockPos, videoId, fromSoundCommand);
-                System.out.println("called for send packet");
+                DisxClientPacketIndex.ClientPackets.playerSuccessStatus("Success", blockPos, videoId, fromSoundCommand, playerCanHear);
                 CompletableFuture.runAsync(DisxAudioPlayer.this::playAudio);
                 double volumeConfig = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.RECORDS).get();
                 if (volumeConfig != 0.0){
@@ -254,14 +267,17 @@ public class DisxAudioPlayer {
                 exceptionStr[0] = "Failed";
                 System.out.println(exception.getMessage().toString() + ": " + exception.getCause().toString());
             }
+
         });
+
         if (exceptionStr[0] == null){
             return "success";
         } else {
             System.out.println(exceptionStr[0]);
-            DisxClientPacketIndex.ClientPackets.playerSuccessStatus(exceptionStr[0], blockPos, videoId, fromSoundCommand);
+            DisxClientPacketIndex.ClientPackets.playerSuccessStatus(exceptionStr[0], blockPos, videoId, fromSoundCommand, playerCanHear);
             return exceptionStr[0];
         }
+
     }
 
     public void pausePlayer(){

@@ -1,12 +1,10 @@
 package com.aviatorrob06.disx.commands;
 
 import com.aviatorrob06.disx.DisxMain;
+import com.aviatorrob06.disx.DisxSystemMessages;
+import com.aviatorrob06.disx.DisxYoutubeTitleScraper;
 import com.aviatorrob06.disx.commands.suggestionProviders.DisxTypeSuggestionProvider;
 import com.aviatorrob06.disx.items.DisxCustomDisc;
-import com.github.kiulian.downloader.YoutubeDownloader;
-import com.github.kiulian.downloader.downloader.request.RequestVideoInfo;
-import com.github.kiulian.downloader.downloader.response.Response;
-import com.github.kiulian.downloader.model.videos.VideoInfo;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -15,7 +13,12 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
+import com.sedmelluq.discord.lavaplayer.source.youtube.*;
+import com.sedmelluq.discord.lavaplayer.track.AudioReference;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
+import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.registries.Registries;
@@ -24,11 +27,17 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+
+import static com.aviatorrob06.disx.DisxMain.debug;
+
 public class DisxGenCommand {
-    static YoutubeDownloader ytDownloader = new YoutubeDownloader();
+    //static YoutubeDownloader ytDownloader = new YoutubeDownloader();
 
     public static void registerCommand(){
         CommandRegistrationEvent.EVENT.register(((dispatcher, registry, selection) -> {
@@ -40,7 +49,7 @@ public class DisxGenCommand {
 
     private static int run(CommandContext<CommandSourceStack> context) {
         Logger logger = LoggerFactory.getLogger("disx");
-        logger.info("Command Run");
+        if (debug) logger.info("Command Run");
         String argumentResult = context.getArgument("discType", String.class);
         String videoId = context.getArgument("videoId", String.class);
         context.getSource().sendSystemMessage(Component.literal("Your disc is generating, one moment please..."));
@@ -60,25 +69,27 @@ public class DisxGenCommand {
             CompoundTag stackNbt = stack.getOrCreateTag();
             videoId.replace(" ", "");
             stackNbt.putString("videoId", videoId);
-            System.out.println(videoId);
-            RequestVideoInfo videoInfoRequest = new RequestVideoInfo(videoId);
-            Response<VideoInfo> videoInfoResponse = ytDownloader.getVideoInfo(videoInfoRequest);
-            VideoInfo videoInfo = videoInfoResponse.data();
-            if (!videoInfoResponse.ok()){
-                throw new Exception("Video Not Found");
-            }
-            String videoTitle = videoInfo.details().title();
+            if (debug) System.out.println(videoId);
+            //RequestVideoInfo videoInfoRequest = new RequestVideoInfo(videoId);
+            //if (debug) System.out.println("videoInfoRequest Generated");
+            //Response<VideoInfo> videoInfoResponse = null;
+            //if (debug) System.out.println("videoInfoResponse initialized");
+            //videoInfoResponse = ytDownloader.getVideoInfo(videoInfoRequest);
+            String videoTitle = DisxYoutubeTitleScraper.getYouTubeVideoTitle(videoId);
             stack.setTag(stackNbt);
             stack.setHoverName(Component.literal(videoTitle));
-            context.getSource().getPlayer().getInventory().add(stack);
-            System.out.println("success??..." + "custom_disc_" + argumentResult);
+            context.getSource().getPlayer().addItem(stack);
+            if (debug) System.out.println("success??..." + "custom_disc_" + argumentResult);
         } catch (Exception e) {
             if (e.getMessage().equals("Video Not Found")) {
-                context.getSource().sendFailure(Component.literal("Video Not Found!"));
+                System.out.println("Video Not Found");
+                DisxSystemMessages.noVideoFound(context.getSource().getPlayer());
             } else if (e.getMessage().equals("No Internet Connection")) {
-                context.getSource().sendFailure(Component.literal("No Internet Connection"));
+                System.out.println("No Internet Connection");
+                DisxSystemMessages.noInternetErrorMessage(context.getSource().getPlayer());
             } else if (e.getMessage().equals("Invalid Disc Type")){
-                context.getSource().sendFailure(Component.literal("Invalid Disc Type!"));
+                System.out.println("Invalid Disc Type");
+                DisxSystemMessages.invalidDiscType(context.getSource().getPlayer());
             } else {
                 System.out.println(e.getMessage() + e.getCause());
             }

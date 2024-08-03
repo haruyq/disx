@@ -13,6 +13,8 @@ import net.minecraft.world.entity.player.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.aviatorrob06.disx.DisxMain.debug;
+
 public class DisxServerPacketIndex {
 
     public static void registerServerPacketReceivers(){
@@ -24,22 +26,23 @@ public class DisxServerPacketIndex {
 
         public static void onPlayerSuccessStatusReceive(FriendlyByteBuf buf, NetworkManager.PacketContext context) {
             Logger logger = LoggerFactory.getLogger("disx");
-            logger.info("got packet");
+            if (debug) logger.info("got packet");
             String status = buf.readUtf();
             BlockPos blockPos = buf.readBlockPos();
             String videoId = buf.readUtf();
-            Boolean boo = buf.readBoolean();
+            Boolean fromSoundCommand = buf.readBoolean();
+            Boolean playerCanHear = buf.readBoolean();
             Player player = context.getPlayer();
-            if (status.equals("Video Not Found") && boo.equals(true)){
+            if (status.equals("Video Not Found") && (fromSoundCommand.equals(true) || playerCanHear.equals(true))){
                 DisxSystemMessages.noVideoFound(player);
             }
-            if (status.equals("Failed") && boo.equals(true)){
+            if (status.equals("Failed") && (fromSoundCommand.equals(true) || playerCanHear.equals(true))){
                 DisxSystemMessages.errorLoading(player);
             }
-            if (status.equals("Playlist") && boo.equals(true)){
+            if (status.equals("Playlist") && (fromSoundCommand.equals(true) || playerCanHear.equals(true))){
                 DisxSystemMessages.playlistError(player);
             }
-            if (status.equals("Success") && boo.equals(true)){
+            if (status.equals("Success") && (fromSoundCommand.equals(true))){
                 DisxSystemMessages.playingAtLocation(player, blockPos, videoId);
             }
         }

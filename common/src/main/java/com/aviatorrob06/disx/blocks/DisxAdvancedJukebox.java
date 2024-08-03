@@ -16,12 +16,16 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -29,7 +33,9 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -43,19 +49,25 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import static com.aviatorrob06.disx.DisxMain.debug;
+
 public class DisxAdvancedJukebox extends BaseEntityBlock {
 
     public static RegistrySupplier<Block> blockRegistration;
     public static RegistrySupplier<Item> blockItemRegistration;
 
+    Logger logger = LoggerFactory.getLogger("disx");
     protected DisxAdvancedJukebox(Properties properties) {
         super(properties);
     }
 
+    BlockEntity blockEntity;
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new DisxAdvancedJukeboxEntity(blockPos, blockState);
+        this.blockEntity = new DisxAdvancedJukeboxEntity(blockPos, blockState);
+        return this.blockEntity;
     }
 
     @Override
@@ -65,14 +77,14 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
 
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-        Logger logger = LoggerFactory.getLogger("disx");
+
         if (!level.isClientSide() && interactionHand == InteractionHand.MAIN_HAND){
             ItemStack stack = player.getMainHandItem();
             Item item = null;
             if (stack != null){
                 item = stack.getItem();
             }
-            DisxAdvancedJukeboxEntity entity = (DisxAdvancedJukeboxEntity) level.getBlockEntity(blockPos);
+            DisxAdvancedJukeboxEntity entity = (DisxAdvancedJukeboxEntity) this.blockEntity;
             // check Internet
             try {
                 HttpRequest testRequest = HttpRequest.newBuilder().uri(new URI("http://www.google.com")).build();
@@ -88,7 +100,7 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                 throw new RuntimeException(e);
             }
             if (entity.isHas_record() && !DisxJukeboxUsageCooldownManager.isOnCooldown(blockPos)){
-                logger.info("does have record, taking it out");
+                if (debug) logger.info("does have record, taking it out");
                 DisxJukeboxUsageCooldownManager.updateCooldown(blockPos);
                 String discType = entity.getDiscType();
                 Item newItem = DisxMain.REGISTRAR_MANAGER.get().get(Registries.ITEM).get(new ResourceLocation("disx","custom_disc_" + discType));
@@ -102,12 +114,12 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                 player.getInventory().add(newStack);
                 entity.setChanged();
                 DisxServerAudioPlayerRegistry.removeFromRegistry(blockPos, videoId);
-                logger.info("current has record value: " + entity.isHas_record());
+                if (debug) logger.info("[advanced jukebox] current has record value: " + entity.isHas_record());
             } else if (!entity.isHas_record() && !DisxJukeboxUsageCooldownManager.isOnCooldown(blockPos)){
                 DisxJukeboxUsageCooldownManager.updateCooldown(blockPos);
                 if (item instanceof DisxCustomDisc){
                     if (stack.getTag() != null && stack.getTag().get("videoId") != null && stack.getTag().getString("videoId") != ""){
-                        logger.info("doesn't have record, putting it in");
+                        if (debug) logger.info("[advanced jukebox] doesn't have record, putting it in");
                         stack.setCount(stack.getCount() - 1);
                         String videoId = stack.getTag().getString("videoId");
                         String discType = ((DisxCustomDisc) item).getDiscType();
@@ -120,12 +132,48 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                         entity.saveWithFullMetadata();
                         DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, false, player);
                         DisxServerPacketIndex.ServerPackets.nowPlayingMessage(videoId, player);
-                        logger.info("current has record value: " + entity.isHas_record());
+                        if (debug) logger.info("[advanced jukebox] current has record value: " + entity.isHas_record());
                     }
                 }
             }
         }
         return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
+    }
+
+    public void onBlockDestroy(LevelAccessor levelAccessor, BlockPos blockPos){
+        DisxAdvancedJukeboxEntity entity = (DisxAdvancedJukeboxEntity) this.blockEntity;
+        if (entity == null){
+            if (debug) logger.info("[advanced jukebox] block destroy initialized, no block entity found");
+        } else
+        if (!levelAccessor.isClientSide() && entity.isHas_record()) {
+            if (debug) logger.info("[advanced jukebox] block destroy initialized, has record; removing record");
+            String discType = entity.getDiscType();
+            String videoId = entity.getVideoId();
+            String discName = entity.getDiscName();
+            Item newItem = DisxMain.REGISTRAR_MANAGER.get().get(Registries.ITEM).get(new ResourceLocation("disx","custom_disc_" + discType));
+            ItemStack newItemStack = new ItemStack(newItem, 1);
+            CompoundTag compoundTag = newItemStack.getOrCreateTag();
+            compoundTag.putString("videoId", videoId);
+            newItemStack.setTag(compoundTag);
+            newItemStack.setHoverName(Component.literal(discName));
+            entity.setHas_record(false);
+            ItemEntity itemEntity = new ItemEntity(entity.getLevel(), blockPos.getX(), blockPos.getY(), blockPos.getZ(), newItemStack);
+            levelAccessor.addFreshEntity(itemEntity);
+
+            DisxServerAudioPlayerRegistry.removeFromRegistry(blockPos, videoId);
+        }
+    }
+
+    @Override
+    public void wasExploded(Level level, BlockPos blockPos, Explosion explosion) {
+        onBlockDestroy(level, blockPos);
+        super.wasExploded(level, blockPos, explosion);
+    }
+
+    @Override
+    public void destroy(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
+        onBlockDestroy(levelAccessor, blockPos);
+        super.destroy(levelAccessor, blockPos, blockState);
     }
 
     public static void registerBlock(Registrar<Block> registry){

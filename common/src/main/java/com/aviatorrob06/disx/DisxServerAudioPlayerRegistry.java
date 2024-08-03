@@ -1,9 +1,5 @@
 package com.aviatorrob06.disx;
 
-import com.github.kiulian.downloader.YoutubeDownloader;
-import com.github.kiulian.downloader.downloader.request.RequestVideoInfo;
-import com.github.kiulian.downloader.downloader.response.Response;
-import com.github.kiulian.downloader.model.videos.VideoInfo;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -17,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
+import static com.aviatorrob06.disx.DisxMain.debug;
 
 public class DisxServerAudioPlayerRegistry {
 
@@ -71,13 +69,9 @@ public class DisxServerAudioPlayerRegistry {
 
         boolean forceStop = false;
         public void videoTimer(BlockPos pos, String videoId){
-            System.out.println("initializing timer");
-            YoutubeDownloader downloader = new YoutubeDownloader();
-            RequestVideoInfo request = new RequestVideoInfo(videoId);
-            Response<VideoInfo> response = downloader.getVideoInfo(request);
-            VideoInfo info = response.data();
-            long length = (long) info.details().lengthSeconds();
-            System.out.println(length);
+            if (debug) System.out.println("initializing timer");
+            int length = DisxYoutubeLengthScraper.getYoutubeVideoLength(videoId);
+            if (debug) System.out.println(length);
             startTime = System.currentTimeMillis();
             while (elapsedSeconds <= (length * 1000) && forceStop == false){
                 int test = 0;

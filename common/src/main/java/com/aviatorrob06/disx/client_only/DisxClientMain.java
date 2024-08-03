@@ -1,5 +1,6 @@
 package com.aviatorrob06.disx.client_only;
 
+import com.aviatorrob06.disx.TestAudioTrack;
 import com.mojang.authlib.minecraft.client.MinecraftClient;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.event.events.client.ClientPlayerEvent;
@@ -9,6 +10,8 @@ import dev.architectury.utils.Env;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+
+import java.util.concurrent.CompletableFuture;
 
 public class DisxClientMain {
     public static void onInitializeClient(){
@@ -26,6 +29,7 @@ public class DisxClientMain {
                     }
                 }
             })));
+            CompletableFuture.runAsync(TestAudioTrack::run);
         }
     }
 

@@ -20,12 +20,15 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 public class DisxMain {
     public static final String MOD_ID = "disx";
 
     public static final Logger LOGGER = LoggerFactory.getLogger("disx");
+
+    public static final boolean debug = true;
 
 
     public static final Supplier<RegistrarManager> REGISTRAR_MANAGER = Suppliers.memoize(() -> RegistrarManager.get(MOD_ID));

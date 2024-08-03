@@ -1,6 +1,6 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.1-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "1.4.+" apply false
 }
 
 architectury {
@@ -50,23 +50,25 @@ allprojects {
         maven { url 'https://mvnrepository.com/artifact/com.github.sealedtx/java-youtube-downloader'}
 
         maven{ url "https://maven.arbjerg.dev/releases" }
+
+        maven{ url 'https://mvnrepository.com/artifact/org.jsoup/jsoup'}
+
+        maven{url "https://maven.lavalink.dev/releases"}
     }
 
     dependencies{
-        implementation 'dev.arbjerg:lavaplayer:2.0.2'
-        implementation group: 'org.json', name: 'json', version: '20230618'
-        implementation group: 'com.github.sealedtx', name: 'java-youtube-downloader', version: '3.2.3'
-        implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
-        implementation "dev.arbjerg:lavadsp:0.7.8"
-        /*
-        include 'com.alibaba:fastjson:1.2.83'
-        include 'com.fasterxml.jackson.core:jackson-annotations:2.10.0'
-        include 'com.fasterxml.jackson.core:jackson-core:2.10.0'
-        include 'com.fasterxml.jackson.core:jackson-databind:2.10.0'
-        include 'com.github.oshi:oshi-core:6.2.2'
-        include 'com.google.code.gson:gson:2.10'
-        include 'com.github.walkyst.JAADec-fork:jaadec-ext-aac:0.1.3'
-        include 'com.github.walkyst:lavaplayer-fork:1.4.3'
+        //implementation 'dev.arbjerg:lavaplayer:2.0.2'
+        //implementation group: 'org.json', name: 'json', version: '20230618'
+        //implementation group: 'com.github.sealedtx', name: 'java-youtube-downloader', version: '3.2.3'
+        //implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+        //implementation "dev.arbjerg:lavadsp:0.7.8"
+
+        implementation 'com.alibaba:fastjson:1.2.83'
+        implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.3'
+        implementation 'com.fasterxml.jackson.core:jackson-core:2.15.3'
+        implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
+        implementation 'com.github.walkyst.JAADec-fork:jaadec-ext-aac:0.1.3'
+        /*include 'com.github.walkyst:lavaplayer-fork:1.4.3'
         include 'com.github.walkyst.lavaplayer-fork:lava-common:1.4.3'
         include 'com.github.walkyst.lavaplayer-fork:lavaplayer:1.4.3'
         include 'com.github.walkyst.lavaplayer-fork:lavaplayer-ext-format-xm:1.4.3'
@@ -75,11 +77,24 @@ allprojects {
         include 'com.github.walkyst.lavaplayer-fork:lavaplayer-test-samples:1.4.3'
         include 'com.github.walkyst:ibxm-fork:a75'
         include 'com.github.walkyst:lavaplayer-natives-fork:1.0.2'
-        include group: 'org.json', name: 'json', version: '20230618'
-        include group: 'com.github.sealedtx', name: 'java-youtube-downloader', version: '3.2.3'
-        include 'org.junit.jupiter:junit-jupiter:5.8.1'
-        include 'org.mozilla:rhino:1.7.14'
-        include 'org.mozilla:rhino-engine:1.7.14'*/
+        */
+        implementation 'com.github.sealedtx:java-youtube-downloader:3.2.3'
+        implementation group: 'org.json', name: 'json', version: '20230618'
+        //implementation group: 'com.github.sealedtx', name: 'java-youtube-downloader', version: '3.2.3'
+        implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+        implementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+        implementation 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+        implementation 'org.junit.jupiter:junit-jupiter-params:5.8.1'
+        implementation 'org.junit.platform:junit-platform-commons:1.8.1'
+        implementation 'org.junit.platform:junit-platform-engine:1.8.1'
+        implementation 'org.mozilla:rhino:1.7.14'
+        implementation 'org.mozilla:rhino-engine:1.7.14'
+        implementation 'org.opentest4j:opentest4j:1.2.0'
+        implementation 'com.github.aikaterna:lavaplayer-natives:original-SNAPSHOT'
+        implementation "dev.arbjerg:lavaplayer:2.1.2"
+        implementation "dev.lavalink.youtube:common:1.2.0"
+
+        implementation group: 'org.jsoup', name: 'jsoup', version: '1.16.2'
     }
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
