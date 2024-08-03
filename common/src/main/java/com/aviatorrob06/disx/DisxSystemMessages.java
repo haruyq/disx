@@ -14,29 +14,29 @@ import net.minecraft.world.entity.player.Player;
 
 public class DisxSystemMessages {
     public static void onPlayReadyNoInternet(Player player) {
-        player.sendSystemMessage(Component.literal("[Disx] Warning: no internet connection found!").withStyle(ChatFormatting.RED));
+        player.sendSystemMessage(Component.literal("Disx Warning: no internet connection found!").withStyle(ChatFormatting.RED));
     }
 
     public static void noInternetErrorMessage(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
-        serverPlayer.sendSystemMessage(Component.literal("Error: No internet connection!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
+        serverPlayer.sendSystemMessage(Component.literal("Disx Error: No internet connection!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
     }
 
     public static void errorLoading(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
-        serverPlayer.sendSystemMessage(Component.literal("Unknown error loading video!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
+        serverPlayer.sendSystemMessage(Component.literal("Disx Error: Unknown error loading video!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
 
     }
 
     public static void noVideoFound(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
-        serverPlayer.sendSystemMessage(Component.literal("Error: No video found!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
+        serverPlayer.sendSystemMessage(Component.literal("Disx Error: No video found!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
 
     }
 
     public static void playlistError(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
-        serverPlayer.sendSystemMessage(Component.literal("Error: Playlists cannot be played!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
+        serverPlayer.sendSystemMessage(Component.literal("Disx Error: Playlists cannot be used!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
 
     }
 
@@ -44,5 +44,10 @@ public class DisxSystemMessages {
         ServerPlayer serverPlayer = (ServerPlayer) player;
         serverPlayer.sendSystemMessage(Component.literal("Video '" + videoId +"' playing at " + pos.toString()));
         serverPlayer.server.sendSystemMessage(Component.literal(player.getName().getString() + " is playing video " + videoId + " at " + pos.getX() + " " + pos.getY() + " " + pos.getZ()));
+    }
+
+    public static void invalidDiscType(Player player){
+        ServerPlayer serverPlayer = (ServerPlayer) player;
+        serverPlayer.sendSystemMessage(Component.literal("Disx Error: Invalid disc type provided!"));
     }
 }

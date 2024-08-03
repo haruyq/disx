@@ -1,17 +1,18 @@
 modLoader = "javafml"
 loaderVersion = "[45,)"
-#issueTrackerURL = ""
-license = "Insert License Here"
+issueTrackerURL = "https://github.com/AviatorRob/disx"
+license = "Apache 2.0"
 
 [[mods]]
 modId = "disx"
 version = "${version}"
-displayName = "Example Mod"
-authors = "Me!"
+displayName = "Disx"
+authors = "Aviator_Rob"
 description = '''
-This is an example description! Tell everyone what your mod is about!
+Burn YouTube videos' audio onto discs, and play them back in real time!
 '''
-#logoFile = ""
+logoFile = "icon.png"
+state="ALPHA"
 
 [[dependencies.disx]]
 modId = "forge"

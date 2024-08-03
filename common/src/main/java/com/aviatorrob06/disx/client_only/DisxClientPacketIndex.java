@@ -59,12 +59,13 @@ public class DisxClientPacketIndex  {
     }
 
     public class ClientPackets{
-        public static void playerSuccessStatus(String status, BlockPos blockPos, String videoId, Boolean boo){
+        public static void playerSuccessStatus(String status, BlockPos blockPos, String videoId, Boolean fromSoundCommand, Boolean playerCanHear){
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
             buf.writeUtf(status);
             buf.writeBlockPos(blockPos);
             buf.writeUtf(videoId);
-            buf.writeBoolean(boo);
+            buf.writeBoolean(fromSoundCommand);
+            buf.writeBoolean(playerCanHear);
             NetworkManager.sendToServer(new ResourceLocation("disx","playersuccessstatus"), buf);
         }
 

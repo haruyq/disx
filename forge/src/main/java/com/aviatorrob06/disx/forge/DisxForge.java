@@ -14,6 +14,7 @@ import com.sedmelluq.lava.common.natives.NativeLibraryLoader;
 import cpw.mods.jarhandling.SecureJar;
 import dev.architectury.platform.forge.EventBuses;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
