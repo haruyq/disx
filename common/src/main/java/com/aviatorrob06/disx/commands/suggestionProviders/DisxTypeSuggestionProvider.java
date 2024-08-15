@@ -20,6 +20,7 @@ public class DisxTypeSuggestionProvider {
         suggestionsBuilder.suggest("purple");
         suggestionsBuilder.suggest("red");
         suggestionsBuilder.suggest("yellow");
+        suggestionsBuilder.suggest("default");
         return suggestionsBuilder.buildFuture();
     }
 }

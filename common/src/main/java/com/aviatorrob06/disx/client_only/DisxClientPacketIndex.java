@@ -1,5 +1,6 @@
 package com.aviatorrob06.disx.client_only;
 
+import com.aviatorrob06.disx.client_only.gui.screens.DisxStampMakerGUI;
 import dev.architectury.networking.NetworkManager;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
@@ -16,13 +17,15 @@ import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
 import java.util.Set;
 
+@Environment(EnvType.CLIENT)
 public class DisxClientPacketIndex  {
 
     static Logger logger = LoggerFactory.getLogger("disx");
     public static void registerClientPacketReceivers() {
-        NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","audioplayerplayevent"), ((buf, context) -> ClientPacketReceivers.receiveAudioPlayerPlayEvent(buf, context)));
-        NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","serveraudioregistryevent"), ((buf, context) -> ClientPacketReceivers.receiveServerAudioPlayerRegistryEvent(buf, context)));
-        NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","nowplayingmsg"), ((buf, context) -> ClientPacketReceivers.receivePlayMsgEvent(buf, context)));
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","audioplayerplayevent"), (ClientPacketReceivers::receiveAudioPlayerPlayEvent));
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","serveraudioregistryevent"), (ClientPacketReceivers::receiveServerAudioPlayerRegistryEvent));
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","nowplayingmsg"), (ClientPacketReceivers::receivePlayMsgEvent));
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","openvideoidscreen"), (ClientPacketReceivers::receiveOpenVideoIdScreenEvent));
     }
 
     public class ClientPacketReceivers{
@@ -56,6 +59,13 @@ public class DisxClientPacketIndex  {
             Minecraft.getInstance().gui.setNowPlaying(Component.literal("Video '" + videoId + "'"));
         }
 
+        public static void receiveOpenVideoIdScreenEvent(FriendlyByteBuf buf, NetworkManager.PacketContext context){
+            BlockPos blockPos = buf.readBlockPos();
+            Minecraft.getInstance().execute(() -> {
+                DisxStampMakerGUI.setScreen(blockPos);
+            });
+        }
+
     }
 
     public class ClientPackets{
@@ -72,6 +82,16 @@ public class DisxClientPacketIndex  {
         public static void getServerPlayerRegistry(){
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
             NetworkManager.sendToServer(new ResourceLocation("disx","retrieveserverplayerregistry"), buf);
+        }
+
+        public static void pushVideoId(String videoId, BlockPos blockPos){
+            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+            buf.writeUtf(videoId);
+            buf.writeBlockPos(blockPos);
+            NetworkManager.sendToServer(
+                    new ResourceLocation("disx","videoidselection"),
+                    buf
+            );
         }
 
     }

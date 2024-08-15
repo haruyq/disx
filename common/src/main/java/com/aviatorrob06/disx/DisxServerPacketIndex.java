@@ -1,25 +1,37 @@
 package com.aviatorrob06.disx;
 
+import com.aviatorrob06.disx.blocks.DisxStampMaker;
+import com.aviatorrob06.disx.entities.DisxStampMakerEntity;
+import dev.architectury.event.events.common.LifecycleEvent;
+import dev.architectury.event.events.common.TickEvent;
 import dev.architectury.networking.NetworkManager;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.awt.image.VolatileImage;
 
 import static com.aviatorrob06.disx.DisxMain.debug;
 
 public class DisxServerPacketIndex {
 
     public static void registerServerPacketReceivers(){
-        NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","playersuccessstatus"), ((buf, context) -> ServerPacketReceivers.onPlayerSuccessStatusReceive(buf, context)));
-        NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","retrieveserverplayerregistry"), (((buf, context) -> ServerPacketReceivers.onPlayerRegistryRequest(buf, context))));
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","playersuccessstatus"), (ServerPacketReceivers::onPlayerSuccessStatusReceive));
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","retrieveserverplayerregistry"), ((ServerPacketReceivers::onPlayerRegistryRequest)));
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","videoidselection"), ServerPacketReceivers::onVideoIdPushRequest);
     }
 
     public class ServerPacketReceivers {
@@ -58,6 +70,24 @@ public class DisxServerPacketIndex {
                 ServerPackets.playerRegistryEvent("add", player, entry.getKey(), entry.getValue(), false, seconds);
             });
         }
+
+        public static void onVideoIdPushRequest(FriendlyByteBuf buf, NetworkManager.PacketContext context){
+            String videoId = buf.readUtf();
+            BlockPos blockPos = buf.readBlockPos();
+            MinecraftServer server = context.getPlayer().getServer();
+            server.executeIfPossible(() -> {
+               BlockEntity entity = server.getLevel(Level.OVERWORLD).getBlockEntity(blockPos);
+               if (entity == null){
+                   DisxMain.LOGGER.info("ENTITY IS NULL");
+               } else {
+                   DisxMain.LOGGER.info("ENTITY IS NOT NULL");
+                   if (entity instanceof DisxStampMakerEntity){
+                       ((DisxStampMakerEntity) entity).setVideoId(videoId, context.getPlayer());
+                       DisxMain.LOGGER.info("SET VIDEO ID TO " + videoId);
+                   }
+               }
+            });
+        }
     }
 
     public class ServerPackets {
@@ -76,6 +106,16 @@ public class DisxServerPacketIndex {
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
             buf.writeUtf(videoId);
             NetworkManager.sendToPlayer((ServerPlayer) player, new ResourceLocation("disx","nowplayingmsg"), buf);
+        }
+
+        public static void openVideoIdScreen(Player player, BlockPos blockPos){
+            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+            buf.writeBlockPos(blockPos);
+            NetworkManager.sendToPlayer(
+                    (ServerPlayer) player,
+                    new ResourceLocation("disx","openvideoidscreen"),
+                    buf
+            );
         }
 
     }

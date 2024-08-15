@@ -27,23 +27,29 @@ public class DisxSoundCommand {
     public static void registerCommand(){
         CommandRegistrationEvent.EVENT.register(((dispatcher, registry, selection) -> {
             LiteralCommandNode<CommandSourceStack> register = dispatcher.register(Commands.literal("disxsound")
-            .then(Commands.argument("videoId", StringArgumentType.string()).then(Commands.argument("position", BlockPosArgument.blockPos()).executes(DisxSoundCommand::run))));
+                    .requires(commandSourceStack -> commandSourceStack.hasPermission(2))
+                    .then(Commands.argument("videoId", StringArgumentType.string())
+                            .then(Commands.argument("position", BlockPosArgument.blockPos()).executes(DisxSoundCommand::run))));
         }));
     }
 
     private static int run(CommandContext<CommandSourceStack> context) {
 
         Logger logger = LoggerFactory.getLogger("disx");
-        String videoId = context.getArgument("videoId", String.class);
-        BlockPos blockPos = BlockPosArgument.getBlockPos(context, "position");
-        try {
-            HttpRequest testRequest = HttpRequest.newBuilder().uri(new URI("http://www.google.com")).build();
-            HttpResponse testResponse = null;
-            testResponse = HttpClient.newHttpClient().send(testRequest, HttpResponse.BodyHandlers.ofString());
-            if (testResponse == null){
-                throw new Exception("No Internet Connection");
-            }
-            context.getSource().sendSystemMessage(Component.literal("One moment please..."));
+        if (!context.getSource().hasPermission(2)){
+            context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
+        } else
+        {
+            String videoId = context.getArgument("videoId", String.class);
+            BlockPos blockPos = BlockPosArgument.getBlockPos(context, "position");
+            try {
+                HttpRequest testRequest = HttpRequest.newBuilder().uri(new URI("http://www.google.com")).build();
+                HttpResponse testResponse = null;
+                testResponse = HttpClient.newHttpClient().send(testRequest, HttpResponse.BodyHandlers.ofString());
+                if (testResponse == null){
+                    throw new Exception("No Internet Connection");
+                }
+                context.getSource().sendSystemMessage(Component.literal("One moment please..."));
             /*ServerPlayerEntity playerEntity = context.getSource().getPlayer();
             PacketByteBuf audioPlayBuf = PacketByteBufs.create();
             audioPlayBuf.writeString(videoId);
@@ -51,14 +57,15 @@ public class DisxSoundCommand {
             audioPlayBuf.writeBoolean(true);
             ServerPlayNetworking.send(playerEntity, new Identifier("disx","audioplayerplayevent"), audioPlayBuf);
              */
-            DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, true, context.getSource().getPlayer());
-            //DisxServerPacketIndex.ServerPackets.playerRegistryEvent("add",context.getSource().getPlayer(), blockPos, videoId, true);
-        } catch (Exception e){
-            if (e.getMessage().equals("Video Not Found")) {
-                context.getSource().sendFailure(Component.literal("Video Not Found!"));
-            }
-            if (e.getMessage().equals("No Internet Connection")) {
-                context.getSource().sendFailure(Component.literal("No Internet Connection"));
+                DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, true, context.getSource().getPlayer());
+                //DisxServerPacketIndex.ServerPackets.playerRegistryEvent("add",context.getSource().getPlayer(), blockPos, videoId, true);
+            } catch (Exception e){
+                if (e.getMessage().equals("Video Not Found")) {
+                    context.getSource().sendFailure(Component.literal("Video Not Found!"));
+                }
+                if (e.getMessage().equals("No Internet Connection")) {
+                    context.getSource().sendFailure(Component.literal("No Internet Connection"));
+                }
             }
         }
         return 1;

@@ -8,8 +8,15 @@
   "item.disx.custom_disc_pink": "Pink Custom Disc",
   "item.disx.custom_disc_purple": "Purple Custom Disc",
   "item.disx.custom_disc_red": "Red Custom Disc",
-  "item.disx.custom_disc_silver": "Iron Custom Disc",
+  "item.disx.custom_disc_iron": "Iron Custom Disc",
   "item.disx.custom_disc_yellow": "Yellow Custom Disc",
+  "item.disx.custom_disc_default": "Custom Disc",
   "item.disx.blank_disc": "Blank Disc",
-  "block.disx.advanced_jukebox": "Advanced Jukebox"
+  "block.disx.advanced_jukebox": "Advanced Jukebox",
+  "category.disx.tab": "Disx",
+  "item.disx.vinyl_shard": "Vinyl Shard",
+  "block.disx.record_press": "Record Press",
+  "block.disx.lacquer_block": "Block of Lacquer",
+  "item.disx.lacquer_drop": "Drop of Lacquer",
+  "item.disx.record_stamp": "Record Stamp"
 }

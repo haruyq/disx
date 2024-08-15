@@ -2,15 +2,14 @@
   "variants": {
     "facing=north": {
       "model": "disx:block/stamp_maker",
-      "y": 90
+      "y": 270
     },
     "facing=south": {
       "model": "disx:block/stamp_maker",
-      "y": 270
+      "y": 90
     },
     "facing=west": {
-      "model": "disx:block/stamp_maker",
-      "y": 0
+      "model": "disx:block/stamp_maker"
     },
     "facing=east": {
       "model": "disx:block/stamp_maker",

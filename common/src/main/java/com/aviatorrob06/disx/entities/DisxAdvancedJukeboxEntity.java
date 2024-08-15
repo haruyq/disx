@@ -1,6 +1,7 @@
 package com.aviatorrob06.disx.entities;
 
 import com.aviatorrob06.disx.DisxMain;
+import com.aviatorrob06.disx.DisxServerAudioPlayerRegistry;
 import com.aviatorrob06.disx.blocks.DisxAdvancedJukebox;
 import dev.architectury.registry.registries.Registrar;
 import dev.architectury.registry.registries.RegistrySupplier;
@@ -8,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -20,6 +22,7 @@ public class DisxAdvancedJukeboxEntity extends BlockEntity {
     private String discName;
 
     private String videoId;
+    private Player lastPlayer;
 
     public DisxAdvancedJukeboxEntity(BlockPos blockPos, BlockState blockState) {
         super(
@@ -79,6 +82,10 @@ public class DisxAdvancedJukeboxEntity extends BlockEntity {
 
     public String getVideoId() {
         return videoId;
+    }
+
+    public void setLastPlayer(Player lastPlayer) {
+        this.lastPlayer = lastPlayer;
     }
 
     public static void registerEntity(Registrar<BlockEntityType<?>> registry){

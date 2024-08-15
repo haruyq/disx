@@ -32,6 +32,7 @@ public class TestAudioTrack {
             @Override
             public void trackLoaded(AudioTrack audioTrack) {
                 if (debug) LOGGER.info("sample track loaded successfully!");
+                /*
                 try{
                     firstPlayer.startTrack(audioTrack, true);
                 } catch (UnsatisfiedLinkError e){
@@ -41,6 +42,9 @@ public class TestAudioTrack {
                 }
 
                 firstPlayer.setVolume(100);
+                */
+                firstPlayer.destroy();
+                firstPlayerManager.shutdown();
             }
 
             @Override
@@ -61,5 +65,7 @@ public class TestAudioTrack {
             }
         });
         if (debug) LOGGER.info("Item should've tried to load??");
+        firstPlayer.destroy();
+        firstPlayerManager.shutdown();
     }
 }

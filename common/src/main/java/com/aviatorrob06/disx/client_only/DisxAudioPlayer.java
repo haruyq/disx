@@ -1,5 +1,6 @@
 package com.aviatorrob06.disx.client_only;
 
+import com.aviatorrob06.disx.DisxSystemMessages;
 import com.mojang.authlib.minecraft.TelemetrySession;
 import com.sedmelluq.discord.lavaplayer.format.AudioDataFormat;
 import com.sedmelluq.discord.lavaplayer.format.AudioPlayerInputStream;
@@ -21,6 +22,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.Music;
+import net.minecraft.sounds.Musics;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
@@ -77,7 +79,18 @@ public class DisxAudioPlayer {
         DisxAudioPlayerRegistry.registerAudioPlayer(this, blockPos);
         fromSoundCommand = boo;
         initializeDisxAudioPlayer();
-        playTrack(videoId, seconds);
+        String playAttempt = playTrack(videoId, seconds);
+        if (playAttempt != null){
+            if (playAttempt.equals("Video Not Found")){
+                DisxSystemMessages.noVideoFound(Minecraft.getInstance().player);
+            }
+            if (playAttempt.equals("Playlist")){
+                DisxSystemMessages.playlistError(Minecraft.getInstance().player);
+            }
+            if (playAttempt.equals("Failed")){
+                DisxSystemMessages.errorLoading(Minecraft.getInstance().player);
+            }
+        }
     }
 
     //player setup; installs proper assignments to declared variables and opens line
@@ -143,11 +156,10 @@ public class DisxAudioPlayer {
                 double volumeConfig = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.RECORDS).get();
                 double volumeConfigMaster = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.MASTER).get();
                 if (volumeConfig != 0.0){
-                    if (volumeCalc > -80f && volumeConfig != 0 && volumeConfigMaster != 0){
+                    if (volumeCalc > -80f && volumeConfigMaster != 0){
                         try {
-                            if (Minecraft.getInstance().getMusicManager().isPlayingMusic(Minecraft.getInstance().getSituationalMusic())){
-                                Minecraft.getInstance().getMusicManager().stopPlaying();
-                            }
+                            Minecraft.getInstance().getMusicManager().stopPlaying();
+
                         } catch (NullPointerException e){
                             logger.error("Audio Player at " + blockPos.toString() + " was unsuccessful in pausing client music. Error: " + e);
                         }

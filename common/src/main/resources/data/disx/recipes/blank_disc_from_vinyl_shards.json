@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "# #",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "disx:vinyl_shard"
+    }
+  },
+  "result": {
+    "item": "disx:blank_disc"
+  }
+}

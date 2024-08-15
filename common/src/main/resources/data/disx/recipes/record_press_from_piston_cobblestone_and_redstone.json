@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "   ",
+    "RDI",
+    "III"
+  ],
+  "key": {
+    "D": {
+      "item": "minecraft:piston"
+    },
+    "I": {
+      "item": "minecraft:cobblestone"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "result": {
+    "item": "disx:record_press",
+    "count": 1
+  }
+}

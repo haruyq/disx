@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "disx:lacquer_drop"
+    }
+  },
+  "result": {
+    "item": "disx:lacquer_block",
+    "count": 1
+  }
+}

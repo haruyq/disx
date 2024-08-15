@@ -21,7 +21,7 @@ public class DisxYoutubeTitleScraper {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return e.getMessage();
+            return "Video Not Found";
         }
     }
 }
