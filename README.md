@@ -19,6 +19,8 @@ This mod uses the [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) Lice
 
 [Modrinth Download](https://modrinth.com/mod/disx)
 
+[CurseForge Download](https://www.curseforge.com/minecraft/mc-mods/disx)
+
 ## Libraries Used
 Credit to the primary libraries used in this project:
 
