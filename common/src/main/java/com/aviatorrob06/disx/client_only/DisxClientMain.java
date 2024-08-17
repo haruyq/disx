@@ -11,9 +11,15 @@ import com.aviatorrob06.disx.entities.DisxStampMakerEntity;
 import com.mojang.authlib.minecraft.client.MinecraftClient;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.*;
+import dev.architectury.event.events.common.LootEvent;
 import dev.architectury.platform.Platform;
 import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.utils.Env;
+import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -28,7 +34,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.concurrent.CompletableFuture;
 
-@Environment(EnvType.CLIENT)
+
 public class DisxClientMain {
     public static final boolean debug_AudioPlayer = false;
     public static void onInitializeClient() {
@@ -59,6 +65,7 @@ public class DisxClientMain {
             if (debug_AudioPlayer){
                 CompletableFuture.runAsync(TestAudioTrack::run);
             }
+
             DisxMain.LOGGER.info("Success in Mod Launch (CLIENT)");
         }
     }

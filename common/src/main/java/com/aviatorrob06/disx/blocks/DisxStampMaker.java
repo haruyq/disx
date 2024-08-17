@@ -60,7 +60,7 @@ import static com.aviatorrob06.disx.blocks.DisxStampMakerShapes.*;
 public class DisxStampMaker extends BaseEntityBlock {
 
     public static RegistrySupplier<Block> blockRegistration;
-    static RegistrySupplier<Item> itemRegistration;
+    public static RegistrySupplier<Item> itemRegistration;
     public static RegistrySupplier<BlockEntityType> blockEntityRegistration;
 
     public static Logger logger = LoggerFactory.getLogger("disx");

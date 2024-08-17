@@ -53,6 +53,7 @@ public class DisxRecordPress extends BaseEntityBlock {
     VoxelShape blockShape = Shapes.box(0.03125, 0, 0.0625, 0.96875, 0.875, 0.9375);
 
     static RegistrySupplier<Block> blockRegistration;
+    public static RegistrySupplier<Item> blockItemRegistration;
 
     protected DisxRecordPress(Properties properties) {
         super(properties);
@@ -223,7 +224,7 @@ public class DisxRecordPress extends BaseEntityBlock {
     }
 
     public static void registerBlockItem(Registrar<Item> registrar, RegistrySupplier<CreativeModeTab> tab){
-        registrar.register(
+        blockItemRegistration = registrar.register(
                 new ResourceLocation("disx", "record_press"),
                 () -> new BlockItem(blockRegistration.get(), new Item.Properties().arch$tab(tab))
         );

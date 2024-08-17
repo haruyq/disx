@@ -6,6 +6,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
@@ -57,7 +59,8 @@ public class DisxSoundCommand {
             audioPlayBuf.writeBoolean(true);
             ServerPlayNetworking.send(playerEntity, new Identifier("disx","audioplayerplayevent"), audioPlayBuf);
              */
-                DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, true, context.getSource().getPlayer());
+                DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, true, context.getSource().getPlayer(), context.getSource().getPlayer().level().dimension());
+                context.getSource().sendSystemMessage(Component.literal("Playing VideoId '" + videoId +"' at " + blockPos.toString()));
                 //DisxServerPacketIndex.ServerPackets.playerRegistryEvent("add",context.getSource().getPlayer(), blockPos, videoId, true);
             } catch (Exception e){
                 if (e.getMessage().equals("Video Not Found")) {

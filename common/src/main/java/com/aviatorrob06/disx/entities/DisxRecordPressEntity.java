@@ -3,6 +3,7 @@ package com.aviatorrob06.disx.entities;
 import com.aviatorrob06.disx.DisxMain;
 import com.aviatorrob06.disx.DisxSystemMessages;
 import com.aviatorrob06.disx.items.DisxCustomDisc;
+import com.aviatorrob06.disx.recipe_types.DisxCustomDiscRecipe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 public class DisxRecordPressEntity extends BlockEntity implements Container {
 
@@ -69,11 +71,15 @@ public class DisxRecordPressEntity extends BlockEntity implements Container {
                     modifiedRecordStamp.setDamageValue(modifiedRecordStamp.getDamageValue() + 1);
                     ItemStack variantFactorStack = this.items.get(2);
                     Item factorItem = variantFactorStack.getItem();
+
+                    /*
                     Item recordItem = DisxCustomDisc.discFactorDiscTypes.get(factorItem);
                     if (recordItem == null){
                         recordItem = DisxMain.REGISTRAR_MANAGER.get().get(Registries.ITEM).get(new ResourceLocation("disx","custom_disc_default"));
                     }
-                    ItemStack record = new ItemStack(recordItem);
+
+                     */
+                    ItemStack record = getRecordVariant();
                     CompoundTag compoundTag = new CompoundTag();
                     compoundTag.putString("videoId", videoId);
                     compoundTag.putString("discName", videoName);
@@ -103,6 +109,16 @@ public class DisxRecordPressEntity extends BlockEntity implements Container {
     }
 
 
+    private ItemStack getRecordVariant(){
+        Optional<DisxCustomDiscRecipe> recipeOptional = level.getRecipeManager().getRecipeFor(DisxCustomDiscRecipe.DisxCustomDiscRecipeType.INSTANCE, this, level);
+        if (!recipeOptional.isEmpty()){
+            ItemStack recordStack = recipeOptional.get().getResultItem();
+            return recordStack;
+        } else {
+            ItemStack recordStack = new ItemStack(DisxMain.REGISTRAR_MANAGER.get().get(Registries.ITEM).get(new ResourceLocation("disx","custom_disc_default")));
+            return recordStack;
+        }
+    }
 
     public boolean hasConditionsForRecord(){
         boolean cond1 = (!this.items.get(0).isEmpty());

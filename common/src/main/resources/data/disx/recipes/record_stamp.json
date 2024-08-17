@@ -1,0 +1,7 @@
+{
+  "type": "disx:stamp_maker_recipe",
+  "category": "misc",
+  "result": {
+    "item": "disx:record_stamp"
+  }
+}

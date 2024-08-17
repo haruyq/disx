@@ -39,6 +39,8 @@ repositories {
 
     maven{url "https://maven.lavalink.dev/releases"}
 
+    maven { url "https://maven.shedaniel.me" }
+
 }
 
 
@@ -111,6 +113,7 @@ dependencies {
     include group: 'org.jsoup', name: 'jsoup', version: '+'
     //include "dev.lavalink.youtube:common:1.2.0"
 
+    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-forge:${rootProject.forge_REI_version}"
 }
 
 processResources {

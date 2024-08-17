@@ -1,0 +1,9 @@
+{
+  "type": "disx:custom_disc_recipe",
+  "category": "misc",
+  "decorative_factor": "minecraft:blue_dye",
+  "name": "blue",
+  "result": {
+    "item": "disx:custom_disc_blue"
+  }
+}

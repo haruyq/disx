@@ -34,8 +34,6 @@ public class DisxCustomDisc extends Item {
             Items.YELLOW_DYE.asItem()
     };
 
-    public static HashMap<Item, Item> discFactorDiscTypes= new HashMap<Item, Item>();
-
     private static RegistrySupplier<Item> diamond;
     private static RegistrySupplier<Item> gold;
     private static RegistrySupplier<Item> iron;
@@ -116,18 +114,5 @@ public class DisxCustomDisc extends Item {
         defaultt = itemRegistrar.register(
                 new ResourceLocation("disx","custom_disc_default"),
                 () -> new DisxCustomDisc(new Item.Properties().stacksTo(1), "default"));
-    }
-
-    public static void buildDiscFactorDiscTypes(){
-        discFactorDiscTypes.put(Items.DIAMOND, diamond.get());
-        discFactorDiscTypes.put(Items.GOLD_INGOT, gold.get());
-        discFactorDiscTypes.put(Items.IRON_INGOT, iron.get());
-        discFactorDiscTypes.put(Items.BLUE_DYE, blue.get());
-        discFactorDiscTypes.put(Items.GREEN_DYE, green.get());
-        discFactorDiscTypes.put(Items.ORANGE_DYE, orange.get());
-        discFactorDiscTypes.put(Items.PINK_DYE, pink.get());
-        discFactorDiscTypes.put(Items.PURPLE_DYE, purple.get());
-        discFactorDiscTypes.put(Items.RED_DYE, red.get());
-        discFactorDiscTypes.put(Items.YELLOW_DYE, yellow.get());
     }
 }

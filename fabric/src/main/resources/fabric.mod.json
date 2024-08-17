@@ -17,11 +17,17 @@
   "entrypoints": {
     "main": [
       "com.aviatorrob06.disx.fabric.DisxMainFabric"
+    ],
+    "rei_client": [
+      "com.aviatorrob06.disx.client_only.DisxCompatWithREI"
     ]
   },
   "depends": {
     "fabric": "*",
     "minecraft": ">=1.19.4",
     "architectury": ">=8.2.89"
+  },
+  "suggests": {
+    "roughlyenoughitems": "12.1.750"
   }
 }

@@ -110,7 +110,7 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                 entity.setHas_record(false);
                 player.getInventory().add(newStack);
                 entity.setChanged();
-                DisxServerAudioPlayerRegistry.removeFromRegistry(blockPos, videoId);
+                DisxServerAudioPlayerRegistry.removeFromRegistry(blockPos, level.dimension());
                 if (debug) logger.info("[advanced jukebox] current has record value: " + entity.isHas_record());
                 debounce = false;
                 return InteractionResult.SUCCESS;
@@ -134,7 +134,7 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                         entity.setHas_record(true);
                         entity.setDiscName(discName);
                         entity.setLastPlayer(player);
-                        DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, false, player);
+                        DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, false, player, level.dimension());
                         DisxServerPacketIndex.ServerPackets.nowPlayingMessage(videoId, player);
                         if (debug) logger.info("[advanced jukebox] current has record value: " + entity.isHas_record());
                         debounce = false;
@@ -154,13 +154,12 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
         super.onRemove(blockState, level, blockPos, blockState2, bl);
     }
 
-    private void onBlockDestroy(LevelAccessor levelAccessor, BlockPos blockPos){
-        if (!levelAccessor.isClientSide()){
-            DisxAdvancedJukeboxEntity entity = (DisxAdvancedJukeboxEntity) levelAccessor.getBlockEntity(blockPos);
+    private void onBlockDestroy(Level level, BlockPos blockPos){
+        if (!level.isClientSide()){
+            DisxAdvancedJukeboxEntity entity = (DisxAdvancedJukeboxEntity) level.getBlockEntity(blockPos);
             if (entity == null){
                 if (debug) logger.info("[advanced jukebox] block destroy initialized, no block entity found");
-            } else
-            if (!levelAccessor.isClientSide() && entity.isHas_record()) {
+            } else if (entity.isHas_record()) {
                 if (debug) logger.info("[advanced jukebox] block destroy initialized, has record; removing record");
                 String discType = entity.getDiscType();
                 String videoId = entity.getVideoId();
@@ -174,8 +173,8 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                 entity.setHas_record(false);
                 ItemEntity itemEntity = new ItemEntity(entity.getLevel(), blockPos.getX(), blockPos.getY(), blockPos.getZ(), newItemStack);
                 itemEntity.setDefaultPickUpDelay();
-                levelAccessor.addFreshEntity(itemEntity);
-                DisxServerAudioPlayerRegistry.removeFromRegistry(blockPos, videoId);
+                level.addFreshEntity(itemEntity);
+                DisxServerAudioPlayerRegistry.removeFromRegistry(blockPos, level.dimension());
             }
         }
 

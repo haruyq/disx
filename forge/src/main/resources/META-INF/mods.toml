@@ -34,3 +34,10 @@ mandatory = true
 versionRange = "[9.1.12,)"
 ordering = "AFTER"
 side = "BOTH"
+
+[[dependencies.disx]]
+modId = "roughlyenoughitems"
+mandatory = false
+versionRange = "[12.1.50,)"
+ordering = "AFTER"
+side = "CLIENT"

@@ -1,132 +1,112 @@
 package com.aviatorrob06.disx.client_only;
 
 import com.aviatorrob06.disx.DisxSystemMessages;
-import com.mojang.authlib.minecraft.TelemetrySession;
 import com.sedmelluq.discord.lavaplayer.format.AudioDataFormat;
 import com.sedmelluq.discord.lavaplayer.format.AudioPlayerInputStream;
 import com.sedmelluq.discord.lavaplayer.player.*;
-import com.sedmelluq.discord.lavaplayer.player.event.AudioEvent;
-import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
-import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.*;
-import com.sedmelluq.discord.lavaplayer.track.playback.AllocatingAudioFrameBuffer;
-import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrameBuffer;
-import com.sedmelluq.discord.lavaplayer.track.playback.AudioProcessingContext;
+import dev.architectury.event.events.client.ClientLifecycleEvent;
+import dev.architectury.event.events.client.ClientTickEvent;
+import dev.architectury.event.events.common.TickEvent;
+import dev.architectury.injectables.annotations.ExpectPlatform;
+import dev.architectury.injectables.annotations.PlatformOnly;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.sounds.MusicManager;
+import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.Musics;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.stylesheets.MediaList;
 
 import javax.sound.sampled.*;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats.COMMON_PCM_S16_BE;
-import static com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats.COMMON_PCM_S16_LE;
 
 @Environment(EnvType.CLIENT)
 public class DisxAudioPlayer {
 
     Logger logger = LoggerFactory.getLogger("Disx");
 
-    AudioDataFormat format = COMMON_PCM_S16_BE;
-    AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
+    private final AudioDataFormat format = COMMON_PCM_S16_BE;
+    private final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
 
-    AudioPlayer player = playerManager.createPlayer();
-    Line.Info info;
-    SourceDataLine line;
-    FloatControl volumeControl;
-    FloatControl balanceControl;
-
-
-    AudioInputStream inputStream;
-    byte[] buffer = new byte[1024];
-    BlockPos blockPos;
-
-    long currentAudioPos;
-    AudioTrack currentLoadedTrack;
-    float volumeCalculation = 1F;
+    private final AudioPlayer player = playerManager.createPlayer();
+    private Line.Info info;
+    private SourceDataLine line;
+    private FloatControl volumeControl;
+    private FloatControl balanceControl;
 
 
-
-    boolean dynamicVolumeCalculations = false;
-    boolean fromSoundCommand = false;
-
-    boolean playerCanHear = false;
-
-    boolean dynamicDistanceCalculations = false;
-
-    YoutubeAudioSourceManager youtube;
+    private final AudioInputStream inputStream = AudioPlayerInputStream.createStream(player, format, 999999999999999999L, true);
+    private final byte[] buffer = new byte[1024];
+    private long currentAudioPos;
+    private AudioTrack currentLoadedTrack;
+    private final float volumeCalculation = 1F;
 
 
+    private boolean dynamicVolumeCalculations = false;
+    private final DisxAudioPlayerDetails audioPlayerDetails;
 
-    public DisxAudioPlayer(BlockPos blockPos, String videoId, Boolean boo, int seconds){
-        DisxAudioPlayerRegistry.registerAudioPlayer(this, blockPos);
-        fromSoundCommand = boo;
-        initializeDisxAudioPlayer();
+    private boolean playerCanHear = false;
+
+    private boolean dynamicDistanceCalculations = false;
+
+    private final YoutubeAudioSourceManager youtube = new YoutubeAudioSourceManager();
+
+
+    public DisxAudioPlayer(BlockPos blockPos, String videoId, boolean serverOwned, int seconds, ResourceLocation dimension, UUID audioPlayerOwner) {
+        this.audioPlayerDetails = new DisxAudioPlayerDetails(this, blockPos, dimension, audioPlayerOwner, serverOwned);
+        DisxAudioPlayerRegistry.registerAudioPlayer(audioPlayerDetails);
+
+        playerManager.registerSourceManager(youtube);
+        playerManager.getConfiguration().setOutputFormat(format);
+        try {
+            createAndOpenLine();
+        } catch (LineUnavailableException e) {
+            throw new RuntimeException(e);
+        }
         String playAttempt = playTrack(videoId, seconds);
-        if (playAttempt != null){
-            if (playAttempt.equals("Video Not Found")){
+        if (playAttempt != null) {
+            if (playAttempt.equals("Video Not Found")) {
                 DisxSystemMessages.noVideoFound(Minecraft.getInstance().player);
             }
-            if (playAttempt.equals("Playlist")){
+            if (playAttempt.equals("Playlist")) {
                 DisxSystemMessages.playlistError(Minecraft.getInstance().player);
             }
-            if (playAttempt.equals("Failed")){
+            if (playAttempt.equals("Failed")) {
                 DisxSystemMessages.errorLoading(Minecraft.getInstance().player);
             }
         }
     }
 
-    //player setup; installs proper assignments to declared variables and opens line
-    public void initializeDisxAudioPlayer(){
-        blockPos = DisxAudioPlayerRegistry.getBlockPos(this);
-        playerManager.getConfiguration().setOutputFormat(format);
-        inputStream = AudioPlayerInputStream.createStream(player, format, 999999999999999999L, true);
-        Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.RECORDS).get();
-        double volumeConfig = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.RECORDS).get();
-        double volumeConfigMaster = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.MASTER).get();
-        volumeConfig *= volumeConfigMaster;
-        volumeConfig *= 100;
-        player.setVolume((int) volumeConfig);
-        try {
-            //info = new DataLine.Info(SourceDataLine.class, inputStream.getFormat());
-            line = AudioSystem.getSourceDataLine(inputStream.getFormat());
-            openLine();
 
-        } catch (LineUnavailableException e) {
-            throw new RuntimeException(e);
-        }
-        youtube = new YoutubeAudioSourceManager();
-        playerManager.registerSourceManager(youtube);
-    }
-
-
-    public void dynamicDistanceLoop(){
-        while (dynamicDistanceCalculations == true){
+    private void dynamicDistanceLoop() {
+        if (dynamicDistanceCalculations == true) {
             LocalPlayer plr = Minecraft.getInstance().player;
             Vec3 currentpos = Minecraft.getInstance().cameraEntity.getPosition(0.01f);
+            BlockPos blockPos = audioPlayerDetails.getBlockPos();
             Vec3 blockPosVec = new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
             double distance = currentpos.distanceTo(blockPosVec);
-            if (distance > 50){
+            if (distance > 50) {
                 line.stop();
-            } else if (distance < 50){
-                if (!line.isRunning()){
+            } else if (distance < 50) {
+                if (!line.isRunning()) {
                     line.flush();
                     line.start();
                 }
@@ -136,44 +116,53 @@ public class DisxAudioPlayer {
     }
 
 
-    public void dynamicVolumeLoop(){
+    private void dynamicVolumeLoop(Minecraft minecraft) {
         if (volumeControl != null && balanceControl != null) {
-            while (dynamicVolumeCalculations) {
-                LocalPlayer plr = Minecraft.getInstance().player;
-                Vec3 currentpos = Minecraft.getInstance().getCameraEntity().getPosition(0.01f);
-                Vec3 blockPosVec = new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
-                //Vec3d currentpos = new Vec3d(plr.lastRenderX, plr.lastRenderY, plr.lastRenderZ);
-                double distance = currentpos.distanceTo(blockPosVec);
-                float volumeCalc = 0f - (1.0f * (float) distance);
-                if (volumeCalc < -80f) {
-                    volumeCalc = -80f;
-                }
-                if (volumeCalc > 6.0206) {
-                    volumeCalc = 6.0206f;
-                }
-                volumeControl.setValue(volumeCalc);
-                float balance = 0.0f;
-                double volumeConfig = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.RECORDS).get();
-                double volumeConfigMaster = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.MASTER).get();
-                if (volumeConfig != 0.0){
-                    if (volumeCalc > -80f && volumeConfigMaster != 0){
-                        try {
-                            Minecraft.getInstance().getMusicManager().stopPlaying();
-
-                        } catch (NullPointerException e){
-                            logger.error("Audio Player at " + blockPos.toString() + " was unsuccessful in pausing client music. Error: " + e);
+            LocalPlayer plr = Minecraft.getInstance().player;
+            ResourceLocation dimension = this.audioPlayerDetails.getDimension();
+            if (plr != null){
+                if (plr.level() != null){
+                    if (plr.level().dimension().location().equals(dimension)) {
+                        Vec3 currentpos = Minecraft.getInstance().getCameraEntity().getPosition(0.01f);
+                        BlockPos blockPos = audioPlayerDetails.getBlockPos();
+                        Vec3 blockPosVec = new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
+                        //Vec3d currentpos = new Vec3d(plr.lastRenderX, plr.lastRenderY, plr.lastRenderZ);
+                        double distance = currentpos.distanceTo(blockPosVec);
+                        float volumeCalc = 0f - (1.0f * (float) distance);
+                        if (volumeCalc < -80f) {
+                            volumeCalc = -80f;
                         }
-                    }
-                }
-                volumeConfig *= volumeConfigMaster;
-                volumeConfig *= 100;
-                int volumeConfigInt = (int) volumeConfig;
-                player.setVolume(volumeConfigInt);
-                if (volumeConfigInt <= 0){
-                    playerCanHear = false;
-                } else {
-                    playerCanHear = true;
-                }
+                        if (volumeCalc > 6.0206) {
+                            volumeCalc = 6.0206f;
+                        }
+                        volumeControl.setValue(volumeCalc);
+                        float balance = 0.0f;
+                        double volumeConfig = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.RECORDS).get();
+                        double volumeConfigMaster = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.MASTER).get();
+                        if (volumeConfig != 0.0) {
+                            if (volumeCalc > -80f && volumeConfigMaster != 0) {
+                                try {
+                                    MusicManager musicManager = Minecraft.getInstance().getMusicManager();
+                                    SoundManager soundManager = Minecraft.getInstance().getSoundManager();
+                                    Minecraft.getInstance().getMusicManager().tick();
+                                    if (playerCanHear) {
+                                        musicManager.stopPlaying();
+                                    }
+
+                                } catch (NullPointerException e) {
+                                    logger.error("Audio Player at " + blockPos.toString() + " was unsuccessful in pausing client music. Error: " + e);
+                                }
+                            }
+                        }
+                        volumeConfig *= volumeConfigMaster;
+                        volumeConfig *= 100;
+                        int volumeConfigInt = (int) volumeConfig;
+                        player.setVolume(volumeConfigInt);
+                        if (volumeConfigInt <= 0) {
+                            playerCanHear = false;
+                        } else {
+                            playerCanHear = true;
+                        }
 
                 /*try {
                     Vec3d relativePos = new Vec3d(blockPos.getX() - currentpos.x,
@@ -192,12 +181,18 @@ public class DisxAudioPlayer {
                 } catch (Exception e){
                     System.out.println(e.getMessage() + e.getCause());
                 }*/
+                    } else {
+                        player.setVolume(0);
+                        volumeControl.setValue(-80f);
+                        playerCanHear = false;
+                    }
 
+                }
             }
+
         }
     }
-
-    public void playAudio(){
+    private void streamToAudioLine(){
         try {
             if (line != null){
                 line.start();
@@ -217,7 +212,8 @@ public class DisxAudioPlayer {
         }
     }
 
-    public void openLine() throws LineUnavailableException {
+    private void createAndOpenLine() throws LineUnavailableException {
+        line = AudioSystem.getSourceDataLine(inputStream.getFormat());
         line.open(inputStream.getFormat());
         line.flush();
         if (!line.isRunning()){
@@ -225,17 +221,14 @@ public class DisxAudioPlayer {
         }
         volumeControl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
         balanceControl = (FloatControl) line.getControl(FloatControl.Type.BALANCE);
-        if (dynamicVolumeCalculations == false){
-            dynamicVolumeCalculations = true;
-            CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(this::dynamicVolumeLoop);
-        }
+        ClientTickEvent.CLIENT_POST.register(this::dynamicVolumeLoop);
         if (dynamicDistanceCalculations == false){
-            dynamicDistanceCalculations = true;
+            //dynamicDistanceCalculations = true;
             //CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(this::dynamicDistanceLoop);
         }
     }
 
-    public void closeLine(){
+    private void closeLine(){
         if (line != null){
             dynamicVolumeCalculations = false;
             line.stop();
@@ -244,20 +237,20 @@ public class DisxAudioPlayer {
         }
     }
 
-    public String playTrack(String videoId, int seconds){
+    private String playTrack(String videoId, int seconds){
         String url = "https://www.youtube.com/watch?v=" + videoId;
         final String[] exceptionStr = {null};
         AudioItem audItem = youtube.loadItem(playerManager, new AudioReference(videoId, ""));
         playerManager.loadItem(url, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
-                initializeDisxAudioPlayer();
-                track.setPosition((long) seconds);
-                System.out.println(seconds);
-                System.out.println((long) seconds);
+                //track.setPosition((long) seconds);
+                //System.out.println(seconds);
                 player.playTrack(track);
-                DisxClientPacketIndex.ClientPackets.playerSuccessStatus("Success", blockPos, videoId, fromSoundCommand, playerCanHear);
-                CompletableFuture.runAsync(DisxAudioPlayer.this::playAudio);
+                BlockPos blockPos = audioPlayerDetails.getBlockPos();
+                boolean serverOwned = audioPlayerDetails.isServerOwned();
+                DisxClientPacketIndex.ClientPackets.playerSuccessStatus("Success", blockPos, videoId, serverOwned, playerCanHear);
+                CompletableFuture.runAsync(DisxAudioPlayer.this::streamToAudioLine);
                 double volumeConfig = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.RECORDS).get();
                 if (volumeConfig != 0.0){
                     Minecraft.getInstance().getMusicManager().stopPlaying();
@@ -286,86 +279,33 @@ public class DisxAudioPlayer {
             return "success";
         } else {
             System.out.println(exceptionStr[0]);
-            DisxClientPacketIndex.ClientPackets.playerSuccessStatus(exceptionStr[0], blockPos, videoId, fromSoundCommand, playerCanHear);
+            BlockPos blockPos = audioPlayerDetails.getBlockPos();
+            boolean serverOwned = audioPlayerDetails.isServerOwned();
+            DisxClientPacketIndex.ClientPackets.playerSuccessStatus(exceptionStr[0], blockPos, videoId, serverOwned, playerCanHear);
             return exceptionStr[0];
         }
 
     }
 
     public void pausePlayer(){
-        if (player.isPaused() == false){
+        if (!player.isPaused()){
             player.setPaused(true);
         }
     }
 
     public void unpausePlayer(){
-        if (player.isPaused() == true){
+        if (player.isPaused()){
             player.setPaused(false);
-            initializeDisxAudioPlayer();
-            CompletableFuture<Void> future2 = CompletableFuture.runAsync(this::playAudio);
+            CompletableFuture<Void> future2 = CompletableFuture.runAsync(this::streamToAudioLine);
         }
     }
-
-    public void deRegisterThis(){
-        DisxAudioPlayerRegistry.deregisterAudioPlayer(this);
-        closeLine();
-    }
-
-    public class DisxTrackScheduler extends AudioEventAdapter {
-        public DisxTrackScheduler() {
-            super();
-        }
-
-        @Override
-        public void onPlayerPause(AudioPlayer player) {
-            super.onPlayerPause(player);
-        }
-
-        @Override
-        public void onPlayerResume(AudioPlayer player) {
-            CompletableFuture<Void> future2 = CompletableFuture.runAsync(DisxAudioPlayer.this::playAudio);
-            super.onPlayerResume(player);
-        }
-
-        @Override
-        public void onTrackStart(AudioPlayer player, AudioTrack track) {
-            super.onTrackStart(player, track);
-        }
-
-        @Override
-        public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-            deRegisterThis();
-            super.onTrackEnd(player, track, endReason);
-        }
-
-        @Override
-        public void onTrackException(AudioPlayer player, AudioTrack track, FriendlyException exception) {
-            super.onTrackException(player, track, exception);
-        }
-
-        @Override
-        public void onTrackStuck(AudioPlayer player, AudioTrack track, long thresholdMs) {
-            super.onTrackStuck(player, track, thresholdMs);
-        }
-
-        @Override
-        public void onTrackStuck(AudioPlayer player, AudioTrack track, long thresholdMs, StackTraceElement[] stackTrace) {
-            super.onTrackStuck(player, track, thresholdMs, stackTrace);
-        }
-
-        @Override
-        public void onEvent(AudioEvent event) {
-            super.onEvent(event);
-        }
-    }
-
-    public boolean stopAudio(){
+    public void dumpsterAudioPlayer(){
         player.stopTrack();
         player.destroy();
         playerManager.shutdown();
         closeLine();
         dynamicDistanceCalculations = false;
-        return true;
+        ClientTickEvent.CLIENT_POST.unregister(this::dynamicVolumeLoop);
     }
 
 }

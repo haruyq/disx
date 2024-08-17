@@ -1,99 +1,73 @@
 package com.aviatorrob06.disx.client_only;
 
-import com.mojang.authlib.minecraft.client.MinecraftClient;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.UUID;
 
 @Environment(EnvType.CLIENT)
 public class DisxAudioPlayerRegistry{
 
-    public static Map<BlockPos, DisxAudioPlayer> registry = new HashMap<BlockPos, DisxAudioPlayer>();
-
+    public static ArrayList<DisxAudioPlayerDetails> registry = new ArrayList<>();
 
     public static void grabServerRegistry(){
         DisxClientPacketIndex.ClientPackets.getServerPlayerRegistry();
     }
 
-    public static void newAudioPlayer(BlockPos blockPos, String videoId, Boolean fromSoundCommand, int seconds){
-        DisxAudioPlayer newAudioPlayer = null;
-        newAudioPlayer = new DisxAudioPlayer(blockPos, videoId, fromSoundCommand, seconds);
+    public static void newAudioPlayer(BlockPos blockPos, String videoId, boolean serverOwned, int seconds, ResourceLocation dimension, UUID audioPlayerOwner){
+        DisxAudioPlayer newAudioPlayer = new DisxAudioPlayer(blockPos, videoId, serverOwned, seconds, dimension, audioPlayerOwner);
     }
 
-    public static void registerAudioPlayer(DisxAudioPlayer player, BlockPos blockPos){
-        registry.put(blockPos, player);
+    public static void registerAudioPlayer(DisxAudioPlayerDetails playerDetails){
+        registry.add(playerDetails);
     }
 
-    public static void deregisterAudioPlayer(BlockPos blockPos){
-        if (registry.containsKey(blockPos)){
-            stopAudioPlayer(blockPos);
-            registry.remove(blockPos);
+    public static void deregisterAudioPlayer(BlockPos blockPos, ResourceLocation dimension){
+        ArrayList<DisxAudioPlayerDetails> toRemove = new ArrayList<>();
+        for (DisxAudioPlayerDetails details : registry){
+            if (details.getBlockPos().equals(blockPos) && details.getDimension().equals(dimension)){
+                toRemove.add(details);
+            }
+        }
+        for (DisxAudioPlayerDetails details : toRemove){
+            details.getDisxAudioPlayer().dumpsterAudioPlayer();
+            details.clearDetails();
+            registry.remove(details);
         }
     };
 
-    public static void stopAudioPlayer(BlockPos blockPos){
-        if (registry.get(blockPos) != null){
-            registry.get(blockPos).stopAudio();
-        }
-    }
-
-    public static void deregisterAudioPlayer(DisxAudioPlayer player){
-        if (registry.entrySet() != null){
-            registry.entrySet().forEach(entrySet -> {
-                if (entrySet.getValue().equals(player)){
-                    BlockPos toDelete = entrySet.getKey();
-                    entrySet.getValue().dynamicVolumeCalculations = false;
-                    entrySet.getValue().stopAudio();
-                    registry.remove(toDelete);
-                }
-            });
-        }
-    }
-
-    public static void getPlayerInstance(BlockPos blockPos){
-
-    }
-
-    public static BlockPos getBlockPos(DisxAudioPlayer player){
-        BlockPos blockPos= null;
-        for (Map.Entry<BlockPos, DisxAudioPlayer> entry : registry.entrySet()){
-            if (entry.getValue().equals(player)){
-                blockPos = entry.getKey();
+    public static void callStopAudioPlayer(BlockPos blockPos, ResourceLocation dimension){
+        for (DisxAudioPlayerDetails details : registry){
+            if (details.getBlockPos().equals(blockPos) && details.getDimension().equals(dimension)){
+                details.getDisxAudioPlayer().dumpsterAudioPlayer();
             }
         }
-        return blockPos;
     }
     public static void clearAllRegisteredPlayers(){
-        registry.entrySet().forEach(map -> {
-            DisxAudioPlayer currentPlayer = map.getValue();
-            currentPlayer.stopAudio();
-        });
+        for (DisxAudioPlayerDetails details : registry){
+            details.getDisxAudioPlayer().dumpsterAudioPlayer();
+            details.clearDetails();
+        }
         registry.clear();
     }
 
     public static void pauseAllRegisteredPlayers(){
-        registry.entrySet().forEach(map -> {
-            DisxAudioPlayer currentPlayer = map.getValue();
-            if (currentPlayer.player != null){
-                currentPlayer.pausePlayer();
-            }
-        });
+        for (DisxAudioPlayerDetails details : registry){
+            details.getDisxAudioPlayer().pausePlayer();
+        }
     }
 
     public static void unpauseAllRegisteredPlayers(){
-        registry.entrySet().forEach(map -> {
-            DisxAudioPlayer currentPlayer = map.getValue();
-            if (currentPlayer.player != null){
-                currentPlayer.unpausePlayer();
-            }
-        });
+        for (DisxAudioPlayerDetails details : registry){
+            details.getDisxAudioPlayer().unpausePlayer();
+        }
     }
 
     public static void onPlayDisconnect() {
@@ -110,13 +84,6 @@ public class DisxAudioPlayerRegistry{
 
     public static void onClientUnpause(){
         unpauseAllRegisteredPlayers();
-    }
-
-    public static void dynamicVolume(){
-        registry.entrySet().forEach(map -> {
-            DisxAudioPlayer currentPlayer = map.getValue();
-            currentPlayer.dynamicVolumeLoop();
-        });
     }
 
 }

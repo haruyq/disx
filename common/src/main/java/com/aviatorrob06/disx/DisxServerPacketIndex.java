@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.image.VolatileImage;
+import java.util.UUID;
 
 import static com.aviatorrob06.disx.DisxMain.debug;
 
@@ -62,13 +63,14 @@ public class DisxServerPacketIndex {
         public static void onPlayerRegistryRequest(FriendlyByteBuf buf, NetworkManager.PacketContext context){
             String name = "retrieveserverplayerregistry";
             Player player = context.getPlayer();
-            DisxServerAudioPlayerRegistry.registry.entrySet().forEach(entry -> {
-                int seconds = 0;
-                if (DisxServerAudioPlayerRegistry.timerRegistry.containsKey(entry.getKey())){
-                    seconds = (int) DisxServerAudioPlayerRegistry.timerRegistry.get(entry.getKey()).elapsedSeconds;
-                }
-                ServerPackets.playerRegistryEvent("add", player, entry.getKey(), entry.getValue(), false, seconds);
-            });
+            for (DisxServerAudioPlayerDetails details : DisxServerAudioPlayerRegistry.registry){
+                int seconds = (int) details.getVideoTimer().elapsedSeconds;
+                BlockPos blockPos = details.getBlockPos();
+                ResourceLocation dimensionLocation = details.getDimension();
+                String videoId = details.getVideoId();
+                UUID playerOwner = details.getAudioPlayerOwner();
+                ServerPackets.playerRegistryEvent("add", player, blockPos, videoId, false,  seconds, dimensionLocation, playerOwner);
+            }
         }
 
         public static void onVideoIdPushRequest(FriendlyByteBuf buf, NetworkManager.PacketContext context){
@@ -76,7 +78,7 @@ public class DisxServerPacketIndex {
             BlockPos blockPos = buf.readBlockPos();
             MinecraftServer server = context.getPlayer().getServer();
             server.executeIfPossible(() -> {
-               BlockEntity entity = server.getLevel(Level.OVERWORLD).getBlockEntity(blockPos);
+               BlockEntity entity = context.getPlayer().level().getBlockEntity(blockPos);
                if (entity == null){
                    DisxMain.LOGGER.info("ENTITY IS NULL");
                } else {
@@ -92,13 +94,15 @@ public class DisxServerPacketIndex {
 
     public class ServerPackets {
 
-        public static void playerRegistryEvent(String type, Player player, BlockPos pos, String videoId, Boolean fromSoundCommand, int seconds){
+        public static void playerRegistryEvent(String type, Player player, BlockPos pos, String videoId, boolean serverOwned, int seconds, ResourceLocation dimension, UUID playerOwner){
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
             buf.writeUtf(type);
             buf.writeBlockPos(pos);
             buf.writeUtf(videoId);
-            buf.writeBoolean(fromSoundCommand);
+            buf.writeBoolean(serverOwned);
             buf.writeInt(seconds);
+            buf.writeResourceLocation(dimension);
+            buf.writeUUID(playerOwner);
             NetworkManager.sendToPlayer((ServerPlayer) player, new ResourceLocation("disx","serveraudioregistryevent"), buf);
         }
 

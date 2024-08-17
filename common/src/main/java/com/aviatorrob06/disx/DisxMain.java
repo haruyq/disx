@@ -11,8 +11,9 @@ import com.aviatorrob06.disx.commands.DisxInfoCommand;
 import com.aviatorrob06.disx.commands.DisxSoundCommand;
 import com.aviatorrob06.disx.entities.DisxAdvancedJukeboxEntity;
 import com.aviatorrob06.disx.items.*;
+import com.aviatorrob06.disx.recipe_types.DisxCustomDiscRecipe;
+import com.aviatorrob06.disx.recipe_types.DisxStampRecipe;
 import com.google.common.base.Suppliers;
-import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.event.events.common.TickEvent;
@@ -25,10 +26,11 @@ import net.fabricmc.api.EnvType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
@@ -41,7 +43,7 @@ public class DisxMain {
 
     public static final Logger LOGGER = LoggerFactory.getLogger("disx");
 
-    public static final boolean debug = true;
+    public static final boolean debug = false;
 
 
     public static final Supplier<RegistrarManager> REGISTRAR_MANAGER = Suppliers.memoize(() -> RegistrarManager.get(MOD_ID));
@@ -52,6 +54,8 @@ public class DisxMain {
         Registrar<Block> blocksRegistrar = REGISTRAR_MANAGER.get().get(Registries.BLOCK);
         Registrar<BlockEntityType<?>> blockEntityRegistrar = REGISTRAR_MANAGER.get().get(Registries.BLOCK_ENTITY_TYPE);
         Registrar<CreativeModeTab> tabRegistrar = REGISTRAR_MANAGER.get().get(Registries.CREATIVE_MODE_TAB);
+        Registrar<RecipeSerializer<?>> serializerRegistrar = REGISTRAR_MANAGER.get().get(Registries.RECIPE_SERIALIZER);
+        Registrar<RecipeType<?>> recipeTypeRegistrar = REGISTRAR_MANAGER.get().get(Registries.RECIPE_TYPE);
         //Creative Mode Tab Registration
         RegistrySupplier<CreativeModeTab> creativeModeTab = tabRegistrar.register(new ResourceLocation("disx", "creativemodetab.disx"), () -> CreativeTabRegistry.create(Component.translatable("category.disx.tab"), () -> new ItemStack(itemsRegistrar.get(new ResourceLocation("disx", "blank_disc")))));
         //Item Registration Calls
@@ -79,6 +83,12 @@ public class DisxMain {
         DisxSoundCommand.registerCommand();
         //Loot Modification Call
         DisxLootModifiers.modifyLootTables(itemsRegistrar);
+        //Recipe & RecipeType Registration Calls
+        DisxCustomDiscRecipe.DisxCustomDiscRecipeType.registerRecipeType(recipeTypeRegistrar);
+        DisxCustomDiscRecipe.DisxCustomDiscRecipeSerializer.registerRecipeSerializer(serializerRegistrar);
+        DisxStampRecipe.DisxStampRecipeType.registerRecipeType(recipeTypeRegistrar);
+        DisxStampRecipe.DisxStampRecipeSerializer.registerSerializer(serializerRegistrar);
+
 
         //Pull Mod Info
         DisxModInfo.pullLatestVersion();
@@ -101,10 +111,6 @@ public class DisxMain {
         });
 
         LifecycleEvent.SERVER_STARTED.register(DisxSystemMessages::outdatedModVersion);
-
-        TickEvent.SERVER_POST.register(instance -> {
-            DisxCustomDisc.buildDiscFactorDiscTypes();
-        });
 
         //Register Server Packets
         DisxServerPacketIndex.registerServerPacketReceivers();

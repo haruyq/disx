@@ -1,0 +1,9 @@
+{
+  "type": "disx:custom_disc_recipe",
+  "category": "misc",
+  "decorative_factor": "minecraft:yellow_dye",
+  "name": "yellow",
+  "result": {
+    "item": "disx:custom_disc_yellow"
+  }
+}
