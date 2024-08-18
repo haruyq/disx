@@ -16,14 +16,14 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class DisxModInfo {
-    private static final String VERSION = "b0.0.1";
+    private static final String VERSION = "b0.0.2-patch-1";
     private static String LATEST_VERSION = "N/A - NO INTERNET";
     private static final String DISCORD_URL = "http://discord.aviatorrob06.com";
     private static final String MODRINTH_URL = "https://modrinth.com/mod/disx";
     private static final String CURSEFORGE_URL = "https://www.curseforge.com/minecraft/mc-mods/disx";
     private static final String GITHUB_URL = "https://github.com/AviatorRob/disx";
     private static final String ROADMAP_URL = "https://trello.com/b/JwbWrPbE";
-
+    private static final String BUY_ME_A_COFFEE_URL = "https://buymeacoffee.com/aviatorrob06";
     private static final String LATEST_VERSION_URL = "https://raw.githubusercontent.com/AviatorRob/disx/master/LATEST_VERSION.json";
     private static Boolean isUpToDate = true;
     private static int versionsOutdated = 0;
@@ -70,6 +70,10 @@ public class DisxModInfo {
             }
 
         }
+    }
+
+    public static String getBuyMeACoffeeUrl() {
+        return BUY_ME_A_COFFEE_URL;
     }
 
     public static String getLatestVersion() {
