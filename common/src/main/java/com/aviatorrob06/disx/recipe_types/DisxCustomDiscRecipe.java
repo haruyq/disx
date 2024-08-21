@@ -82,7 +82,7 @@ public class DisxCustomDiscRecipe implements Recipe<Container> {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return new DisxCustomDiscRecipeSerializer();
+        return DisxCustomDiscRecipeSerializer.INSTANCE;
     }
 
     @Override

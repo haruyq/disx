@@ -11,7 +11,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.mozilla.javascript.engine.RhinoScriptEngineFactory;
+import mozilla.javascript.engine.RhinoScriptEngineFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -50,7 +50,7 @@ public class DisxStampRecipe implements Recipe<Container> {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return new DisxStampRecipeSerializer();
+        return DisxStampRecipeSerializer.INSTANCE;
     }
 
     @Override

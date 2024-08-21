@@ -36,6 +36,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.function.Supplier;
 
 public class DisxMain {
@@ -76,6 +78,7 @@ public class DisxMain {
         DisxRecordPress.registerBlockEntity(blockEntityRegistrar);
         DisxLacquerBlock.registerBlock(blocksRegistrar);
         DisxLacquerBlock.registerBlockItem(itemsRegistrar, creativeModeTab);
+        //GOOD SO FAR
         //Command Registration Calls
         DisxGenCommand.registerCommand();
         DisxHelpCommand.registerCommand();
@@ -88,7 +91,6 @@ public class DisxMain {
         DisxCustomDiscRecipe.DisxCustomDiscRecipeSerializer.registerRecipeSerializer(serializerRegistrar);
         DisxStampRecipe.DisxStampRecipeType.registerRecipeType(recipeTypeRegistrar);
         DisxStampRecipe.DisxStampRecipeSerializer.registerSerializer(serializerRegistrar);
-
 
         //Pull Mod Info
         DisxModInfo.pullLatestVersion();

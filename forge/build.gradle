@@ -84,8 +84,8 @@ dependencies {
     forgeRuntimeLibrary 'org.junit.jupiter:junit-jupiter-params:+'
     forgeRuntimeLibrary 'org.junit.platform:junit-platform-commons:+'
     forgeRuntimeLibrary 'org.junit.platform:junit-platform-engine:+'
-    forgeRuntimeLibrary 'org.mozilla:rhino:+'
-    forgeRuntimeLibrary 'org.mozilla:rhino-engine:+'
+    //forgeRuntimeLibrary 'org.mozilla:rhino:1.7.13'
+    //forgeRuntimeLibrary 'org.mozilla:rhino-engine:+'
     forgeRuntimeLibrary 'org.opentest4j:opentest4j:+'
     forgeRuntimeLibrary 'com.github.aikaterna:lavaplayer-natives:original-SNAPSHOT'
     //forgeRuntimeLibrary "dev.arbjerg:lavaplayer:2.1.2"
@@ -105,8 +105,8 @@ dependencies {
     include 'org.junit.jupiter:junit-jupiter-params:+'
     include 'org.junit.platform:junit-platform-commons:+'
     include 'org.junit.platform:junit-platform-engine:+'
-    include 'org.mozilla:rhino:+'
-    include 'org.mozilla:rhino-engine:+'
+    //include 'org.mozilla:rhino:+'
+    //include 'org.mozilla:rhino-engine:+'
     include 'org.opentest4j:opentest4j:+'
     include 'com.github.aikaterna:lavaplayer-natives:original-SNAPSHOT'
     //include "dev.arbjerg:lavaplayer:2.1.2"

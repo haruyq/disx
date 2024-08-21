@@ -49,8 +49,8 @@ dependencies {
     include 'org.junit.jupiter:junit-jupiter-params:+'
     include 'org.junit.platform:junit-platform-commons:+'
     include 'org.junit.platform:junit-platform-engine:+'
-    include 'org.mozilla:rhino:+'
-    include 'org.mozilla:rhino-engine:+'
+    //include 'org.mozilla:rhino:+'
+    //include 'org.mozilla:rhino-engine:+'
     include 'org.opentest4j:opentest4j:+'
     //include 'com.github.aikaterna:lavaplayer-natives:original-SNAPSHOT'
     //include "dev.arbjerg:lavaplayer:2.1.2"
