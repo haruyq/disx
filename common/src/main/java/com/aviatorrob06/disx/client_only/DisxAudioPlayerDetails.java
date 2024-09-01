@@ -17,12 +17,19 @@ public class DisxAudioPlayerDetails {
     private ResourceLocation dimension;
     private UUID audioPlayerOwner;
     private boolean serverOwned;
+
+    private boolean loop = false;
+    private String videoId;
+    private int startTime;
     public DisxAudioPlayerDetails(DisxAudioPlayer disxAudioPlayer, BlockPos blockPos, ResourceLocation dimension,
-                                  UUID audioPlayerOwner, boolean fromServer){
+                                  UUID audioPlayerOwner, boolean fromServer, boolean loop, String videoId, int startTime){
         this.disxAudioPlayer = disxAudioPlayer;
         this.blockPos = blockPos;
         this.dimension = dimension;
         this.serverOwned = fromServer;
+        this.loop = loop;
+        this.videoId = videoId;
+        this.startTime = startTime;
         if (!fromServer){
             this.audioPlayerOwner = audioPlayerOwner;
         } else {
@@ -56,5 +63,32 @@ public class DisxAudioPlayerDetails {
         this.dimension = null;
         this.audioPlayerOwner = null;
         this.serverOwned = false;
+        this.loop = false;
+        this.videoId = null;
+        this.startTime = 0;
+    }
+
+    public boolean isLoop() {
+        return loop;
+    }
+
+    public void changeBlockPos(BlockPos newBlockPos){
+        this.blockPos = newBlockPos;
+    }
+
+    public void changeLooped(boolean newValue){
+        this.loop = newValue;
+    }
+
+    public void changeDimension(ResourceLocation newDimension){
+        this.dimension = newDimension;
+    }
+
+    public String getVideoId() {
+        return videoId;
+    }
+
+    public int getStartTime(){
+        return startTime;
     }
 }

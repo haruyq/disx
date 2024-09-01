@@ -1,6 +1,6 @@
 package com.aviatorrob06.disx;
 
-import net.minecraft.core.BlockPos;
+import com.aviatorrob06.disx.utils.DisxYoutubeLengthScraper;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -29,12 +29,16 @@ public class DisxServerVideoTimer {
         int length = DisxYoutubeLengthScraper.getYoutubeVideoLength(videoId);
         if (debug) System.out.println(length);
         startTime = System.currentTimeMillis();
+        elapsedSeconds = 0;
         while (elapsedSeconds <= (length * 1000L) && !forceStop){
-            int test = 0;
             elapsedSeconds = (System.currentTimeMillis() - startTime);
         }
-        if (parent.getVideoTimer().equals(this)){
-            DisxServerAudioPlayerRegistry.removeFromRegistry(this.parent);
+        if (parent.getVideoTimer().equals(this) && parent.isLoop()){
+            this.commenceTimer();
+        } else {
+            if (parent.getVideoTimer().equals(this)){
+                DisxServerAudioPlayerRegistry.removeFromRegistry(this.parent);
+            }
         }
     }
 }

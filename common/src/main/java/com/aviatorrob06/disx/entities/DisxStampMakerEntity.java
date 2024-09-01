@@ -1,24 +1,16 @@
 package com.aviatorrob06.disx.entities;
 
-import com.aviatorrob06.disx.DisxInternetCheck;
+import com.aviatorrob06.disx.utils.DisxInternetCheck;
 import com.aviatorrob06.disx.DisxMain;
 import com.aviatorrob06.disx.DisxSystemMessages;
-import com.aviatorrob06.disx.DisxYoutubeTitleScraper;
+import com.aviatorrob06.disx.utils.DisxYoutubeTitleScraper;
 import com.aviatorrob06.disx.blocks.DisxLacquerBlock;
-import com.aviatorrob06.disx.blocks.DisxStampMaker;
+import com.aviatorrob06.disx.config.DisxConfigHandler;
 import com.aviatorrob06.disx.items.DisxRecordStamp;
-import com.mojang.authlib.minecraft.TelemetrySession;
-import dev.architectury.networking.NetworkManager;
-import dev.architectury.platform.Platform;
-import dev.architectury.registry.registries.RegistrarManager;
-import dev.architectury.utils.Env;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -28,18 +20,12 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.ticks.ContainerSingleItem;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class DisxStampMakerEntity extends BlockEntity implements ContainerSingleItem {
@@ -151,7 +137,7 @@ public class DisxStampMakerEntity extends BlockEntity implements ContainerSingle
             DisxSystemMessages.noInternetErrorMessage(player);
         } else {
             String videoName = DisxYoutubeTitleScraper.getYouTubeVideoTitle(this.videoId);
-            if (videoName.equals("Video Not Found")){
+            if (videoName.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
                 DisxSystemMessages.noVideoFound(player);
                 return;
             }

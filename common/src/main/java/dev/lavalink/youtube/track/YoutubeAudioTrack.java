@@ -12,6 +12,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import com.sedmelluq.discord.lavaplayer.track.DelegatedAudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.playback.LocalAudioTrackExecutor;
 import dev.lavalink.youtube.CannotBeLoaded;
+import dev.lavalink.youtube.ClientInformation;
 import dev.lavalink.youtube.UrlTools;
 import dev.lavalink.youtube.UrlTools.UrlInfo;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
@@ -70,19 +71,23 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
         try {
           processWithClient(localExecutor, httpInterface, client, 0);
           return; // stream played through successfully, short-circuit.
-        } catch (FriendlyException e) {
-          // usually thrown by getPlayabilityStatus when loading formats.
-          // these aren't considered fatal, so we just store them and continue.
-          lastException = e;
         } catch (RuntimeException e) {
           // store exception so it can be thrown if we run out of clients to
           // load formats with.
+          e.addSuppressed(ClientInformation.create(client));
           lastException = e;
+
+          if (e instanceof FriendlyException) {
+            // usually thrown by getPlayabilityStatus when loading formats.
+            // these aren't considered fatal, so we just store them and continue.
+            continue;
+          }
+
           String message = e.getMessage();
 
           if ("Not success status code: 403".equals(message) ||
               "Invalid status code for player api response: 400".equals(message) ||
-              message.contains("No supported audio streams available")) {
+              (message != null && message.contains("No supported audio streams available"))) {
             continue; // try next client
           }
 
@@ -188,10 +193,12 @@ public class YoutubeAudioTrack extends DelegatedAudioTrack {
 
     StreamFormat format = formats.getBestFormat();
 
-    URI signedUrl = sourceManager.getCipherManager()
+    URI resolvedUrl = sourceManager.getCipherManager()
         .resolveFormatUrl(httpInterface, formats.getPlayerScriptUrl(), format);
 
-    return new FormatWithUrl(format, signedUrl);
+    resolvedUrl = client.transformPlaybackUri(format.getUrl(), resolvedUrl);
+
+    return new FormatWithUrl(format, resolvedUrl);
   }
 
   @Override

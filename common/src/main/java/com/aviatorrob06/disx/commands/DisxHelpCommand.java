@@ -27,18 +27,37 @@ public class DisxHelpCommand {
                 Component.literal("Disx Commands:")
                         .withStyle(ChatFormatting.BOLD),
                 Component.literal("/disxhelp - Lists all Disx-related commands"),
-                Component.literal("/disxinfo - Lists version number and all Disx-associated URLs")
+                Component.literal("/disxinfo - Lists version number and all Disx-associated URLs"),
+                Component.literal("/disxmute - Mutes any audios being played by the specified player"),
+                Component.literal("Usage: /disxmute PLAYER")
+                        .withStyle(ChatFormatting.GRAY),
+                Component.literal("/disxunmute - Unmutes any players you muted with /disxmute"),
+                Component.literal("Usage: /disxunmute PLAYER")
+                        .withStyle(ChatFormatting.GRAY)
         };
         MutableComponent[] messageLinesOP = {
                 Component.literal("Disx Commands:")
                         .withStyle(ChatFormatting.BOLD),
                 Component.literal("/disxhelp - Lists all Disx-related commands"),
                 Component.literal("/disxinfo - Lists version number and all Disx-associated URLs"),
+                Component.literal("/disxmute - Mutes any audios being played by the specified player"),
+                Component.literal("Usage: /disxmute PLAYER")
+                        .withStyle(ChatFormatting.GRAY),
+                Component.literal("/disxunmute - Unmutes any players you muted with /disxmute"),
+                Component.literal("Usage: /disxunmute PLAYER")
+                        .withStyle(ChatFormatting.GRAY),
                 Component.literal("/disxgen - Generates custom disc with provided video id"),
-                Component.literal("Usage: /disxgen VARIANT VIDEO_ID")
+                Component.literal("Usage: /disxgen PLAYER VARIANT VIDEO_ID")
                         .withStyle(ChatFormatting.GRAY),
                 Component.literal("/disxsound - Starts playback of provided video id at provided block position"),
-                Component.literal("Usage: /disxsound VIDEO_ID X Y Z")
+                Component.literal("Usage: /disxsound VIDEO_ID DIMENSION X Y Z START_TIME")
+                        .withStyle(ChatFormatting.GRAY),
+                Component.literal("/disxforcestop - Forces all playing audios to stop"),
+                Component.literal("/disxconfig - Gets or modifies config options"),
+                Component.literal("Usage: /disxconfig SUB_COMMAND (OPTIONAL SUB_COMMAND) (OPTIONAL ARGUMENT)")
+                        .withStyle(ChatFormatting.GRAY),
+                Component.literal("/disxstamp - Generates a record stamp with provided video id"),
+                Component.literal("Usage: /disxstamp PLAYER VIDEO_ID")
                         .withStyle(ChatFormatting.GRAY)
         };
         Player player = context.getSource().getPlayer();

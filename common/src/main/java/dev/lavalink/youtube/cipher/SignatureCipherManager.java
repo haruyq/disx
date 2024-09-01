@@ -4,6 +4,7 @@ import com.sedmelluq.discord.lavaplayer.tools.DataFormatTools;
 import com.sedmelluq.discord.lavaplayer.tools.ExceptionTools;
 import com.sedmelluq.discord.lavaplayer.tools.io.HttpClientTools;
 import com.sedmelluq.discord.lavaplayer.tools.io.HttpInterface;
+import dev.lavalink.youtube.YoutubeSource;
 import dev.lavalink.youtube.track.format.StreamFormat;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -81,7 +82,7 @@ public class SignatureCipherManager {
   private static final Pattern timestampPattern = Pattern.compile("(signatureTimestamp|sts):(\\d+)");
   private static final Pattern nFunctionPattern = Pattern.compile(
       "function\\(\\s*(\\w+)\\s*\\)\\s*\\{" +
-          "var\\s*(\\w+)=(?:\\1\\.split\\(\"\"\\)|String\\.prototype\\.split\\.call\\(\\1,.*?\\))," +
+          "var\\s*(\\w+)=(?:\\1\\.split\\(.*?\\)|String\\.prototype\\.split\\.call\\(\\1,.*?\\))," +
           "\\s*(\\w+)=(\\[.*?]);\\s*\\3\\[\\d+]" +
           "(.*?try)(\\{.*?})catch\\(\\s*(\\w+)\\s*\\)\\s*\\{" +
           "\\s*return\"enhanced_except_([A-z0-9-]+)\"\\s*\\+\\s*\\1\\s*}" +
@@ -218,8 +219,8 @@ public class SignatureCipherManager {
       Path path = Files.createTempFile("lavaplayer-yt-player-script", ".js");
       Files.write(path, script.getBytes(StandardCharsets.UTF_8));
 
-      log.error("Problematic YouTube player script {} detected (issue detected with script: {}). Dumped to {}",
-          sourceUrl, issue, path.toAbsolutePath());
+      log.error("Problematic YouTube player script {} detected (issue detected with script: {}). Dumped to {} (Source version: {})",
+          sourceUrl, issue, path.toAbsolutePath(), YoutubeSource.VERSION);
     } catch (Exception e) {
       log.error("Failed to dump problematic YouTube player script {} (issue detected with script: {})", sourceUrl, issue);
     }

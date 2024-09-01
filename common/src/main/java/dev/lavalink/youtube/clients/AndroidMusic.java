@@ -4,7 +4,6 @@ import com.sedmelluq.discord.lavaplayer.tools.DataFormatTools;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity;
 import com.sedmelluq.discord.lavaplayer.tools.JsonBrowser;
-import com.sedmelluq.discord.lavaplayer.tools.Units;
 import com.sedmelluq.discord.lavaplayer.tools.io.HttpInterface;
 import com.sedmelluq.discord.lavaplayer.track.AudioItem;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -17,7 +16,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class AndroidMusic extends Android {
-    public static String CLIENT_VERSION = "6.42.52";
+    public static String CLIENT_VERSION = "7.11.50";
 
     public static ClientConfig BASE_CONFIG = new ClientConfig()
         .withApiKey(Android.BASE_CONFIG.getApiKey())

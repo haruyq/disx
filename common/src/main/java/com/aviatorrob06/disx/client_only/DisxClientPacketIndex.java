@@ -29,6 +29,7 @@ public class DisxClientPacketIndex  {
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","serveraudioregistryevent"), (ClientPacketReceivers::receiveServerAudioPlayerRegistryEvent));
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","nowplayingmsg"), (ClientPacketReceivers::receivePlayMsgEvent));
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","openvideoidscreen"), (ClientPacketReceivers::receiveOpenVideoIdScreenEvent));
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx", "muteplayer"), ClientPacketReceivers::receivePlayerMute);
     }
 
     public class ClientPacketReceivers{
@@ -46,6 +47,7 @@ public class DisxClientPacketIndex  {
          */
 
         public static void receiveServerAudioPlayerRegistryEvent(FriendlyByteBuf buf, NetworkManager.PacketContext context){
+            System.out.println("got audio registry event");
             String type = buf.readUtf();
             BlockPos blockPos = buf.readBlockPos();
             String videoId = buf.readUtf();
@@ -53,13 +55,18 @@ public class DisxClientPacketIndex  {
             int seconds = buf.readInt();
             ResourceLocation dimensionLocation = buf.readResourceLocation();
             UUID playerOwner = buf.readUUID();
+            Boolean loop = buf.readBoolean();
+            BlockPos newBlockPos = buf.readBlockPos();
+            ResourceLocation newDimLocation = buf.readResourceLocation();
             if (type.equals("add")){
-                System.out.println("adding new audio player called");
-                DisxAudioPlayerRegistry.newAudioPlayer(blockPos, videoId, fromSoundCommand, seconds, dimensionLocation, playerOwner);
+                System.out.println("calling for add");
+                DisxAudioPlayerRegistry.newAudioPlayer(blockPos, videoId, fromSoundCommand, seconds, dimensionLocation, playerOwner, loop);
             }
             if (type.equals("remove")){
-                System.out.println("removing audio player called");
                 DisxAudioPlayerRegistry.deregisterAudioPlayer(blockPos, dimensionLocation);
+            }
+            if (type.equals("modify")){
+                DisxAudioPlayerRegistry.modifyAudioPlayer(blockPos, dimensionLocation, newBlockPos, newDimLocation, loop);
             }
         }
 
@@ -73,6 +80,16 @@ public class DisxClientPacketIndex  {
             Minecraft.getInstance().execute(() -> {
                 DisxStampMakerGUI.setScreen(blockPos);
             });
+        }
+
+        public static void receivePlayerMute(FriendlyByteBuf buf, NetworkManager.PacketContext context){
+            UUID uuid = buf.readUUID();
+            String action = buf.readUtf();
+            if (action.equals("add")){
+                DisxAudioPlayerRegistry.addToMuted(uuid);
+            } else if (action.equals("remove")){
+                DisxAudioPlayerRegistry.removeFromMuted(uuid);
+            }
         }
 
     }

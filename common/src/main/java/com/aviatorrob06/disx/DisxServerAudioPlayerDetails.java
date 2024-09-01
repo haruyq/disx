@@ -15,12 +15,15 @@ public class DisxServerAudioPlayerDetails {
     private String videoId;
 
     private DisxServerVideoTimer videoTimer;
+
+    private boolean loop;
     public DisxServerAudioPlayerDetails(BlockPos blockPos, ResourceLocation dimension,
-                                        UUID audioPlayerOwner, boolean fromServer, String videoId, boolean timerEnabled){
+                                        UUID audioPlayerOwner, boolean fromServer, String videoId, boolean timerEnabled, boolean loop){
         this.blockPos = blockPos;
         this.dimension = dimension;
         this.serverOwned = fromServer;
         this.videoId = videoId;
+        this.loop = loop;
         if (timerEnabled){
             this.videoTimer = new DisxServerVideoTimer(videoId, this);
         }
@@ -62,5 +65,22 @@ public class DisxServerAudioPlayerDetails {
         this.serverOwned = false;
         this.videoTimer = null;
         this.videoId = null;
+        this.loop = false;
+    }
+
+    public boolean isLoop() {
+        return loop;
+    }
+
+    public void setLoop(boolean loop) {
+        this.loop = loop;
+    }
+
+    public void changeBlockPos(BlockPos pos){
+        this.blockPos = pos;
+    }
+
+    public void changeDimension(ResourceLocation dimension){
+        this.dimension = dimension;
     }
 }

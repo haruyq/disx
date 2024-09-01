@@ -56,7 +56,7 @@ public class DisxServerPacketIndex {
                 DisxSystemMessages.playlistError(player);
             }
             if (status.equals("Success") && (fromSoundCommand.equals(true))){
-                DisxSystemMessages.playingAtLocation(player, blockPos, videoId);
+                //DisxSystemMessages.playingAtLocation(player, blockPos, videoId);
             }
         }
 
@@ -64,12 +64,15 @@ public class DisxServerPacketIndex {
             String name = "retrieveserverplayerregistry";
             Player player = context.getPlayer();
             for (DisxServerAudioPlayerDetails details : DisxServerAudioPlayerRegistry.registry){
+                System.out.println("got registry grab request");
                 int seconds = (int) details.getVideoTimer().elapsedSeconds;
                 BlockPos blockPos = details.getBlockPos();
                 ResourceLocation dimensionLocation = details.getDimension();
                 String videoId = details.getVideoId();
                 UUID playerOwner = details.getAudioPlayerOwner();
-                ServerPackets.playerRegistryEvent("add", player, blockPos, videoId, false,  seconds, dimensionLocation, playerOwner);
+                boolean loop = details.isLoop();
+                ServerPackets.playerRegistryEvent("add", player, blockPos, videoId, false,  seconds, dimensionLocation, playerOwner, loop, blockPos, dimensionLocation);
+                System.out.println("sent registry add event");
             }
         }
 
@@ -94,7 +97,8 @@ public class DisxServerPacketIndex {
 
     public class ServerPackets {
 
-        public static void playerRegistryEvent(String type, Player player, BlockPos pos, String videoId, boolean serverOwned, int seconds, ResourceLocation dimension, UUID playerOwner){
+        public static void playerRegistryEvent(String type, Player player, BlockPos pos, String videoId, boolean serverOwned, int seconds, ResourceLocation dimension, UUID playerOwner, boolean loop,
+                                               BlockPos newBlockPos, ResourceLocation newDimension){
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
             buf.writeUtf(type);
             buf.writeBlockPos(pos);
@@ -103,6 +107,9 @@ public class DisxServerPacketIndex {
             buf.writeInt(seconds);
             buf.writeResourceLocation(dimension);
             buf.writeUUID(playerOwner);
+            buf.writeBoolean(loop);
+            buf.writeBlockPos(newBlockPos);
+            buf.writeResourceLocation(newDimension);
             NetworkManager.sendToPlayer((ServerPlayer) player, new ResourceLocation("disx","serveraudioregistryevent"), buf);
         }
 
@@ -118,6 +125,28 @@ public class DisxServerPacketIndex {
             NetworkManager.sendToPlayer(
                     (ServerPlayer) player,
                     new ResourceLocation("disx","openvideoidscreen"),
+                    buf
+            );
+        }
+
+        public static void mutePlayer(Player player, UUID toMute){
+            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+            buf.writeUUID(toMute);
+            buf.writeUtf("add");
+            NetworkManager.sendToPlayer(
+                    (ServerPlayer) player,
+                    new ResourceLocation("disx","muteplayer"),
+                    buf
+            );
+        }
+
+        public static void unmutePlayer(Player player, UUID toUnmute){
+            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+            buf.writeUUID(toUnmute);
+            buf.writeUtf("remove");
+            NetworkManager.sendToPlayer(
+                    (ServerPlayer) player,
+                    new ResourceLocation("disx","muteplayer"),
                     buf
             );
         }

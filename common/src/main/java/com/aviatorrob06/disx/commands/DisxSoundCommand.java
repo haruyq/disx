@@ -1,28 +1,24 @@
 package com.aviatorrob06.disx.commands;
 
+import com.aviatorrob06.disx.utils.DisxInternetCheck;
 import com.aviatorrob06.disx.DisxServerAudioPlayerRegistry;
+import com.aviatorrob06.disx.DisxSystemMessages;
+import com.aviatorrob06.disx.utils.DisxYoutubeTitleScraper;
+import com.aviatorrob06.disx.config.DisxConfigHandler;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
-import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 
 public class DisxSoundCommand {
 
@@ -31,7 +27,9 @@ public class DisxSoundCommand {
             LiteralCommandNode<CommandSourceStack> register = dispatcher.register(Commands.literal("disxsound")
                     .requires(commandSourceStack -> commandSourceStack.hasPermission(2))
                     .then(Commands.argument("videoId", StringArgumentType.string())
-                            .then(Commands.argument("position", BlockPosArgument.blockPos()).executes(DisxSoundCommand::run))));
+                            .then(Commands.argument("dimension", DimensionArgument.dimension())
+                                    .then(Commands.argument("position", BlockPosArgument.blockPos())
+                                            .then(Commands.argument("startTime", IntegerArgumentType.integer()).executes(DisxSoundCommand::run))))));
         }));
     }
 
@@ -42,32 +40,60 @@ public class DisxSoundCommand {
             context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
         } else
         {
+            if (context.getSource().isPlayer()){
+                if (DisxConfigHandler.SERVER.isOnUseBlacklist(context.getSource().getPlayer().getUUID())){
+                    DisxSystemMessages.blacklistedByServer(context.getSource().getPlayer());
+                    return 1;
+                }
+                if (!DisxConfigHandler.SERVER.isOnUseWhitelist(context.getSource().getPlayer().getUUID())){
+                    DisxSystemMessages.notWhitelistedByServer(context.getSource().getPlayer());
+                    return 1;
+                }
+            }
+            int currentAudioPlayerCount = DisxServerAudioPlayerRegistry.getRegistryCount();
+            int maxAudioPlayerCount = Integer.valueOf(DisxConfigHandler.SERVER.getProperty("max_audio_players"));
+            if (currentAudioPlayerCount >= maxAudioPlayerCount){
+                if (context.getSource().isPlayer()){
+                    DisxSystemMessages.maxAudioPlayerCtReached(context.getSource().getPlayer());
+                } else {
+                    DisxSystemMessages.maxAudioPlayerCtReached(context.getSource().getServer());
+                }
+            }
             String videoId = context.getArgument("videoId", String.class);
+            ResourceLocation dimension = context.getArgument("dimension", ResourceLocation.class);
             BlockPos blockPos = BlockPosArgument.getBlockPos(context, "position");
+            Integer startTime = context.getArgument("startTime", Integer.class);
+            System.out.println("START TIME PROVIDED: " + startTime);
             try {
-                HttpRequest testRequest = HttpRequest.newBuilder().uri(new URI("http://www.google.com")).build();
-                HttpResponse testResponse = null;
-                testResponse = HttpClient.newHttpClient().send(testRequest, HttpResponse.BodyHandlers.ofString());
-                if (testResponse == null){
+                boolean hasInternet = DisxInternetCheck.checkInternet();
+                if (!hasInternet){
                     throw new Exception("No Internet Connection");
                 }
+                String videoTitle = DisxYoutubeTitleScraper.getYouTubeVideoTitle(videoId);
+                if (videoTitle.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
+                    throw new Exception("Video Not Found");
+                }
                 context.getSource().sendSystemMessage(Component.literal("One moment please..."));
-            /*ServerPlayerEntity playerEntity = context.getSource().getPlayer();
-            PacketByteBuf audioPlayBuf = PacketByteBufs.create();
-            audioPlayBuf.writeString(videoId);
-            audioPlayBuf.writeBlockPos(blockPos);
-            audioPlayBuf.writeBoolean(true);
-            ServerPlayNetworking.send(playerEntity, new Identifier("disx","audioplayerplayevent"), audioPlayBuf);
-             */
-                DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, true, context.getSource().getPlayer(), context.getSource().getPlayer().level().dimension());
-                context.getSource().sendSystemMessage(Component.literal("Playing VideoId '" + videoId +"' at " + blockPos.toString()));
-                //DisxServerPacketIndex.ServerPackets.playerRegistryEvent("add",context.getSource().getPlayer(), blockPos, videoId, true);
+                if (!context.getSource().isPlayer()){
+                    DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, true, null, context.getSource().getServer(), dimension, startTime.intValue(), false);
+                } else {
+                    DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, true, context.getSource().getPlayer(), context.getSource().getServer(), dimension, startTime.intValue(), false);
+                }
+                context.getSource().sendSystemMessage(Component.literal("Attempting to start playback of Video Id '" + videoId + "' at " + blockPos + " in " + dimension));
             } catch (Exception e){
                 if (e.getMessage().equals("Video Not Found")) {
-                    context.getSource().sendFailure(Component.literal("Video Not Found!"));
+                    if (context.getSource().isPlayer()){
+                        DisxSystemMessages.noVideoFound(context.getSource().getPlayer());
+                    } else {
+                        DisxSystemMessages.noVideoFound(context.getSource().getServer());
+                    }
                 }
                 if (e.getMessage().equals("No Internet Connection")) {
-                    context.getSource().sendFailure(Component.literal("No Internet Connection"));
+                    if (context.getSource().isPlayer()){
+                        DisxSystemMessages.noInternetErrorMessage(context.getSource().getPlayer());
+                    } else {
+                        DisxSystemMessages.noInternetErrorMessage(context.getSource().getServer());
+                    }
                 }
             }
         }

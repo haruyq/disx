@@ -1,10 +1,11 @@
 package com.aviatorrob06.disx.commands;
 
-import com.aviatorrob06.disx.DisxInternetCheck;
+import com.aviatorrob06.disx.utils.DisxInternetCheck;
 import com.aviatorrob06.disx.DisxMain;
 import com.aviatorrob06.disx.DisxSystemMessages;
-import com.aviatorrob06.disx.DisxYoutubeTitleScraper;
+import com.aviatorrob06.disx.utils.DisxYoutubeTitleScraper;
 import com.aviatorrob06.disx.commands.suggestionProviders.DisxTypeSuggestionProvider;
+import com.aviatorrob06.disx.config.DisxConfigHandler;
 import com.aviatorrob06.disx.items.DisxCustomDisc;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -13,18 +14,15 @@ import dev.architectury.event.events.common.CommandRegistrationEvent;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,28 +83,37 @@ public class DisxGenCommand {
                 //if (debug) System.out.println("videoInfoResponse initialized");
                 //videoInfoResponse = ytDownloader.getVideoInfo(videoInfoRequest);
                 String videoTitle = DisxYoutubeTitleScraper.getYouTubeVideoTitle(videoId);
-                if (videoTitle.equals("Video Not Found")){
+                if (videoTitle.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
                     throw new Exception("Video Not Found");
                 }
                 stackNbt.putString("discName", videoTitle);
                 stack.setTag(stackNbt);
                 Collection<ServerPlayer> playerCollection = EntityArgument.getPlayers(context, "player");
                 for (ServerPlayer player : playerCollection){
-                    player.playNotifySound(SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 1, 1);
+                    player.playNotifySound(SoundEvents.PISTON_EXTEND, SoundSource.MASTER, 1, 1);
                     player.getInventory().add(stack);
                 }
                 context.getSource().sendSystemMessage(Component.literal("Your disc has been distributed!"));
                 if (debug) System.out.println("success??..." + "custom_disc_" + argumentResult);
             } catch (Exception e) {
                 if (e.getMessage().equals("Video Not Found")) {
-                    System.out.println("Video Not Found");
-                    DisxSystemMessages.noVideoFound(context.getSource().getPlayer());
+                    if (context.getSource().isPlayer()){
+                        DisxSystemMessages.noVideoFound(context.getSource().getPlayer());
+                    } else {
+                        DisxSystemMessages.noVideoFound(context.getSource().getServer());
+                    }
                 } else if (e.getMessage().equals("No Internet Connection")) {
-                    System.out.println("No Internet Connection");
-                    DisxSystemMessages.noInternetErrorMessage(context.getSource().getPlayer());
+                    if (context.getSource().isPlayer()){
+                        DisxSystemMessages.noInternetErrorMessage(context.getSource().getPlayer());
+                    } else {
+                        DisxSystemMessages.noInternetErrorMessage(context.getSource().getServer());
+                    }
                 } else if (e.getMessage().equals("Invalid Disc Type")){
-                    System.out.println("Invalid Disc Type");
-                    DisxSystemMessages.invalidDiscType(context.getSource().getPlayer());
+                    if (context.getSource().isPlayer()){
+                        DisxSystemMessages.invalidDiscType(context.getSource().getPlayer());
+                    } else {
+                        DisxSystemMessages.invalidDiscType(context.getSource().getServer());
+                    }
                 } else {
                     System.out.println(e.getMessage() + e.getCause());
                 }

@@ -1,10 +1,8 @@
-package com.aviatorrob06.disx;
+package com.aviatorrob06.disx.utils;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-
-import java.io.IOException;
 
 public class DisxYoutubeLengthScraper {
 
@@ -44,7 +42,6 @@ public class DisxYoutubeLengthScraper {
             Element meta = doc.select("meta[itemprop=duration]").first();
             if (meta != null) {
                 String duration = meta.attr("content"); // Duration is in ISO 8601 format (e.g., PT4M20S)
-                System.out.println("Video Duration: " + duration);
 
                 int seconds = convertDurationToSeconds(duration);
                 return seconds;

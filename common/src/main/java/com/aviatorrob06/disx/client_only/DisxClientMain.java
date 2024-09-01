@@ -6,6 +6,7 @@ import com.aviatorrob06.disx.TestAudioTrack;
 import com.aviatorrob06.disx.client_only.gui.screens.DisxStampMakerGUI;
 import com.aviatorrob06.disx.client_only.renderers.DisxRecordPressEntityRenderer;
 import com.aviatorrob06.disx.client_only.renderers.DisxStampMakerEntityRenderer;
+import com.aviatorrob06.disx.config.DisxConfigHandler;
 import com.aviatorrob06.disx.entities.DisxRecordPressEntity;
 import com.aviatorrob06.disx.entities.DisxStampMakerEntity;
 import com.mojang.authlib.minecraft.client.MinecraftClient;
@@ -62,6 +63,7 @@ public class DisxClientMain {
                         (BlockEntityType<DisxRecordPressEntity>) DisxMain.REGISTRAR_MANAGER.get().get(Registries.BLOCK_ENTITY_TYPE).get(new ResourceLocation("disx", "record_press_entity")),
                 provider1);
             });
+            //ClientLifecycleEvent.CLIENT_SETUP.register(DisxConfigHandler.CLIENT::initializeConfig);
             if (debug_AudioPlayer){
                 CompletableFuture.runAsync(TestAudioTrack::run);
             }

@@ -1,4 +1,4 @@
-package com.aviatorrob06.disx;
+package com.aviatorrob06.disx.utils;
 
 import org.apache.http.client.methods.HttpGet;
 

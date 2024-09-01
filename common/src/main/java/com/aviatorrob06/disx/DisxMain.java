@@ -5,14 +5,13 @@ import com.aviatorrob06.disx.blocks.DisxLacquerBlock;
 import com.aviatorrob06.disx.blocks.DisxRecordPress;
 import com.aviatorrob06.disx.blocks.DisxStampMaker;
 import com.aviatorrob06.disx.client_only.DisxClientMain;
-import com.aviatorrob06.disx.commands.DisxGenCommand;
-import com.aviatorrob06.disx.commands.DisxHelpCommand;
-import com.aviatorrob06.disx.commands.DisxInfoCommand;
-import com.aviatorrob06.disx.commands.DisxSoundCommand;
+import com.aviatorrob06.disx.commands.*;
+import com.aviatorrob06.disx.config.DisxConfigHandler;
 import com.aviatorrob06.disx.entities.DisxAdvancedJukeboxEntity;
 import com.aviatorrob06.disx.items.*;
 import com.aviatorrob06.disx.recipe_types.DisxCustomDiscRecipe;
 import com.aviatorrob06.disx.recipe_types.DisxStampRecipe;
+import com.aviatorrob06.disx.utils.DisxJukeboxUsageCooldownManager;
 import com.google.common.base.Suppliers;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
@@ -36,8 +35,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.function.Supplier;
 
 public class DisxMain {
@@ -78,12 +75,15 @@ public class DisxMain {
         DisxRecordPress.registerBlockEntity(blockEntityRegistrar);
         DisxLacquerBlock.registerBlock(blocksRegistrar);
         DisxLacquerBlock.registerBlockItem(itemsRegistrar, creativeModeTab);
-        //GOOD SO FAR
         //Command Registration Calls
+        DisxConfigCommand.registerCommand();
+        DisxForceStopCommand.registerCommand();
         DisxGenCommand.registerCommand();
         DisxHelpCommand.registerCommand();
         DisxInfoCommand.registerCommand();
+        DisxMuteCommand.registerCommand();
         DisxSoundCommand.registerCommand();
+        DisxStampCommand.registerCommand();
         //Loot Modification Call
         DisxLootModifiers.modifyLootTables(itemsRegistrar);
         //Recipe & RecipeType Registration Calls
@@ -114,13 +114,14 @@ public class DisxMain {
 
         LifecycleEvent.SERVER_STARTED.register(DisxSystemMessages::outdatedModVersion);
 
+        LifecycleEvent.SERVER_STARTING.register(DisxConfigHandler.SERVER::initializeConfig);
+
         //Register Server Packets
         DisxServerPacketIndex.registerServerPacketReceivers();
 
         //Call Common Client Initialization
         if (Platform.getEnv().equals(EnvType.CLIENT)){
             DisxClientMain.onInitializeClient();
-
         }
 
         LOGGER.info("Success in Mod Launch (SERVER)");

@@ -9,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -27,6 +28,10 @@ public class DisxSystemMessages {
         serverPlayer.sendSystemMessage(Component.literal("Disx Error: No internet connection!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
     }
 
+    public static void noInternetErrorMessage(MinecraftServer server){
+        server.sendSystemMessage(Component.literal("Disx Error: No internet connection!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
+    }
+
     public static void errorLoading(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
         serverPlayer.sendSystemMessage(Component.literal("Disx Error: Unknown error loading video!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
@@ -36,7 +41,10 @@ public class DisxSystemMessages {
     public static void noVideoFound(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
         serverPlayer.sendSystemMessage(Component.literal("Disx Error: No video found!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
+    }
 
+    public static void noVideoFound(MinecraftServer server){
+        server.sendSystemMessage(Component.literal("Disx Error: No video found!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
     }
 
     public static void playlistError(Player player){
@@ -45,16 +53,48 @@ public class DisxSystemMessages {
 
     }
 
-    public static void playingAtLocation(Player player, BlockPos pos, String videoId){
-        ServerPlayer serverPlayer = (ServerPlayer) player;
-        serverPlayer.sendSystemMessage(Component.literal("Video '" + videoId +"' playing at " + pos.toString()));
-        serverPlayer.server.sendSystemMessage(Component.literal(player.getName().getString() + " is playing video " + videoId + " at " + pos.getX() + " " + pos.getY() + " " + pos.getZ()));
+    public static void playingAtLocation(MinecraftServer server, String playerName, BlockPos pos, String videoId, ResourceLocation dimension){
+        server.sendSystemMessage(Component.literal("" + playerName + " is playing Video '" + videoId +"' at " + pos.toString() + " in " + dimension.toString()));
     }
 
     public static void invalidDiscType(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
-        serverPlayer.sendSystemMessage(Component.literal("Disx Error: Invalid disc type provided!"));
+        serverPlayer.sendSystemMessage(Component.literal("Disx Error: Invalid disc type provided!").withStyle(ChatFormatting.RED));
     }
+
+    public static void invalidDiscType(MinecraftServer server){
+        server.sendSystemMessage(Component.literal("Disx Error: Invalid disc type provided!").withStyle(ChatFormatting.RED));
+    }
+
+    public static void blacklistedByServer(Player player){
+        ServerPlayer serverPlayer = (ServerPlayer) player;
+        serverPlayer.sendSystemMessage(Component.literal("Disx Error: You've been blacklisted by server administration!").withStyle(ChatFormatting.RED));
+    }
+
+    public static void notWhitelistedByServer(Player player){
+        ServerPlayer serverPlayer = (ServerPlayer) player;
+        serverPlayer.sendSystemMessage(Component.literal("Disx Error: Player-use whitelist is enabled, and you are not whitelisted.").withStyle(ChatFormatting.RED));
+    }
+
+    public static void dimensionBlacklisted(Player player){
+        ServerPlayer serverPlayer = (ServerPlayer) player;
+        serverPlayer.sendSystemMessage(Component.literal("Disx Error: You are not allowed to play audio in this dimension, per server administration!").withStyle(ChatFormatting.RED));
+    }
+
+    public static void maxAudioPlayerCtReached(Player player){
+        ServerPlayer serverPlayer = (ServerPlayer) player;
+        serverPlayer.sendSystemMessage(Component.literal("Disx Error: Maximum number of audio players reached in this server! Please contact a server admin if you believe this to be an error.").withStyle(ChatFormatting.RED));
+    }
+
+    public static void maxAudioPlayerCtReached(MinecraftServer server){
+        server.sendSystemMessage(Component.literal("Disx Error: Maximum number of audio players defined in disx server config has been reached!").withStyle(ChatFormatting.RED));
+    }
+
+    public static void ageRestrictionEnabled(Player player){
+        ServerPlayer serverPlayer = (ServerPlayer) player;
+        serverPlayer.sendSystemMessage(Component.literal("Disx Error: This video is age restricted, and age restricted playback is not allowed on this server!").withStyle(ChatFormatting.RED));
+    }
+
 
     public static void outdatedModVersion(MinecraftServer server){
         if (!DisxModInfo.getIsUpToDate()){

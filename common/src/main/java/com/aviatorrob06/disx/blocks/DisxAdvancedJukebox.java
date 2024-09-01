@@ -2,57 +2,45 @@ package com.aviatorrob06.disx.blocks;
 
 
 import com.aviatorrob06.disx.*;
+import com.aviatorrob06.disx.config.DisxConfigHandler;
 import com.aviatorrob06.disx.entities.DisxAdvancedJukeboxEntity;
-import com.aviatorrob06.disx.items.DisxBlankDisc;
 import com.aviatorrob06.disx.items.DisxCustomDisc;
-import dev.architectury.injectables.annotations.PlatformOnly;
-import dev.architectury.platform.Platform;
+import com.aviatorrob06.disx.utils.DisxInternetCheck;
+import com.aviatorrob06.disx.utils.DisxJukeboxUsageCooldownManager;
 import dev.architectury.registry.registries.Registrar;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Display;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.concurrent.CompletableFuture;
 
 import static com.aviatorrob06.disx.DisxMain.debug;
 
@@ -68,6 +56,8 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
 
     private boolean debounce = false;
 
+    private int power;
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
@@ -80,24 +70,31 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
     }
 
     @Override
+    public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+        super.neighborChanged(blockState, level, blockPos, block, blockPos2, bl);
+        int p = level.getBestNeighborSignal(blockPos);
+        this.power = p;
+        boolean loop = false;
+        if (p > 0){
+            loop = true;
+        }
+        DisxServerAudioPlayerRegistry.modifyRegistryEntry(blockPos, level.dimension(), blockPos, level.dimension(), loop);
+    }
+
+    @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
 
-        if (!level.isClientSide() && interactionHand == InteractionHand.MAIN_HAND && !debounce && !DisxJukeboxUsageCooldownManager.isOnCooldown(blockPos)){
+        if (!level.isClientSide() && interactionHand == InteractionHand.MAIN_HAND && !debounce && !DisxJukeboxUsageCooldownManager.isOnCooldown(blockPos, level.dimension())){
             ItemStack stack = player.getMainHandItem();
             Item item = null;
             if (stack != null){
                 item = stack.getItem();
             }
             DisxAdvancedJukeboxEntity entity = (DisxAdvancedJukeboxEntity) level.getBlockEntity(blockPos);
-            // check Internet
-            if (!DisxInternetCheck.checkInternet()){
-                player.sendSystemMessage(Component.literal("Disx Error: No internet connection found!").withStyle(ChatFormatting.RED, ChatFormatting.BOLD));
-                return InteractionResult.FAIL;
-            }
             if (entity.isHas_record()){
                 debounce = true;
                 if (debug) logger.info("does have record, taking it out");
-                DisxJukeboxUsageCooldownManager.updateCooldown(blockPos);
+                DisxJukeboxUsageCooldownManager.updateCooldown(blockPos, level.dimension());
                 String discType = entity.getDiscType();
                 Item newItem = DisxMain.REGISTRAR_MANAGER.get().get(Registries.ITEM).get(new ResourceLocation("disx","custom_disc_" + discType));
                 ItemStack newStack = new ItemStack(newItem, 1);
@@ -117,6 +114,9 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
             } else if (!entity.isHas_record()){
                 if (item instanceof DisxCustomDisc){
                     if (stack.getTag() != null && stack.getTag().get("videoId") != null && stack.getTag().getString("videoId") != ""){
+                        if (!isPassingAudioPrerequisiteChecks(player, level)){
+                            return InteractionResult.FAIL;
+                        }
                         if (debug) logger.info("[advanced jukebox] doesn't have record, putting it in");
                         debounce = true;
                         String videoId = stack.getTag().getString("videoId");
@@ -128,13 +128,17 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                         }
                         player.getCooldowns().addCooldown(item, 999999999);
                         stack.setCount(stack.getCount() - 1);
-                        DisxJukeboxUsageCooldownManager.updateCooldown(blockPos);
+                        DisxJukeboxUsageCooldownManager.updateCooldown(blockPos, level.dimension());
                         entity.setVideoId(videoId);
                         entity.setDiscType(discType);
                         entity.setHas_record(true);
                         entity.setDiscName(discName);
                         entity.setLastPlayer(player);
-                        DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, false, player, level.dimension());
+                        boolean loop = false;
+                        if (this.power > 0){
+                            loop = true;
+                        }
+                        DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, false, player, level.dimension(), loop);
                         DisxServerPacketIndex.ServerPackets.nowPlayingMessage(videoId, player);
                         if (debug) logger.info("[advanced jukebox] current has record value: " + entity.isHas_record());
                         debounce = false;
@@ -178,6 +182,35 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
             }
         }
 
+    }
+
+    private static boolean isPassingAudioPrerequisiteChecks(Player player, Level level){
+        // check Internet
+        if (!DisxInternetCheck.checkInternet()){
+            DisxSystemMessages.noInternetErrorMessage(player);
+            return false;
+        }
+        //Check Use-Blacklist, Use-Whitelist, and Dimension-Blacklist
+        if (DisxConfigHandler.SERVER.isOnUseBlacklist(player.getUUID())){
+            DisxSystemMessages.blacklistedByServer(player);
+            return false;
+        }
+        if (!DisxConfigHandler.SERVER.isOnUseWhitelist(player.getUUID())){
+            DisxSystemMessages.notWhitelistedByServer(player);
+            return false;
+        }
+        if (DisxConfigHandler.SERVER.isOnDimensionBlacklist(level.dimension())){
+            DisxSystemMessages.dimensionBlacklisted(player);
+            return false;
+        }
+        //Check Audio Player Count
+        int maxAudioPlayerCt = Integer.valueOf(DisxConfigHandler.SERVER.getProperty("max_audio_players"));
+        int currentAudioPlayerCt = DisxServerAudioPlayerRegistry.getRegistryCount();
+        if (currentAudioPlayerCt >= maxAudioPlayerCt){
+            DisxSystemMessages.maxAudioPlayerCtReached(player);
+            return false;
+        }
+        return true;
     }
 
     /*
