@@ -32,3 +32,5 @@ Credit to the primary libraries used in this project:
 
 [Jsoup](https://github.com/jhy/jsoup)
 
+[Mozilla Rhino](https://github.com/mozilla/rhino)
+
