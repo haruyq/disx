@@ -34,6 +34,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -191,6 +192,21 @@ public class DisxStampMaker extends BaseEntityBlock {
         level.addFreshEntity(itemEntity);
     }
 
+    @Override
+    public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
+        double x = blockPos.getX();
+        double y = blockPos.getY();
+        double z = blockPos.getZ();
+        x += 0.5;
+        y += 0.5;
+        z += 0.5;
+        ItemStack item2 = new ItemStack(itemRegistration.get());
+        item2.setCount(1);
+        ItemEntity itemEntity2 = new ItemEntity(serverLevel, x, y, z, item2);
+        serverLevel.addFreshEntity(itemEntity2);
+        super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack, bl);
+    }
+
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
@@ -219,7 +235,7 @@ public class DisxStampMaker extends BaseEntityBlock {
     }
 
     public static void registerBlock(Registrar<Block> blockRegistrar){
-        blockRegistration = blockRegistrar.register(new ResourceLocation("disx", "stamp_maker"), () -> new DisxStampMaker(BlockBehaviour.Properties.of()));
+        blockRegistration = blockRegistrar.register(new ResourceLocation("disx", "stamp_maker"), () -> new DisxStampMaker(BlockBehaviour.Properties.copy(Blocks.PISTON)));
     }
 
     public static void registerBlockItem(Registrar<Item> itemRegistrar, RegistrySupplier<CreativeModeTab> tab){

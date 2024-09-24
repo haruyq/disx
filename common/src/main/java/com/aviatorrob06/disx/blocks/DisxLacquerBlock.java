@@ -1,13 +1,16 @@
 package com.aviatorrob06.disx.blocks;
 
+import com.aviatorrob06.disx.entities.DisxRecordPressEntity;
 import dev.architectury.registry.registries.Registrar;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -15,6 +18,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -55,6 +59,32 @@ public class DisxLacquerBlock extends HalfTransparentBlock{
         return Shapes.box(0,0,0,1,1,1);
     }
 
+    @Override
+    public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+        this.onBlockDestroy(level, blockPos);
+        super.onRemove(blockState, level, blockPos, blockState2, bl);
+    }
+
+    private void onBlockDestroy(Level level, BlockPos blockPos){
+        if (!level.isClientSide()) {
+
+        }
+    }
+
+    @Override
+    public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
+        double x = blockPos.getX();
+        double y = blockPos.getY();
+        double z = blockPos.getZ();
+        x += 0.5;
+        y += 0.5;
+        z += 0.5;
+        ItemStack item2 = new ItemStack(itemRegistration.get());
+        item2.setCount(1);
+        ItemEntity itemEntity2 = new ItemEntity(serverLevel, x, y, z, item2);
+        serverLevel.addFreshEntity(itemEntity2);
+        super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack, bl);
+    }
 
     public static void registerBlock(Registrar<Block> registrar){
         blockRegistration = registrar.register(

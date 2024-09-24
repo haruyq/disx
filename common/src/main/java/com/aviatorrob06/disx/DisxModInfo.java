@@ -16,7 +16,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class DisxModInfo {
-    private static final String VERSION = "b0.1.0";
+    private static final String VERSION = "b0.1.1";
     private static String LATEST_VERSION = "N/A - NO INTERNET";
     private static final String DISCORD_URL = "http://discord.aviatorrob06.com";
     private static final String MODRINTH_URL = "https://modrinth.com/mod/disx";

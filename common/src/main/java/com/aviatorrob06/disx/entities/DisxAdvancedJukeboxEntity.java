@@ -6,23 +6,22 @@ import com.aviatorrob06.disx.blocks.DisxAdvancedJukebox;
 import dev.architectury.registry.registries.Registrar;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.ticks.ContainerSingleItem;
 
-public class DisxAdvancedJukeboxEntity extends BlockEntity {
+public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerSingleItem {
 
-    private boolean has_record = false;
-    private String discType;
-    private String discName;
-
-    private String videoId;
-    private Player lastPlayer;
+    private NonNullList<ItemStack> itemInventory = NonNullList.withSize(1, ItemStack.EMPTY);
 
     public DisxAdvancedJukeboxEntity(BlockPos blockPos, BlockState blockState) {
         super(
@@ -33,62 +32,44 @@ public class DisxAdvancedJukeboxEntity extends BlockEntity {
     }
 
     public boolean isHas_record() {
-        return has_record;
-    }
-
-    public void setHas_record(boolean has_record) {
-        this.has_record = has_record;
-    }
-
-    public String getDiscName() {
-        return discName;
-    }
-
-    public void setDiscName(String discName) {
-        this.discName = discName;
+        return !itemInventory.get(0).equals(ItemStack.EMPTY);
     }
 
     @Override
     protected void saveAdditional(CompoundTag compoundTag) {
-        compoundTag.putBoolean("has_record", has_record);
-        if (videoId != null){
-            compoundTag.putString("videoId", videoId);
-            compoundTag.putString("discType",discType);
-            compoundTag.putString("discName", discName);
-        }
+        ContainerHelper.saveAllItems(compoundTag, itemInventory);
         super.saveAdditional(compoundTag);
     }
 
     @Override
     public void load(CompoundTag compoundTag) {
-        has_record = compoundTag.getBoolean("has_record");
-        videoId = compoundTag.getString("videoId");
-        discType = compoundTag.getString("discType");
-        discName = compoundTag.getString("discName");
+        ContainerHelper.loadAllItems(compoundTag, itemInventory);
         super.load(compoundTag);
-    }
-
-    public void setDiscType(String discType) {
-        this.discType = discType;
-    }
-
-    public String getDiscType() {
-        return discType;
-    }
-
-    public void setVideoId(String videoId) {
-        this.videoId = videoId;
-    }
-
-    public String getVideoId() {
-        return videoId;
-    }
-
-    public void setLastPlayer(Player lastPlayer) {
-        this.lastPlayer = lastPlayer;
     }
 
     public static void registerEntity(Registrar<BlockEntityType<?>> registry){
         RegistrySupplier<BlockEntityType<?>> registration = registry.register(new ResourceLocation("disx","advanced_jukebox_entity"), () -> BlockEntityType.Builder.of(DisxAdvancedJukeboxEntity::new, DisxAdvancedJukebox.blockRegistration.get()).build(null));
+    }
+
+    @Override
+    public ItemStack getItem(int i) {
+        return itemInventory.get(i);
+    }
+
+    @Override
+    public ItemStack removeItem(int i, int j) {
+        ItemStack returnStack = itemInventory.get(i).copy();
+        itemInventory.set(i, ItemStack.EMPTY);
+        return returnStack;
+    }
+
+    @Override
+    public void setItem(int i, ItemStack itemStack) {
+        itemInventory.set(i, itemStack);
+    }
+
+    @Override
+    public boolean stillValid(Player player) {
+        return false;
     }
 }

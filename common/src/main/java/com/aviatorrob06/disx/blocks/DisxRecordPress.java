@@ -28,10 +28,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.AnvilBlock;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -202,6 +199,21 @@ public class DisxRecordPress extends BaseEntityBlock {
     }
 
     @Override
+    public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
+        double x = blockPos.getX();
+        double y = blockPos.getY();
+        double z = blockPos.getZ();
+        x += 0.5;
+        y += 0.5;
+        z += 0.5;
+        ItemStack item2 = new ItemStack(blockItemRegistration.get());
+        item2.setCount(1);
+        ItemEntity itemEntity2 = new ItemEntity(serverLevel, x, y, z, item2);
+        serverLevel.addFreshEntity(itemEntity2);
+        super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack, bl);
+    }
+
+    @Override
     public Holder<Block> arch$holder() {
         return super.arch$holder();
     }
@@ -219,7 +231,7 @@ public class DisxRecordPress extends BaseEntityBlock {
     public static void registerBlock(Registrar<Block> registrar){
         blockRegistration = registrar.register(
                 new ResourceLocation("disx", "record_press"),
-                () -> new DisxRecordPress(BlockBehaviour.Properties.of())
+                () -> new DisxRecordPress(BlockBehaviour.Properties.copy(Blocks.PISTON))
         );
     }
 

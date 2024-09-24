@@ -8,6 +8,7 @@ import com.aviatorrob06.disx.blocks.DisxLacquerBlock;
 import com.aviatorrob06.disx.config.DisxConfigHandler;
 import com.aviatorrob06.disx.items.DisxRecordStamp;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -17,7 +18,9 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +31,7 @@ import net.minecraft.world.ticks.ContainerSingleItem;
 import org.jetbrains.annotations.Nullable;
 
 
-public class DisxStampMakerEntity extends BlockEntity implements ContainerSingleItem {
+public class DisxStampMakerEntity extends BlockEntity implements ContainerSingleItem, WorldlyContainer {
 
     private NonNullList<ItemStack> items;
 
@@ -53,9 +56,14 @@ public class DisxStampMakerEntity extends BlockEntity implements ContainerSingle
     @Override
     public ItemStack removeItem(int i, int j) {
         ItemStack stack = this.items.get(i).copy();
-        this.items.set(0, ItemStack.EMPTY);
+        this.items.set(i, ItemStack.EMPTY);
         this.setChanged();
         return stack;
+    }
+
+    @Override
+    public boolean canTakeItem(Container container, int i, ItemStack itemStack) {
+        return ContainerSingleItem.super.canTakeItem(container, i, itemStack);
     }
 
     @Override
@@ -72,6 +80,7 @@ public class DisxStampMakerEntity extends BlockEntity implements ContainerSingle
 
     public void setItem(int i, ItemStack itemStack, Player player) {
         this.items.set(i, itemStack);
+        this.setChanged();
         if (itemStack.getItem().equals(DisxLacquerBlock.itemRegistration.get())){
             if (!this.isVideoIdNull()){
                 produceStamp(player);
@@ -161,4 +170,19 @@ public class DisxStampMakerEntity extends BlockEntity implements ContainerSingle
         }
     }
 
+
+    @Override
+    public int[] getSlotsForFace(Direction direction) {
+        return new int[0];
+    }
+
+    @Override
+    public boolean canPlaceItemThroughFace(int i, ItemStack itemStack, @Nullable Direction direction) {
+        return false;
+    }
+
+    @Override
+    public boolean canTakeItemThroughFace(int i, ItemStack itemStack, Direction direction) {
+        return false;
+    }
 }
