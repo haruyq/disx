@@ -6,6 +6,7 @@ import com.sedmelluq.discord.lavaplayer.tools.io.HttpClientTools;
 import com.sedmelluq.discord.lavaplayer.tools.io.HttpInterface;
 import com.sedmelluq.discord.lavaplayer.track.*;
 import dev.lavalink.youtube.CannotBeLoaded;
+import dev.lavalink.youtube.OptionDisabledException;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import dev.lavalink.youtube.cipher.SignatureCipher;
 import dev.lavalink.youtube.cipher.SignatureCipherManager;
@@ -15,12 +16,14 @@ import dev.lavalink.youtube.track.TemporalInfo;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -54,13 +57,22 @@ public abstract class NonMusicClient implements Client {
     protected JsonBrowser loadJsonResponse(@NotNull HttpInterface httpInterface,
                                            @NotNull HttpPost request,
                                            @NotNull String context) throws IOException {
+        if (request.getEntity() instanceof StringEntity) {
+            log.debug("Requesting {} ({}) with payload {}", request.getURI(), context, EntityUtils.toString(request.getEntity(), StandardCharsets.UTF_8));
+        } else {
+            log.debug("Requesting {} ({})", context, request.getURI());
+        }
+
         try (CloseableHttpResponse response = httpInterface.execute(request)) {
             HttpClientTools.assertSuccessWithContent(response, context);
             // todo: flag for checking json content type?
             //       from my testing, json is always returned so might not be necessary.
             HttpClientTools.assertJsonContentType(response);
 
-            return JsonBrowser.parse(response.getEntity().getContent());
+            String json = EntityUtils.toString(response.getEntity());
+            log.trace("Response from {} ({}) {}", request.getURI(), context, json);
+
+            return JsonBrowser.parse(json);
         }
     }
 
@@ -89,19 +101,23 @@ public abstract class NonMusicClient implements Client {
             .setAttributes(httpInterface)
             .toJsonString();
 
-        log.debug("Requesting {} with payload {}", PLAYER_URL, payload);
-
         HttpPost request = new HttpPost(PLAYER_URL);
         request.setEntity(new StringEntity(payload, "UTF-8"));
 
         JsonBrowser json = loadJsonResponse(httpInterface, request, "player api response");
         JsonBrowser playabilityJson = json.get("playabilityStatus");
-        PlayabilityStatus playabilityStatus = getPlayabilityStatus(playabilityJson, false);
+        // fix: Make this method throw if a status was supplied (typically when we recurse).
+        PlayabilityStatus playabilityStatus = getPlayabilityStatus(playabilityJson, status != null);
 
         // All other branches should've been caught by getPlayabilityStatus().
         // An exception will be thrown if we can't handle it.
         if (playabilityStatus == PlayabilityStatus.NON_EMBEDDABLE) {
-            json = loadTrackInfoFromInnertube(source, httpInterface, videoId, status);
+            if (isEmbedded()) {
+                throw new FriendlyException("Loading information for for video failed", Severity.COMMON,
+                    new RuntimeException("Non-embeddable video cannot be loaded by embedded client"));
+            }
+
+            json = loadTrackInfoFromInnertube(source, httpInterface, videoId, playabilityStatus);
             getPlayabilityStatus(json.get("playabilityStatus"), true);
         }
 
@@ -126,13 +142,14 @@ public abstract class NonMusicClient implements Client {
     @NotNull
     protected JsonBrowser loadSearchResults(@NotNull HttpInterface httpInterface,
                                             @NotNull String searchQuery) {
-        ClientConfig clientConfig = getBaseClientConfig(httpInterface)
+        String payload = getBaseClientConfig(httpInterface)
             .withRootField("query", searchQuery)
             .withRootField("params", SEARCH_PARAMS)
-            .setAttributes(httpInterface);
+            .setAttributes(httpInterface)
+            .toJsonString();
 
         HttpPost request = new HttpPost(SEARCH_URL); // This *had* a key parameter. Doesn't seem needed though.
-        request.setEntity(new StringEntity(clientConfig.toJsonString(), "UTF-8"));
+        request.setEntity(new StringEntity(payload, "UTF-8"));
 
         try {
             return loadJsonResponse(httpInterface, request, "search response");
@@ -274,7 +291,6 @@ public abstract class NonMusicClient implements Client {
                 String title = DataFormatTools.defaultOnNull(titleField.get("simpleText").text(), titleField.get("runs").index(0).get("text").text());
                 String author = DataFormatTools.defaultOnNull(authorJson.get("runs").index(0).get("text").text(), "Unknown artist");
                 long duration = Units.secondsToMillis(item.get("lengthSeconds").asLong(Units.DURATION_SEC_UNKNOWN));
-
                 tracks.add(buildAudioTrack(source, item, title, author, duration, videoId, false));
             }
         }
@@ -290,6 +306,11 @@ public abstract class NonMusicClient implements Client {
         JsonBrowser titleJson = json.get("title");
         String title = DataFormatTools.defaultOnNull(titleJson.get("runs").index(0).get("text").text(), titleJson.get("simpleText").text());
         String author = json.get("longBylineText").get("runs").index(0).get("text").text();
+
+        if (author == null) {
+            log.debug("Author field is null, client: {}, json: {}", getIdentifier(), json.format());
+            author = "Unknown artist";
+        }
 
         JsonBrowser durationJson = json.get("lengthText");
         String durationText = DataFormatTools.defaultOnNull(durationJson.get("runs").index(0).get("text").text(), durationJson.get("simpleText").text());
@@ -314,7 +335,7 @@ public abstract class NonMusicClient implements Client {
                                @NotNull HttpInterface httpInterface,
                                @NotNull String videoId) throws CannotBeLoaded, IOException {
         if (!getOptions().getVideoLoading()) {
-            throw new RuntimeException("Video loading is disabled for this client");
+            throw new OptionDisabledException("Video loading is disabled for this client");
         }
 
         JsonBrowser json = loadTrackInfoFromInnertube(source, httpInterface, videoId, null);
@@ -324,12 +345,12 @@ public abstract class NonMusicClient implements Client {
         String title = videoDetails.get("title").text();
         String author = videoDetails.get("author").text();
 
-        TemporalInfo temporalInfo = TemporalInfo.fromRawData(
-            !playabilityStatus.get("liveStreamability").isNull(),
-            videoDetails.get("lengthSeconds"),
-            videoDetails.get("isLive").asBoolean(false)
-        );
+        if (author == null) {
+            log.debug("Author field is null, client: {}, json: {}", getIdentifier(), json.format());
+            author = "Unknown artist";
+        }
 
+        TemporalInfo temporalInfo = TemporalInfo.fromRawData(playabilityStatus, videoDetails);
         return buildAudioTrack(source, videoDetails, title, author, temporalInfo.durationMillis, videoId, temporalInfo.isActiveStream);
     }
 
@@ -338,7 +359,7 @@ public abstract class NonMusicClient implements Client {
                                 @NotNull HttpInterface httpInterface,
                                 @NotNull String searchQuery) {
         if (!getOptions().getSearching()) {
-            throw new RuntimeException("Searching is disabled for this client");
+            throw new OptionDisabledException("Searching is disabled for this client");
         }
 
         JsonBrowser json = loadSearchResults(httpInterface, searchQuery);
@@ -357,7 +378,7 @@ public abstract class NonMusicClient implements Client {
                              @NotNull String mixId,
                              @Nullable String selectedVideoId) {
         if (!getOptions().getPlaylistLoading()) {
-            throw new RuntimeException("Mix loading is disabled for this client");
+            throw new OptionDisabledException("Mix loading is disabled for this client");
         }
 
         JsonBrowser json = loadMixResult(httpInterface, mixId, selectedVideoId);
@@ -386,7 +407,7 @@ public abstract class NonMusicClient implements Client {
                                   @NotNull String playlistId,
                                   @Nullable String selectedVideoId) {
         if (!getOptions().getPlaylistLoading()) {
-            throw new RuntimeException("Playlist loading is disabled for this client");
+            throw new OptionDisabledException("Playlist loading is disabled for this client");
         }
 
         JsonBrowser json = loadPlaylistResult(httpInterface, playlistId);

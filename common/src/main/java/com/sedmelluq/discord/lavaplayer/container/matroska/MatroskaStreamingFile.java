@@ -5,6 +5,7 @@ import com.sedmelluq.discord.lavaplayer.tools.io.SeekableInputStream;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +19,7 @@ public class MatroskaStreamingFile {
 
     private String title;
     private String artist;
+    private String isrc;
 
     private long timecodeScale = 1000000;
     private double duration;
@@ -49,11 +51,15 @@ public class MatroskaStreamingFile {
      * @return The title for this file.
      */
     public String getTitle() {
-        return title;
+        return title != null && title.isEmpty() ? null : title;
     }
 
     public String getArtist() {
-        return artist;
+        return artist != null && artist.isEmpty() ? null : artist;
+    }
+
+    public String getIsrc() {
+        return isrc != null && isrc.isEmpty() ? null : isrc;
     }
 
     /**
@@ -394,8 +400,8 @@ public class MatroskaStreamingFile {
                 duration = reader.asDouble(child);
             } else if (child.is(MatroskaElementType.TimecodeScale)) {
                 timecodeScale = reader.asLong(child);
-            } else if (child.is(MatroskaElementType.Title)) {
-                title = reader.asString(child);
+            } else if (child.is(MatroskaElementType.Title) && title == null) {
+                title = reader.asString(child, StandardCharsets.UTF_8);
             }
 
             reader.skip(child);
@@ -446,10 +452,18 @@ public class MatroskaStreamingFile {
             if (child.is(MatroskaElementType.TagName)) {
                 tagName = reader.asString(child);
             } else if (child.is(MatroskaElementType.TagString)) {
-                if ("artist".equalsIgnoreCase(tagName)) {
-                    artist = reader.asString(child);
+                // https://www.matroska.org/technical/tagging.html
+                if ("title".equalsIgnoreCase(tagName) && title == null) {
+                    title = reader.asString(child, StandardCharsets.UTF_8);
+                } else if ("artist".equalsIgnoreCase(tagName)) {
+                    artist = reader.asString(child, StandardCharsets.UTF_8);
+                } else if ("isrc".equalsIgnoreCase(tagName)) {
+                    // probably not necessary to force a charset here
+                    isrc = reader.asString(child, StandardCharsets.UTF_8);
                 }
             }
+
+            reader.skip(child);
         }
     }
 }

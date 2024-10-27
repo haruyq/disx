@@ -32,7 +32,7 @@ public class DisxStampMakerEntityRenderer implements BlockEntityRenderer<DisxSta
     @Override
     public void render(DisxStampMakerEntity blockEntity, float f, PoseStack poseStack,
                        MultiBufferSource multiBufferSource, int i, int j) {
-        if (!blockEntity.isEmpty()){
+        if (!blockEntity.getItem(0).isEmpty()){
             ItemRenderer renderer = Minecraft.getInstance().getItemRenderer();
             ItemStack stack = new ItemStack(blockEntity.getItem(0).getItem());
             poseStack.pushPose();

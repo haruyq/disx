@@ -72,10 +72,14 @@ public class TvHtml5Embedded extends StreamingNonMusicClient {
                 String title = DataFormatTools.defaultOnNull(titleField.get("simpleText").text(), titleField.get("runs").index(0).get("text").text());
                 String author = DataFormatTools.defaultOnNull(authorJson.get("runs").index(0).get("text").text(), "Unknown artist");
                 long duration = Units.secondsToMillis(item.get("lengthSeconds").asLong(Units.DURATION_SEC_UNKNOWN));
-
                 tracks.add(buildAudioTrack(source, track, title, author, duration, videoId, false));
             }
         }
+    }
+
+    @Override
+    public boolean isEmbedded() {
+        return true;
     }
 
     @Override

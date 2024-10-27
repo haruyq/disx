@@ -90,11 +90,18 @@ public class DisxSystemMessages {
         server.sendSystemMessage(Component.literal("Disx Error: Maximum number of audio players defined in disx server config has been reached!").withStyle(ChatFormatting.RED));
     }
 
+    public static void noInternetFoundStampMakerAsync(MinecraftServer server, BlockPos blockPos){
+        server.sendSystemMessage(Component.literal("Disx Error: Tried to make Record Stamp at " + blockPos.toString() + " but no internet connection has been found!"));
+    }
+
+    public static void videoNotFoundStampMakerAsync(MinecraftServer server, BlockPos blockPos){
+        server.sendSystemMessage(Component.literal("Disx Error: Tried to make Record Stamp at " + blockPos.toString() + " but no video has been found for provided video id!"));
+    }
+
     public static void ageRestrictionEnabled(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
         serverPlayer.sendSystemMessage(Component.literal("Disx Error: This video is age restricted, and age restricted playback is not allowed on this server!").withStyle(ChatFormatting.RED));
     }
-
 
     public static void outdatedModVersion(MinecraftServer server){
         if (!DisxModInfo.getIsUpToDate()){

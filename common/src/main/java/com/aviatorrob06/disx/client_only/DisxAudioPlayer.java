@@ -79,6 +79,7 @@ public class DisxAudioPlayer {
         DisxAudioPlayerRegistry.registerAudioPlayer(audioPlayerDetails);
         System.out.println("registered audio player on client side");
         if (!playerManagerConfigured){
+            youtube.useOauth2("1//04tqoS3blEJp-CgYIARAAGAQSNwF-L9IrkV9tfnde3cDu5BQhyLE_xDWkd3XNpvwD3lvaN3RQB3tv3qLqNV84JjVXlEmug-F4V80", false);
             playerManager.registerSourceManager(youtube);
             playerManager.getConfiguration().setOutputFormat(format);
             playerManagerConfigured = true;

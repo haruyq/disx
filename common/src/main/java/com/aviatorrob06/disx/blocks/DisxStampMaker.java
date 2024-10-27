@@ -141,7 +141,7 @@ public class DisxStampMaker extends BaseEntityBlock {
                     DisxServerPacketIndex.ServerPackets.openVideoIdScreen(player, blockHitResult.getBlockPos());
                     return InteractionResult.SUCCESS;
                 } else
-                if (blockEntity.isEmpty()){
+                if (blockEntity.getItem(0).isEmpty()){
                     player.getCooldowns().addCooldown(itemStack.getItem(), 9999999);
                     ItemStack newStack = itemStack.copyWithCount(1);
                     itemStack.shrink(1);
@@ -157,13 +157,13 @@ public class DisxStampMaker extends BaseEntityBlock {
                     return InteractionResult.SUCCESS;
                 } else {
                     assert blockEntity != null;
-                    if (!blockEntity.isEmpty()){
+                    if (!blockEntity.getItem(0).isEmpty()){
                         ItemStack returnToPlayer = blockEntity.removeItem(0, 1);
-                        System.out.println(returnToPlayer);
-                        blockEntity.setChanged();
+                        blockEntity.setItem(0, ItemStack.EMPTY);
                         ItemEntity itemEntity = new ItemEntity(level, ((double) blockPos.getX()) + 0.5, ((double) blockPos.getY()) + 0.2, ((double) blockPos.getZ()) + 0.5, returnToPlayer);
                         itemEntity.setDefaultPickUpDelay();
                         level.addFreshEntity(itemEntity);
+                        blockEntity.setChanged();
                         return InteractionResult.CONSUME;
                     }
                 }

@@ -24,14 +24,17 @@ import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.ticks.ContainerSingleItem;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 
-public class DisxStampMakerEntity extends BlockEntity implements ContainerSingleItem, WorldlyContainer {
+
+public class DisxStampMakerEntity extends BlockEntity implements Container, WorldlyContainer {
 
     private NonNullList<ItemStack> items;
 
@@ -43,9 +46,24 @@ public class DisxStampMakerEntity extends BlockEntity implements ContainerSingle
                 DisxMain.REGISTRAR_MANAGER.get().get(Registries.BLOCK_ENTITY_TYPE).get(new ResourceLocation("disx","stamp_maker_entity")),
                 blockPos,
                 blockState);
-        items = NonNullList.withSize(1, ItemStack.EMPTY);
+        this.items = NonNullList.withSize(3, ItemStack.EMPTY);
         DisxMain.LOGGER.info("MAKING NEW ENTITY AT " + blockPos);
-        System.out.println(this.items);
+    }
+
+    @Override
+    public int getContainerSize() {
+        return this.items.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        boolean returnValue = true;
+        for (ItemStack stack : this.items){
+            if (!stack.equals(ItemStack.EMPTY)){
+                returnValue = false;
+            }
+        }
+        return returnValue;
     }
 
     @Override
@@ -57,30 +75,38 @@ public class DisxStampMakerEntity extends BlockEntity implements ContainerSingle
     public ItemStack removeItem(int i, int j) {
         ItemStack stack = this.items.get(i).copy();
         this.items.set(i, ItemStack.EMPTY);
-        this.setChanged();
         return stack;
     }
 
     @Override
-    public boolean canTakeItem(Container container, int i, ItemStack itemStack) {
-        return ContainerSingleItem.super.canTakeItem(container, i, itemStack);
+    public ItemStack removeItemNoUpdate(int i) {
+        ItemStack returnStack = this.items.get(i).copy();
+        this.items.set(i, ItemStack.EMPTY);
+        return returnStack;
     }
 
     @Override
     public void setItem(int i, ItemStack itemStack) {
-        this.setChanged();
+        if (i == 1){
+            String videoId = itemStack.getHoverName().getString();
+            this.videoId = videoId;
+            System.out.println("set video id to " + videoId);
+            System.out.println("to confirm: " + this.videoId);
+        } else {
+            this.items.set(i, itemStack);
+        }
+        checkTryAsyncProductionCond();
     }
 
     @Override
     public void load(CompoundTag compoundTag) {
-        this.items = NonNullList.withSize(1, ItemStack.EMPTY);
+        this.items = NonNullList.withSize(3, ItemStack.EMPTY);
         ContainerHelper.loadAllItems(compoundTag, this.items);
         super.load(compoundTag);
     }
 
-    public void setItem(int i, ItemStack itemStack, Player player) {
+    public void setItem(int i, ItemStack itemStack, Player player) {;
         this.items.set(i, itemStack);
-        this.setChanged();
         if (itemStack.getItem().equals(DisxLacquerBlock.itemRegistration.get())){
             if (!this.isVideoIdNull()){
                 produceStamp(player);
@@ -88,9 +114,31 @@ public class DisxStampMakerEntity extends BlockEntity implements ContainerSingle
         }
     }
 
+    public void setItems(NonNullList<ItemStack> items) {
+        this.items = items;
+        checkTryAsyncProductionCond();
+    }
+
+
+    public void checkTryAsyncProductionCond(){
+        System.out.println("checking async production conditions");
+        /*if (!this.items.get(1).equals(ItemStack.EMPTY)){
+            String videoId = this.items.get(1).getHoverName().getString();
+            this.videoId = videoId;
+        }*/
+        if (this.items.get(0).getItem().equals(DisxLacquerBlock.itemRegistration.get())){
+            System.out.println("lacquer block found");
+            if (!this.isVideoIdNull()){
+                System.out.println("video id is not null, running produce async");
+                produceStampAsync();
+            }
+        }
+    }
+
     @Override
     public void setChanged() {
         this.getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 1);
+        System.out.println("should've sent block update");
         super.setChanged();
     }
 
@@ -150,7 +198,7 @@ public class DisxStampMakerEntity extends BlockEntity implements ContainerSingle
                 DisxSystemMessages.noVideoFound(player);
                 return;
             }
-            this.removeItem(0, 1);
+            this.setItem(0, ItemStack.EMPTY);
             BlockPos blockPos = this.getBlockPos();
             Level lvl = getLevel();
             lvl.playSound(null, blockPos, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, SoundSource.BLOCKS);
@@ -161,28 +209,119 @@ public class DisxStampMakerEntity extends BlockEntity implements ContainerSingle
             ItemStack stampStack = new ItemStack(stamp);
             stampStack.setTag(tag);
             stampStack.setCount(1);
-            ItemEntity itemEntity = new ItemEntity(getLevel(), ((double) blockPos.getX()) + 0.5, ((double) blockPos.getY()) + 0.2, ((double) blockPos.getZ()) + 0.5, stampStack);
-            itemEntity.setDefaultPickUpDelay();
-            itemEntity.setTarget(player.getUUID());
-            lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
-            level.addFreshEntity(itemEntity);
-            this.videoId = null;
+            if (lvl.getBlockEntity(blockPos.below()) != null && lvl.getBlockEntity(blockPos.below()) instanceof HopperBlockEntity){
+                this.items.set(2, stampStack);
+                this.items.set(1, ItemStack.EMPTY);
+                this.videoId = null;
+                lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
+            } else {
+                ItemEntity itemEntity = new ItemEntity(getLevel(), ((double) blockPos.getX()) + 0.5, ((double) blockPos.getY()) + 0.2, ((double) blockPos.getZ()) + 0.5, stampStack);
+                itemEntity.setDefaultPickUpDelay();
+                this.items.set(1, ItemStack.EMPTY);
+                this.videoId = null;
+                lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
+                level.addFreshEntity(itemEntity);
+            }
+        }
+    }
+
+    public void produceStampAsync(){
+        if (!DisxInternetCheck.checkInternet()){
+                DisxSystemMessages.noInternetFoundStampMakerAsync(this.getLevel().getServer(), this.getBlockPos());
+        } else {
+            String videoName = DisxYoutubeTitleScraper.getYouTubeVideoTitle(this.videoId);
+            if (videoName.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
+                DisxSystemMessages.videoNotFoundStampMakerAsync(this.getLevel().getServer(), this.getBlockPos());
+                return;
+            }
+            this.setItem(0, ItemStack.EMPTY);
+            BlockPos blockPos = this.getBlockPos();
+            Level lvl = getLevel();
+            lvl.playSound(null, blockPos, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, SoundSource.BLOCKS);
+            DisxRecordStamp stamp = (DisxRecordStamp) DisxMain.REGISTRAR_MANAGER.get().get(Registries.ITEM).get(new ResourceLocation("disx", "record_stamp"));
+            CompoundTag tag = new CompoundTag();
+            tag.putString("videoId", this.videoId);
+            tag.putString("videoName", videoName);
+            ItemStack stampStack = new ItemStack(stamp);
+            stampStack.setTag(tag);
+            stampStack.setCount(1);
+            if (lvl.getBlockEntity(blockPos.below()) != null && lvl.getBlockEntity(blockPos.below()) instanceof HopperBlockEntity){
+                this.items.set(2, stampStack);
+                this.items.set(1, ItemStack.EMPTY);
+                this.videoId = null;
+                lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
+            } else {
+                ItemEntity itemEntity = new ItemEntity(getLevel(), ((double) blockPos.getX()) + 0.5, ((double) blockPos.getY()) + 0.2, ((double) blockPos.getZ()) + 0.5, stampStack);
+                itemEntity.setDefaultPickUpDelay();
+                lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
+                level.addFreshEntity(itemEntity);
+                this.items.set(1, ItemStack.EMPTY);
+                this.videoId = null;
+            }
         }
     }
 
 
     @Override
     public int[] getSlotsForFace(Direction direction) {
+        if (direction.equals(Direction.UP)){
+            int[] returnValue = new int[]{1};
+            return returnValue;
+        }
+        ArrayList<Object> sideDirections = new ArrayList<>();
+        sideDirections.add(Direction.NORTH);
+        sideDirections.add(Direction.EAST);
+        sideDirections.add(Direction.SOUTH);
+        sideDirections.add(Direction.WEST);
+        for (Object o : sideDirections){
+            if (direction.equals(o)){
+                int[] returnValue = new int[]{0};
+                return returnValue;
+            }
+        }
+        if (direction.equals(Direction.DOWN)){
+            int[] returnValue = new int[]{2};
+            return returnValue;
+        }
         return new int[0];
     }
 
     @Override
     public boolean canPlaceItemThroughFace(int i, ItemStack itemStack, @Nullable Direction direction) {
+        ArrayList<Object> sideDirections = new ArrayList<>();
+        sideDirections.add(Direction.NORTH);
+        sideDirections.add(Direction.EAST);
+        sideDirections.add(Direction.SOUTH);
+        sideDirections.add(Direction.WEST);
+        for (Object o : sideDirections){
+            if (direction.equals(o)){
+                if (itemStack.getItem().equals(DisxLacquerBlock.itemRegistration.get())){
+                    if (this.items.get(0).equals(ItemStack.EMPTY)){
+                        return true;
+                    }
+                }
+            }
+        }
+        if (direction.equals(Direction.UP)){
+            if (itemStack.getItem().equals(Items.PAPER) && itemStack.hasCustomHoverName()){
+                if (this.items.get(1).equals(ItemStack.EMPTY)){
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
     @Override
     public boolean canTakeItemThroughFace(int i, ItemStack itemStack, Direction direction) {
+        if (direction.equals(Direction.DOWN) && itemStack.getItem().equals(DisxRecordStamp.getItemRegistration().get())){
+            return true;
+        }
         return false;
+    }
+
+    @Override
+    public void clearContent() {
+        this.items = NonNullList.withSize(3, ItemStack.EMPTY);
     }
 }
