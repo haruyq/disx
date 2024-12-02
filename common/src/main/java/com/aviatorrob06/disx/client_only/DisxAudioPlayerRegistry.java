@@ -1,5 +1,7 @@
 package com.aviatorrob06.disx.client_only;
 
+import com.aviatorrob06.disx.DisxLogger;
+import com.aviatorrob06.disx.DisxMain;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -27,7 +29,7 @@ public class DisxAudioPlayerRegistry{
 
     public static void newAudioPlayer(BlockPos blockPos, String videoId, boolean serverOwned, int seconds, ResourceLocation dimension, UUID audioPlayerOwner, boolean loop){
         DisxAudioPlayer newAudioPlayer = new DisxAudioPlayer(blockPos, videoId, serverOwned, seconds, dimension, audioPlayerOwner, loop);
-        System.out.println("new audio player made");
+        DisxLogger.debug("new audio player made");
     }
 
     public static void registerAudioPlayer(DisxAudioPlayerDetails playerDetails){

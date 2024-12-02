@@ -1,5 +1,6 @@
 package com.aviatorrob06.disx.utils;
 
+import com.aviatorrob06.disx.DisxLogger;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -38,9 +39,9 @@ public class DisxUUIDUtil {
 
             // Parse the JSON response
             JSONObject jsonObject = new JSONObject(response.toString());
-            System.out.println("RESPONSE JSON: " + jsonObject.toString());
+            DisxLogger.debug("RESPONSE JSON: " + jsonObject.toString());
             String uuidString = jsonObject.getString("id");
-            System.out.println("UUID GOTTEN: " + uuidString);
+            DisxLogger.debug("UUID GOTTEN: " + uuidString);
             // Convert UUID string to UUID object
             return UUID.fromString(formatUuid(uuidString));
         }

@@ -98,6 +98,22 @@ public class DisxServerAudioPlayerRegistry {
         }
     }
 
+    //RemoveFromRegistry variant for singleplayer track ending
+    public static void removeFromRegistry(BlockPos pos, ResourceLocation dimensionLocation){
+        players.forEach(plr -> {
+            DisxServerPacketIndex.ServerPackets.playerRegistryEvent("remove", (Player) plr, pos, "", false, 0, dimensionLocation, UUID.randomUUID(), false, pos, dimensionLocation);
+        });
+        ArrayList<DisxServerAudioPlayerDetails> toRemove = new ArrayList<>();
+        for (DisxServerAudioPlayerDetails details : registry){
+            if (details.getBlockPos().equals(pos) && details.getDimension().equals(dimensionLocation)){
+                toRemove.add(details);
+            }
+        }
+        for (DisxServerAudioPlayerDetails details : toRemove){
+            registry.remove(details);
+        }
+    }
+
     public static void modifyRegistryEntry(BlockPos blockPos, ResourceKey<Level> dimension, BlockPos newBlockPos, ResourceKey<Level> newDimension, boolean loop){
         ResourceLocation dimensionLocation = dimension.location();
         ResourceLocation newDimensionLocation = newDimension.location();

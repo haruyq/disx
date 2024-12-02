@@ -7,6 +7,7 @@ import dev.architectury.utils.Env;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
@@ -35,7 +36,14 @@ public class DisxSystemMessages {
     public static void errorLoading(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
         serverPlayer.sendSystemMessage(Component.literal("Disx Error: Unknown error loading video!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
+    }
 
+    public static void errorLoading(LocalPlayer player){
+        player.sendSystemMessage(Component.literal("Disx Error: Unknown error loading video!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
+    }
+
+    public static void apiError(LocalPlayer player){
+        player.sendSystemMessage(Component.literal("Disx Error: Invalid or incomplete response from Disx YT-SRC API. Check client logs for more information.").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
     }
 
     public static void noVideoFound(Player player){
@@ -47,10 +55,8 @@ public class DisxSystemMessages {
         server.sendSystemMessage(Component.literal("Disx Error: No video found!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
     }
 
-    public static void playlistError(Player player){
-        ServerPlayer serverPlayer = (ServerPlayer) player;
-        serverPlayer.sendSystemMessage(Component.literal("Disx Error: Playlists cannot be used!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
-
+    public static void noVideoFound(LocalPlayer player){
+        player.sendSystemMessage(Component.literal("Disx Error: No video found!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
     }
 
     public static void playingAtLocation(MinecraftServer server, String playerName, BlockPos pos, String videoId, ResourceLocation dimension){

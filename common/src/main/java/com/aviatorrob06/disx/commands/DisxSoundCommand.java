@@ -1,5 +1,6 @@
 package com.aviatorrob06.disx.commands;
 
+import com.aviatorrob06.disx.DisxLogger;
 import com.aviatorrob06.disx.utils.DisxInternetCheck;
 import com.aviatorrob06.disx.DisxServerAudioPlayerRegistry;
 import com.aviatorrob06.disx.DisxSystemMessages;
@@ -63,7 +64,7 @@ public class DisxSoundCommand {
             ResourceLocation dimension = context.getArgument("dimension", ResourceLocation.class);
             BlockPos blockPos = BlockPosArgument.getBlockPos(context, "position");
             Integer startTime = context.getArgument("startTime", Integer.class);
-            System.out.println("START TIME PROVIDED: " + startTime);
+            DisxLogger.debug("START TIME PROVIDED: " + startTime);
             try {
                 boolean hasInternet = DisxInternetCheck.checkInternet();
                 if (!hasInternet){

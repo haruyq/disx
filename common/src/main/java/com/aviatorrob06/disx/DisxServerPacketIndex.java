@@ -30,9 +30,11 @@ import static com.aviatorrob06.disx.DisxMain.debug;
 public class DisxServerPacketIndex {
 
     public static void registerServerPacketReceivers(){
-        NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","playersuccessstatus"), (ServerPacketReceivers::onPlayerSuccessStatusReceive));
+        //NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","playersuccessstatus"), (ServerPacketReceivers::onPlayerSuccessStatusReceive));
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","retrieveserverplayerregistry"), ((ServerPacketReceivers::onPlayerRegistryRequest)));
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","videoidselection"), ServerPacketReceivers::onVideoIdPushRequest);
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","singleplayertrackend"), ServerPacketReceivers::onSingleplayerTrackEnd);
+
     }
 
     public class ServerPacketReceivers {
@@ -52,9 +54,6 @@ public class DisxServerPacketIndex {
             if (status.equals("Failed") && (fromSoundCommand.equals(true) || playerCanHear.equals(true))){
                 DisxSystemMessages.errorLoading(player);
             }
-            if (status.equals("Playlist") && (fromSoundCommand.equals(true) || playerCanHear.equals(true))){
-                DisxSystemMessages.playlistError(player);
-            }
             if (status.equals("Success") && (fromSoundCommand.equals(true))){
                 //DisxSystemMessages.playingAtLocation(player, blockPos, videoId);
             }
@@ -64,7 +63,7 @@ public class DisxServerPacketIndex {
             String name = "retrieveserverplayerregistry";
             Player player = context.getPlayer();
             for (DisxServerAudioPlayerDetails details : DisxServerAudioPlayerRegistry.registry){
-                System.out.println("got registry grab request");
+                DisxLogger.debug("got registry grab request");
                 int seconds = (int) details.getVideoTimer().elapsedSeconds;
                 BlockPos blockPos = details.getBlockPos();
                 ResourceLocation dimensionLocation = details.getDimension();
@@ -72,7 +71,7 @@ public class DisxServerPacketIndex {
                 UUID playerOwner = details.getAudioPlayerOwner();
                 boolean loop = details.isLoop();
                 ServerPackets.playerRegistryEvent("add", player, blockPos, videoId, false,  seconds, dimensionLocation, playerOwner, loop, blockPos, dimensionLocation);
-                System.out.println("sent registry add event");
+                DisxLogger.debug("sent registry add event");
             }
         }
 
@@ -92,6 +91,12 @@ public class DisxServerPacketIndex {
                    }
                }
             });
+        }
+
+        public static void onSingleplayerTrackEnd(FriendlyByteBuf buf, NetworkManager.PacketContext context){
+            BlockPos blockPos = buf.readBlockPos();
+            ResourceLocation dimension = buf.readResourceLocation();
+            DisxServerAudioPlayerRegistry.removeFromRegistry(blockPos, dimension);
         }
     }
 

@@ -1,5 +1,6 @@
 package com.aviatorrob06.disx.commands;
 
+import com.aviatorrob06.disx.DisxLogger;
 import com.aviatorrob06.disx.commands.suggestionProviders.DisxBlacklistSuggestionProvider;
 import com.aviatorrob06.disx.commands.suggestionProviders.DisxWhitelistSuggestionProvider;
 import com.aviatorrob06.disx.utils.DisxUUIDUtil;
@@ -108,7 +109,7 @@ public class DisxConfigCommand {
             for (Object o : list){
                 String name = "";
                 try{
-                    System.out.println("TRYING TO CONVERT STRING TO UUID: " + o.toString());
+                    DisxLogger.debug("TRYING TO CONVERT STRING TO UUID: " + o.toString());
                     name = DisxUUIDUtil.getUsernameFromUuid(UUID.fromString(o.toString()));
                 } catch (Exception e) {
                     e.printStackTrace();

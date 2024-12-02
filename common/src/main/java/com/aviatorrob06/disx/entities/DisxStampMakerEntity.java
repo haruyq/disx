@@ -1,5 +1,6 @@
 package com.aviatorrob06.disx.entities;
 
+import com.aviatorrob06.disx.DisxLogger;
 import com.aviatorrob06.disx.utils.DisxInternetCheck;
 import com.aviatorrob06.disx.DisxMain;
 import com.aviatorrob06.disx.DisxSystemMessages;
@@ -90,8 +91,8 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
         if (i == 1){
             String videoId = itemStack.getHoverName().getString();
             this.videoId = videoId;
-            System.out.println("set video id to " + videoId);
-            System.out.println("to confirm: " + this.videoId);
+            DisxLogger.debug("set video id to " + videoId);
+            DisxLogger.debug("to confirm: " + this.videoId);
         } else {
             this.items.set(i, itemStack);
         }
@@ -121,15 +122,15 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
 
 
     public void checkTryAsyncProductionCond(){
-        System.out.println("checking async production conditions");
+        DisxLogger.debug("checking async production conditions");
         /*if (!this.items.get(1).equals(ItemStack.EMPTY)){
             String videoId = this.items.get(1).getHoverName().getString();
             this.videoId = videoId;
         }*/
         if (this.items.get(0).getItem().equals(DisxLacquerBlock.itemRegistration.get())){
-            System.out.println("lacquer block found");
+            DisxLogger.debug("lacquer block found");
             if (!this.isVideoIdNull()){
-                System.out.println("video id is not null, running produce async");
+                DisxLogger.debug("video id is not null, running produce async");
                 produceStampAsync();
             }
         }
@@ -138,7 +139,7 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
     @Override
     public void setChanged() {
         this.getLevel().sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 1);
-        System.out.println("should've sent block update");
+        DisxLogger.debug("should've sent block update");
         super.setChanged();
     }
 

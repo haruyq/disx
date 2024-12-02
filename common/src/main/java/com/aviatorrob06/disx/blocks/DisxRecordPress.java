@@ -1,5 +1,6 @@
 package com.aviatorrob06.disx.blocks;
 
+import com.aviatorrob06.disx.DisxLogger;
 import com.aviatorrob06.disx.DisxMain;
 import com.aviatorrob06.disx.entities.DisxRecordPressEntity;
 import com.aviatorrob06.disx.items.DisxBlankDisc;
@@ -153,8 +154,8 @@ public class DisxRecordPress extends BaseEntityBlock {
             } else {
                 for (Item compare : DisxCustomDisc.validDiscFactors){
                     if (inHandItem.equals(compare)){
-                        DisxMain.LOGGER.info("item in hand is disc factor");
-                        System.out.println(blockEntity.getItem(2));
+                        DisxLogger.debug("item in hand is disc factor");
+                        DisxLogger.debug(blockEntity.getItem(2));
                         if (blockEntity.getItem(2).isEmpty()){
                             ItemStack inHandStackCopy = inHandStack.copyWithCount(1);
                             inHandStack.shrink(1);

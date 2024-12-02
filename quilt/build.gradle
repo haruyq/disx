@@ -76,7 +76,7 @@ dependencies {
     include 'com.github.walkyst:lavaplayer-natives-fork:1.0.2'
     */
     include group: 'org.json', name: 'json', version: '+'
-    //include group: 'com.github.sealedtx', name: 'java-youtube-downloader', version: '+'
+    include group: 'com.github.sealedtx', name: 'java-youtube-downloader', version: '+'
     include 'org.junit.jupiter:junit-jupiter:+'
     include 'org.junit.jupiter:junit-jupiter-api:+'
     include 'org.junit.jupiter:junit-jupiter-engine:+'

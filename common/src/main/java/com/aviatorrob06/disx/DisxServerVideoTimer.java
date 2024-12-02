@@ -25,9 +25,9 @@ public class DisxServerVideoTimer {
         this.forceStop = true;
     }
     public void commenceTimer(){
-        if (debug) System.out.println("initializing timer");
+        DisxLogger.debug("initializing timer");
         int length = DisxYoutubeLengthScraper.getYoutubeVideoLength(videoId);
-        if (debug) System.out.println(length);
+        DisxLogger.debug(length);
         startTime = System.currentTimeMillis();
         elapsedSeconds = 0;
         while (elapsedSeconds <= (length * 1000L) && !forceStop){

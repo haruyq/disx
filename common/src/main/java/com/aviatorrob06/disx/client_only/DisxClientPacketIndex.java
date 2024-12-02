@@ -1,5 +1,7 @@
 package com.aviatorrob06.disx.client_only;
 
+import com.aviatorrob06.disx.DisxLogger;
+import com.aviatorrob06.disx.DisxMain;
 import com.aviatorrob06.disx.client_only.gui.screens.DisxStampMakerGUI;
 import dev.architectury.networking.NetworkManager;
 import io.netty.buffer.Unpooled;
@@ -47,7 +49,7 @@ public class DisxClientPacketIndex  {
          */
 
         public static void receiveServerAudioPlayerRegistryEvent(FriendlyByteBuf buf, NetworkManager.PacketContext context){
-            System.out.println("got audio registry event");
+            DisxLogger.debug("got audio registry event");
             String type = buf.readUtf();
             BlockPos blockPos = buf.readBlockPos();
             String videoId = buf.readUtf();
@@ -59,7 +61,7 @@ public class DisxClientPacketIndex  {
             BlockPos newBlockPos = buf.readBlockPos();
             ResourceLocation newDimLocation = buf.readResourceLocation();
             if (type.equals("add")){
-                System.out.println("calling for add");
+                DisxLogger.debug("calling for add");
                 DisxAudioPlayerRegistry.newAudioPlayer(blockPos, videoId, fromSoundCommand, seconds, dimensionLocation, playerOwner, loop);
             }
             if (type.equals("remove")){
@@ -116,6 +118,16 @@ public class DisxClientPacketIndex  {
             buf.writeBlockPos(blockPos);
             NetworkManager.sendToServer(
                     new ResourceLocation("disx","videoidselection"),
+                    buf
+            );
+        }
+
+        public static void singleplayerTrackEnd(BlockPos blockPos, ResourceLocation dimension){
+            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+            buf.writeBlockPos(blockPos);
+            buf.writeResourceLocation(dimension);
+            NetworkManager.sendToServer(
+                    new ResourceLocation("disx","singleplayertrackend"),
                     buf
             );
         }

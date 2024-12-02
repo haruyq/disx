@@ -1,5 +1,6 @@
 package com.aviatorrob06.disx.recipe_types;
 
+import com.aviatorrob06.disx.DisxLogger;
 import com.aviatorrob06.disx.DisxMain;
 import com.aviatorrob06.disx.items.DisxBlankDisc;
 import com.aviatorrob06.disx.items.DisxRecordStamp;
@@ -40,9 +41,9 @@ public class DisxCustomDiscRecipe implements Recipe<Container> {
     @Override
     public boolean matches(Container container, Level level) {
         if (container.getItem(0).getItem().equals(DisxMain.REGISTRAR_MANAGER.get().get(Registries.ITEM).get(new ResourceLocation("disx","blank_disc")))){
-            System.out.println("blank disc found");
+            DisxLogger.debug("blank disc found");
             if (container.getItem(2).getItem().equals(this.decorativeFactor)){
-                System.out.println("decorative factor found " + this.decorativeFactor.toString());
+                DisxLogger.debug("decorative factor found " + this.decorativeFactor.toString());
                 return true;
             } else {
                 return false;

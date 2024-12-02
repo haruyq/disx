@@ -1,5 +1,6 @@
 package com.aviatorrob06.disx.commands;
 
+import com.aviatorrob06.disx.DisxLogger;
 import com.aviatorrob06.disx.utils.DisxInternetCheck;
 import com.aviatorrob06.disx.DisxMain;
 import com.aviatorrob06.disx.DisxSystemMessages;
@@ -75,12 +76,12 @@ public class DisxGenCommand {
                 CompoundTag stackNbt = stack.getOrCreateTag();
                 videoId.replace(" ", "");
                 stackNbt.putString("videoId", videoId);
-                if (debug) System.out.println(videoId);
+                DisxLogger.debug(videoId);
                 //OLD TITLE SCRAPER
                 //RequestVideoInfo videoInfoRequest = new RequestVideoInfo(videoId);
-                //if (debug) System.out.println("videoInfoRequest Generated");
+                //DisxLogger.debug("videoInfoRequest Generated");
                 //Response<VideoInfo> videoInfoResponse = null;
-                //if (debug) System.out.println("videoInfoResponse initialized");
+                //DisxLogger.debug("videoInfoResponse initialized");
                 //videoInfoResponse = ytDownloader.getVideoInfo(videoInfoRequest);
                 String videoTitle = DisxYoutubeTitleScraper.getYouTubeVideoTitle(videoId);
                 if (videoTitle.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
@@ -94,7 +95,7 @@ public class DisxGenCommand {
                     player.getInventory().add(stack);
                 }
                 context.getSource().sendSystemMessage(Component.literal("Your disc has been distributed!"));
-                if (debug) System.out.println("success??..." + "custom_disc_" + argumentResult);
+                DisxLogger.debug("success??..." + "custom_disc_" + argumentResult);
             } catch (Exception e) {
                 if (e.getMessage().equals("Video Not Found")) {
                     if (context.getSource().isPlayer()){
@@ -115,7 +116,7 @@ public class DisxGenCommand {
                         DisxSystemMessages.invalidDiscType(context.getSource().getServer());
                     }
                 } else {
-                    System.out.println(e.getMessage() + e.getCause());
+                    DisxLogger.debug(e.getMessage() + e.getCause());
                 }
             }
         }

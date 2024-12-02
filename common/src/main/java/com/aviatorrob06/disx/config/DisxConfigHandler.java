@@ -1,6 +1,7 @@
 package com.aviatorrob06.disx.config;
 
 
+import com.aviatorrob06.disx.DisxLogger;
 import com.aviatorrob06.disx.DisxMain;
 import com.aviatorrob06.disx.DisxServerAudioPlayerRegistry;
 import com.aviatorrob06.disx.DisxSystemMessages;
@@ -39,7 +40,9 @@ public class DisxConfigHandler {
             //Config Properties File Check/Create/Initialization
             File dir = new File(filePath);
             File parent = dir.getParentFile();
-            if (!parent.exists() || !dir.exists()){
+            File configFolder = parent.getParentFile();
+            if (!parent.exists() || !dir.exists() || !configFolder.exists()){
+                configFolder.mkdir();
                 parent.mkdir();
                 try {
                     FileOutputStream outputStream = new FileOutputStream(dir);
@@ -228,14 +231,14 @@ public class DisxConfigHandler {
                     return "duplicate";
                 }
                 whitelist.add(uuid.toString());
-                System.out.println("WHITELIST LIST OBJECT: " + whitelist);
+                DisxLogger.debug("WHITELIST LIST OBJECT: " + whitelist);
                 JSONObject jsonObject = new JSONObject();
                 JSONArray jsonArray = new JSONArray();
                 for (Object o : whitelist){
                     jsonArray.put(o);
                 }
                 jsonObject.put("whitelist", jsonArray);
-                System.out.println(jsonObject);
+                DisxLogger.debug(jsonObject);
                 FileWriter fileWriter = new FileWriter(useWhitelistJsonPath);
                 jsonObject.write(fileWriter);
                 fileWriter.close();
@@ -252,9 +255,9 @@ public class DisxConfigHandler {
             try {
                 UUID uuid = DisxUUIDUtil.getUuidFromUsername(username);
                 List<Object> whitelist = getUseWhitelist();
-                System.out.println("checking if user is on whitelist");
+                DisxLogger.debug("checking if user is on whitelist");
                 if (whitelist.contains(uuid.toString())){
-                    System.out.println("user is, removing them");
+                    DisxLogger.debug("user is, removing them");
                     whitelist.remove(uuid.toString());
                 } else {
                     return "notfoundonit";
@@ -265,7 +268,7 @@ public class DisxConfigHandler {
                     jsonArray.put(o);
                 }
                 jsonObject.put("whitelist", jsonArray);
-                System.out.println(jsonObject);
+                DisxLogger.debug(jsonObject);
                 FileWriter fileWriter = new FileWriter(useWhitelistJsonPath);
                 jsonObject.write(fileWriter);
                 fileWriter.close();

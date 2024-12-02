@@ -16,14 +16,14 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class DisxModInfo {
-    private static final String VERSION = "b0.1.1-patch1";
+    private static final String VERSION = "b0.1.2";
     private static String LATEST_VERSION = "N/A - NO INTERNET";
-    private static final String DISCORD_URL = "http://discord.aviatorrob06.com";
+    private static final String DISCORD_URL = "http://discord.ar06.xyz";
     private static final String MODRINTH_URL = "https://modrinth.com/mod/disx";
     private static final String CURSEFORGE_URL = "https://www.curseforge.com/minecraft/mc-mods/disx";
     private static final String GITHUB_URL = "https://github.com/AviatorRob/disx";
     private static final String ROADMAP_URL = "https://trello.com/b/JwbWrPbE";
-    private static final String BUY_ME_A_COFFEE_URL = "https://buymeacoffee.com/aviatorrob06";
+    private static final String PATREON_URL = "https://www.patreon.com/c/ar06";
     private static final String LATEST_VERSION_URL = "https://raw.githubusercontent.com/AviatorRob/disx/master/LATEST_VERSION.json";
     private static Boolean isUpToDate = true;
     private static int versionsOutdated = 0;
@@ -53,18 +53,18 @@ public class DisxModInfo {
                             break;
                         } else {
                             versionOutdateCounter++;
-                            DisxMain.LOGGER.info("+1 VERSION OUTDATED");
+                            DisxLogger.debug("+1 VERSION OUTDATED");
                         }
                     }
                     versionsOutdated = versionOutdateCounter;
-                    DisxMain.LOGGER.info(Integer.toString(versionsOutdated));
+                    DisxLogger.debug(Integer.toString(versionsOutdated));
                 }
             } else {
-                System.out.println("Version Fetch Request failed with status code: " + response.statusCode());
+                DisxLogger.error("Version Fetch Request failed with status code: " + response.statusCode());
             }
         } catch (Exception e) {
             if (e instanceof ConnectException){
-                DisxMain.LOGGER.info(e.getCause() + ": Failed to get latest Disx version. Is there an internet connection readily available?");
+                DisxLogger.error(e.getCause() + ": Failed to get latest Disx version. Is there an internet connection readily available?");
             } else {
                 e.printStackTrace();
             }
@@ -72,8 +72,8 @@ public class DisxModInfo {
         }
     }
 
-    public static String getBuyMeACoffeeUrl() {
-        return BUY_ME_A_COFFEE_URL;
+    public static String getPatreonUrl() {
+        return PATREON_URL;
     }
 
     public static String getLatestVersion() {
