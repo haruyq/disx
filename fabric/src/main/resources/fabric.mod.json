@@ -16,10 +16,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.aviatorrob06.disx.fabric.DisxMainFabric"
+      "xyz.ar06.disx.fabric.DisxMainFabric"
     ],
     "rei_client": [
-      "com.aviatorrob06.disx.client_only.DisxCompatWithREI"
+      "xyz.ar06.disx.client_only.DisxCompatWithREI"
     ]
   },
   "depends": {

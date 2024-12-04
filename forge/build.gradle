@@ -87,7 +87,7 @@ dependencies {
     //forgeRuntimeLibrary 'org.mozilla:rhino:1.7.13'
     //forgeRuntimeLibrary 'org.mozilla:rhino-engine:+'
     forgeRuntimeLibrary 'org.opentest4j:opentest4j:+'
-    forgeRuntimeLibrary 'com.github.aikaterna:lavaplayer-natives:original-SNAPSHOT'
+    //forgeRuntimeLibrary 'com.github.aikaterna:lavaplayer-natives:original-SNAPSHOT'
     //forgeRuntimeLibrary "dev.arbjerg:lavaplayer:2.1.2"
     forgeRuntimeLibrary group: 'org.jsoup', name: 'jsoup', version: '+'
     //forgeRuntimeLibrary "dev.lavalink.youtube:common:1.2.0"
@@ -108,7 +108,7 @@ dependencies {
     //include 'org.mozilla:rhino:+'
     //include 'org.mozilla:rhino-engine:+'
     include 'org.opentest4j:opentest4j:+'
-    include 'com.github.aikaterna:lavaplayer-natives:original-SNAPSHOT'
+    //include 'com.github.aikaterna:lavaplayer-natives:original-SNAPSHOT'
     //include "dev.arbjerg:lavaplayer:2.1.2"
     include group: 'org.jsoup', name: 'jsoup', version: '+'
     //include "dev.lavalink.youtube:common:1.2.0"

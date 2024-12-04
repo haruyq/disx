@@ -15,7 +15,7 @@
     "intermediate_mappings": "net.fabricmc:intermediary",
     "entrypoints": {
       "init": [
-        "com.aviatorrob06.disx.DisxMainQuilt"
+        "xyz.ar06.disx.DisxMainQuilt"
       ]
     },
     "depends": [
