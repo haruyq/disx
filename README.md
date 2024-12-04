@@ -28,11 +28,8 @@ Credit to the primary libraries used in this project:
 
 [Lavaplayer](https://github.com/lavalink-devs/lavaplayer)
 
-[YouTube Source](https://github.com/lavalink-devs/youtube-source)
-
 [Jsoup](https://github.com/jhy/jsoup)
 
 [Mozilla Rhino](https://github.com/mozilla/rhino)
 
-[Mozilla Rhino](https://github.com/mozilla/rhino)
 
