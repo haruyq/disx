@@ -12,7 +12,8 @@ import java.net.http.HttpResponse;
 import java.util.HashMap;
 
 public class DisxModInfo {
-    private static final String VERSION = "b0.1.2-patch1";
+    private static final String VERSION = "0.1.3-dev1";
+    private static final boolean DEV_BUILD = true;
     private static String LATEST_VERSION = "N/A - NO INTERNET";
     private static final String DISCORD_URL = "http://discord.ar06.xyz";
     private static final String MODRINTH_URL = "https://modrinth.com/mod/disx";
@@ -47,9 +48,11 @@ public class DisxModInfo {
                 if (!LATEST_VERSION.equals(VERSION)){
                     isUpToDate = false;
                     int versionOutdateCounter = 1;
+                    boolean foundOnVersionsList = false;
                     for (int i = 1; i < versionsJson.length(); i++){
                         String next = versionsJson.getString(i);
                         if (next.equals(VERSION)) {
+                            foundOnVersionsList = true;
                             break;
                         } else {
                             versionOutdateCounter++;
@@ -58,6 +61,12 @@ public class DisxModInfo {
                     }
                     versionsOutdated = versionOutdateCounter;
                     DisxLogger.debug(Integer.toString(versionsOutdated));
+                    if (!foundOnVersionsList){
+                        versionsOutdated = 0;
+                        isUpToDate = true;
+                        DisxLogger.debug("This version not found on version control. Dev build?");
+                    }
+
                 }
             } else {
                 DisxLogger.error("Version Fetch Request failed with status code: " + response.statusCode());
@@ -126,5 +135,9 @@ public class DisxModInfo {
 
     public static String getCarryonConfigInstructionsUrl() {
         return CARRYON_CONFIG_INSTRUCTIONS_URL;
+    }
+
+    public static boolean getIsDevBuild(){
+        return DEV_BUILD;
     }
 }

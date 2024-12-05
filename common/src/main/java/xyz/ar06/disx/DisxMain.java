@@ -120,6 +120,8 @@ public class DisxMain {
 
         LifecycleEvent.SERVER_STARTED.register(DisxSystemMessages::potentialModConflict);
 
+        LifecycleEvent.SERVER_STARTED.register(DisxSystemMessages::devBuildNotice);
+
         //Register Server Packets
         DisxServerPacketIndex.registerServerPacketReceivers();
 
