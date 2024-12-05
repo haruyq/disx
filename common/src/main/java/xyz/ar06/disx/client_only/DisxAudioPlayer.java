@@ -1,5 +1,7 @@
 package xyz.ar06.disx.client_only;
 
+import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager;
+import org.apache.http.client.config.RequestConfig;
 import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.DisxMain;
 import xyz.ar06.disx.DisxSystemMessages;
@@ -85,7 +87,12 @@ public class DisxAudioPlayer {
         if (!playerManagerConfigured){
             //playerManager.registerSourceManager(youtube);
             AudioSourceManagers.registerRemoteSources(playerManager);
+            AudioSourceManagers.registerLocalSource(playerManager);
             playerManager.getConfiguration().setOutputFormat(format);
+            playerManager.setHttpRequestConfigurator(config -> RequestConfig.copy(config)
+                    .setSocketTimeout(10000)
+                    .setConnectTimeout(10000)
+                    .build());
             playerManagerConfigured = true;
         }
         DisxLogger.debug("configured playermanager");
@@ -113,9 +120,6 @@ public class DisxAudioPlayer {
             }
             if (playAttempt.equals("API FAILURE")){
                 DisxSystemMessages.apiError(Minecraft.getInstance().player);
-            }
-            if (playAttempt.equals("success")){
-                DisxSystemMessages.playingVideo(videoId);
             }
         }
     }
@@ -244,7 +248,7 @@ public class DisxAudioPlayer {
     }
 
     private String playTrack(String videoId, int seconds){
-        String url = DisxYoutubeAudioURLScraper.scrapeURL(videoId);
+        String url = "http://disxytsourceapi.ar06.xyz/stream_audio?id=" + videoId;
         final String[] exceptionStr = {null};
         if (url.equals("ERROR")){
             exceptionStr[0] = "API FAILURE";
@@ -326,6 +330,12 @@ public class DisxAudioPlayer {
                 }
             }
             super.onTrackEnd(player, track, endReason);
+        }
+
+        @Override
+        public void onTrackStart(AudioPlayer player, AudioTrack track) {
+            DisxSystemMessages.playingVideo(audioPlayerDetails.getVideoId());
+            super.onTrackStart(player, track);
         }
     }
 

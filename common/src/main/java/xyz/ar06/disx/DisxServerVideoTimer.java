@@ -25,6 +25,12 @@ public class DisxServerVideoTimer {
         this.forceStop = true;
     }
     public void commenceTimer(){
+        /*try {
+            DisxLogger.debug("Attempting to wait 7 seconds to start timer to adjust for API response time");
+            Thread.sleep(12000);
+        } catch (InterruptedException e){
+            System.out.println(e);
+        }*/
         DisxLogger.debug("initializing timer");
         int length = DisxYoutubeLengthScraper.getYoutubeVideoLength(videoId);
         DisxLogger.debug(length);
