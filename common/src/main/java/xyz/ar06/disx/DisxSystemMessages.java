@@ -143,6 +143,13 @@ public class DisxSystemMessages {
                 for (MutableComponent component : messages){
                     server.sendSystemMessage(component);
                 }
+                PlayerEvent.PLAYER_JOIN.register(player -> {
+                    if (player.hasPermissions(1)){
+                        for (MutableComponent component : messages){
+                            player.sendSystemMessage(component);
+                        }
+                    }
+                });
             }
         }
     }
@@ -181,6 +188,40 @@ public class DisxSystemMessages {
             for (MutableComponent component : messages){
                 server.sendSystemMessage(component);
             }
+            PlayerEvent.PLAYER_JOIN.register(player -> {
+                if (player.hasPermissions(1)){
+                    for (MutableComponent component : messages){
+                        player.sendSystemMessage(component);
+                    }
+                }
+            });
         }
     }
+
+    public static void devBuildNotice(MinecraftServer server){
+        if (DisxModInfo.getIsDevBuild()){
+            MutableComponent message = Component.literal("Disx Notice: This build has been marked as an in-dev/pre-production build. Expect more bugs than usual!")
+                    .withStyle(ChatFormatting.GOLD)
+                    .withStyle(ChatFormatting.BOLD);
+            MutableComponent message2 = Component.literal("Installed Version: " + DisxModInfo.getVERSION())
+                    .withStyle(ChatFormatting.GRAY);
+            if (server.isSingleplayer()){
+                PlayerEvent.PLAYER_JOIN.register(player -> {
+                    player.sendSystemMessage(message);
+                    player.sendSystemMessage(message2);
+                });
+            } else {
+                server.sendSystemMessage(message);
+                server.sendSystemMessage(message2);
+                PlayerEvent.PLAYER_JOIN.register(player -> {
+                    if (player.hasPermissions(1)){
+                        player.sendSystemMessage(message);
+                        player.sendSystemMessage(message2);
+                    }
+                });
+            }
+        }
+
+    }
+
 }
