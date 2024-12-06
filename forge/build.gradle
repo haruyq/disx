@@ -97,7 +97,7 @@ dependencies {
     include 'com.fasterxml.jackson.core:jackson-core:2.17.2'
     include 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
     include 'com.github.walkyst.JAADec-fork:jaadec-ext-aac:+'
-    include 'com.github.sealedtx:java-youtube-downloader:+'
+    //include 'com.github.sealedtx:java-youtube-downloader:+'
     include group: 'org.json', name: 'json', version: '+'
     include 'org.junit.jupiter:junit-jupiter:+'
     include 'org.junit.jupiter:junit-jupiter-api:+'
