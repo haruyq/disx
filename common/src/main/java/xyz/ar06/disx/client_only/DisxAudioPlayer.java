@@ -327,42 +327,38 @@ public class DisxAudioPlayer {
     private String playTrack(String videoId, int seconds){
         String url = "http://disxytsourceapi.ar06.xyz/stream_audio?id=" + videoId;
         final String[] exceptionStr = {null};
-        if (url.equals("ERROR")){
-            exceptionStr[0] = "API FAILURE";
-        } else {
-            playerManager.loadItem(url, new AudioLoadResultHandler() {
-                @Override
-                public void trackLoaded(AudioTrack track) {
-                    //DisxLogger.debug("setting track at " + (seconds * 1000L));
-                    DisxAudioPlayer.this.cachedTrack = track.makeClone();
-                    track.setPosition(seconds);
-                    player.playTrack(track);
-                    //BlockPos blockPos = audioPlayerDetails.getBlockPos();
-                    //boolean serverOwned = audioPlayerDetails.isServerOwned();
-                    //DisxClientPacketIndex.ClientPackets.playerSuccessStatus("Success", blockPos, videoId, serverOwned, playerCanHear);
-                    DisxAudioPlayer.this.startAudioLineStreaming();
-                    DisxLogger.debug("ran track loaded function");
-                    exceptionStr[0] = "success";
-                }
+        playerManager.loadItem(url, new AudioLoadResultHandler() {
+            @Override
+            public void trackLoaded(AudioTrack track) {
+                //DisxLogger.debug("setting track at " + (seconds * 1000L));
+                DisxAudioPlayer.this.cachedTrack = track.makeClone();
+                track.setPosition(seconds);
+                player.playTrack(track);
+                //BlockPos blockPos = audioPlayerDetails.getBlockPos();
+                //boolean serverOwned = audioPlayerDetails.isServerOwned();
+                //DisxClientPacketIndex.ClientPackets.playerSuccessStatus("Success", blockPos, videoId, serverOwned, playerCanHear);
+                DisxAudioPlayer.this.startAudioLineStreaming();
+                DisxLogger.debug("ran track loaded function");
+                exceptionStr[0] = "success";
+            }
 
-                @Override
-                public void playlistLoaded(AudioPlaylist playlist) {
+            @Override
+            public void playlistLoaded(AudioPlaylist playlist) {
 
-                }
+            }
 
-                @Override
-                public void noMatches() {
-                    exceptionStr[0] = "Video Not Found";
-                }
+            @Override
+            public void noMatches() {
+                exceptionStr[0] = "Video Not Found";
+            }
 
-                @Override
-                public void loadFailed(FriendlyException exception) {
-                    exceptionStr[0] = "Failed";
-                    DisxLogger.debug(exception.getMessage().toString() + ": " + exception.getCause().toString());
-                }
+            @Override
+            public void loadFailed(FriendlyException exception) {
+                exceptionStr[0] = "Failed";
+                DisxLogger.debug(exception.getMessage().toString() + ": " + exception.getCause().toString());
+            }
 
-            });
-        }
+        });
         if (exceptionStr[0] == null){
             return "success";
         } else {
