@@ -44,7 +44,7 @@ public class DisxMain {
 
     public static final Logger LOGGER = LoggerFactory.getLogger("disx");
 
-    public static final boolean debug = false;
+    public static final boolean debug = true;
 
 
     public static final Supplier<RegistrarManager> REGISTRAR_MANAGER = Suppliers.memoize(() -> RegistrarManager.get(MOD_ID));
