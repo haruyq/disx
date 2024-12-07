@@ -13,6 +13,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+@Deprecated
 public class DisxYoutubeAudioURLScraper {
     private static String apiURL = "http://disxytsourceapi.ar06.xyz/get_url/";
     public static String scrapeURL(String videoId){

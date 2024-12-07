@@ -3,7 +3,7 @@ package xyz.ar06.disx.utils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-
+@Deprecated
 public class DisxYoutubeTitleScraper {
     public static String getYouTubeVideoTitle(String videoId) {
         try {

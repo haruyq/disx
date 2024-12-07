@@ -4,6 +4,7 @@ import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.utils.DisxInternetCheck;
 import xyz.ar06.disx.DisxMain;
 import xyz.ar06.disx.DisxSystemMessages;
+import xyz.ar06.disx.utils.DisxYoutubeInfoScraper;
 import xyz.ar06.disx.utils.DisxYoutubeTitleScraper;
 import xyz.ar06.disx.commands.suggestionProviders.DisxTypeSuggestionProvider;
 import xyz.ar06.disx.config.DisxConfigHandler;
@@ -28,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
 import static xyz.ar06.disx.DisxMain.debug;
 
@@ -53,6 +55,7 @@ public class DisxGenCommand {
             context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
         } else
         {
+            CompletableFuture.runAsync(() -> context.getSource().sendSystemMessage(Component.literal("Your disc is generating, one moment please...")));
             String argumentResult = context.getArgument("discType", String.class);
             String videoId = context.getArgument("videoId", String.class);
             try {
@@ -69,7 +72,6 @@ public class DisxGenCommand {
                 if (!validDisc){
                     throw new Exception("Invalid Disc Type");
                 }
-                context.getSource().sendSystemMessage(Component.literal("Your disc is generating, one moment please..."));
                 Item disc = DisxMain.REGISTRAR_MANAGER.get().get(Registries.ITEM).get(new ResourceLocation("disx", "custom_disc_" + argumentResult));
                 ItemStack stack = disc.getDefaultInstance();
                 stack.setCount(1);
@@ -83,7 +85,7 @@ public class DisxGenCommand {
                 //Response<VideoInfo> videoInfoResponse = null;
                 //DisxLogger.debug("videoInfoResponse initialized");
                 //videoInfoResponse = ytDownloader.getVideoInfo(videoInfoRequest);
-                String videoTitle = DisxYoutubeTitleScraper.getYouTubeVideoTitle(videoId);
+                String videoTitle = DisxYoutubeInfoScraper.scrapeTitle(videoId);
                 if (videoTitle.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
                     throw new Exception("Video Not Found");
                 }

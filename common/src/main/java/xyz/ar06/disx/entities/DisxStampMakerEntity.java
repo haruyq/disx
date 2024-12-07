@@ -4,6 +4,7 @@ import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.utils.DisxInternetCheck;
 import xyz.ar06.disx.DisxMain;
 import xyz.ar06.disx.DisxSystemMessages;
+import xyz.ar06.disx.utils.DisxYoutubeInfoScraper;
 import xyz.ar06.disx.utils.DisxYoutubeTitleScraper;
 import xyz.ar06.disx.blocks.DisxLacquerBlock;
 import xyz.ar06.disx.config.DisxConfigHandler;
@@ -195,7 +196,7 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
         if (!DisxInternetCheck.checkInternet()){
             DisxSystemMessages.noInternetErrorMessage(player);
         } else {
-            String videoName = DisxYoutubeTitleScraper.getYouTubeVideoTitle(this.videoId);
+            String videoName = DisxYoutubeInfoScraper.scrapeTitle(this.videoId);
             if (videoName.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
                 DisxSystemMessages.noVideoFound(player);
                 return;
@@ -231,7 +232,7 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
         if (!DisxInternetCheck.checkInternet()){
                 DisxSystemMessages.noInternetFoundStampMakerAsync(this.getLevel().getServer(), this.getBlockPos());
         } else {
-            String videoName = DisxYoutubeTitleScraper.getYouTubeVideoTitle(this.videoId);
+            String videoName = DisxYoutubeInfoScraper.scrapeTitle(this.videoId);
             if (videoName.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
                 DisxSystemMessages.videoNotFoundStampMakerAsync(this.getLevel().getServer(), this.getBlockPos());
                 return;

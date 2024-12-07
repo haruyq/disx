@@ -2,6 +2,7 @@ package xyz.ar06.disx.commands;
 
 import xyz.ar06.disx.config.DisxConfigHandler;
 import xyz.ar06.disx.items.DisxRecordStamp;
+import xyz.ar06.disx.utils.DisxYoutubeInfoScraper;
 import xyz.ar06.disx.utils.DisxYoutubeTitleScraper;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -19,6 +20,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
 public class DisxStampCommand {
 
@@ -36,7 +38,7 @@ public class DisxStampCommand {
             context.getSource().sendFailure(Component.literal("You do not have permission to do that!"));
             return 1;
         } else {
-            context.getSource().sendSystemMessage(Component.literal("Your stamp is generating, one moment please..."));
+            CompletableFuture.runAsync(() -> context.getSource().sendSystemMessage(Component.literal("Your stamp is generating, one moment please...")));
             String videoId = context.getArgument("videoId", String.class);
             Collection<ServerPlayer> playerCollection;
             try {
@@ -46,7 +48,7 @@ public class DisxStampCommand {
                 context.getSource().sendFailure(Component.literal("Disx Error: Unable to get player(s) provided!"));
                 throw new RuntimeException(e);
             }
-            String videoName = DisxYoutubeTitleScraper.getYouTubeVideoTitle(videoId);
+            String videoName = DisxYoutubeInfoScraper.scrapeTitle(videoId);
             if (videoName.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")) {
                 context.getSource().sendFailure(Component.literal("Disx Error: Video not found!"));
                 return 1;

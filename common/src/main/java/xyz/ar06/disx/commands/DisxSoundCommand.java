@@ -4,6 +4,7 @@ import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.utils.DisxInternetCheck;
 import xyz.ar06.disx.DisxServerAudioPlayerRegistry;
 import xyz.ar06.disx.DisxSystemMessages;
+import xyz.ar06.disx.utils.DisxYoutubeInfoScraper;
 import xyz.ar06.disx.utils.DisxYoutubeTitleScraper;
 import xyz.ar06.disx.config.DisxConfigHandler;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -20,6 +21,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.CompletableFuture;
 
 public class DisxSoundCommand {
 
@@ -70,11 +73,11 @@ public class DisxSoundCommand {
                 if (!hasInternet){
                     throw new Exception("No Internet Connection");
                 }
-                String videoTitle = DisxYoutubeTitleScraper.getYouTubeVideoTitle(videoId);
+                String videoTitle = DisxYoutubeInfoScraper.scrapeTitle(videoId);
                 if (videoTitle.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
                     throw new Exception("Video Not Found");
                 }
-                context.getSource().sendSystemMessage(Component.literal("One moment please..."));
+                CompletableFuture.runAsync(() -> context.getSource().sendSystemMessage(Component.literal("One moment please...")));
                 if (!context.getSource().isPlayer()){
                     DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, true, null, context.getSource().getServer(), dimension, startTime.intValue(), false);
                 } else {

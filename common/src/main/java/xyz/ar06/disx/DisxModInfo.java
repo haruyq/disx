@@ -12,7 +12,7 @@ import java.net.http.HttpResponse;
 import java.util.HashMap;
 
 public class DisxModInfo {
-    private static final String VERSION = "0.1.3-dev-b3864357";
+    private static final String VERSION = "0.1.3-dev-f2bf430c";
     private static final boolean DEV_BUILD = true;
     private static String LATEST_VERSION = "N/A - NO INTERNET";
     private static final String DISCORD_URL = "http://discord.ar06.xyz";

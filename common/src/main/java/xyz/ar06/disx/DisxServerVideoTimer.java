@@ -1,5 +1,6 @@
 package xyz.ar06.disx;
 
+import xyz.ar06.disx.utils.DisxYoutubeInfoScraper;
 import xyz.ar06.disx.utils.DisxYoutubeLengthScraper;
 
 import java.util.concurrent.CompletableFuture;
@@ -32,7 +33,7 @@ public class DisxServerVideoTimer {
             System.out.println(e);
         }*/
         DisxLogger.debug("initializing timer");
-        int length = DisxYoutubeLengthScraper.getYoutubeVideoLength(videoId);
+        int length = DisxYoutubeInfoScraper.scrapeLengthInSeconds(videoId);
         DisxLogger.debug(length);
         startTime = System.currentTimeMillis();
         elapsedSeconds = 0;

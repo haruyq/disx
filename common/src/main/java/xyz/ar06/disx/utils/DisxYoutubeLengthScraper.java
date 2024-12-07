@@ -4,6 +4,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+@Deprecated
 public class DisxYoutubeLengthScraper {
 
     // Method to convert ISO 8601 duration to seconds
