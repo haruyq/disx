@@ -1,5 +1,6 @@
 package xyz.ar06.disx.entities;
 
+import net.minecraft.network.chat.Component;
 import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.utils.DisxInternetCheck;
 import xyz.ar06.disx.DisxMain;
@@ -196,9 +197,15 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
         if (!DisxInternetCheck.checkInternet()){
             DisxSystemMessages.noInternetErrorMessage(player);
         } else {
-            String videoName = DisxYoutubeInfoScraper.scrapeTitle(this.videoId);
+            ArrayList<String> title_and_length = DisxYoutubeInfoScraper.scrapeLengthAndTitle(this.videoId);
+            String videoName = title_and_length.get(0);
             if (videoName.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
                 DisxSystemMessages.noVideoFound(player);
+                return;
+            }
+            int videoLength = Integer.valueOf(title_and_length.get(1));
+            if (videoLength > 1800) {
+                DisxSystemMessages.badDuration(player);
                 return;
             }
             this.setItem(0, ItemStack.EMPTY);
@@ -232,9 +239,15 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
         if (!DisxInternetCheck.checkInternet()){
                 DisxSystemMessages.noInternetFoundStampMakerAsync(this.getLevel().getServer(), this.getBlockPos());
         } else {
-            String videoName = DisxYoutubeInfoScraper.scrapeTitle(this.videoId);
+            ArrayList<String> title_and_length = DisxYoutubeInfoScraper.scrapeLengthAndTitle(this.videoId);
+            String videoName = title_and_length.get(0);
             if (videoName.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
                 DisxSystemMessages.videoNotFoundStampMakerAsync(this.getLevel().getServer(), this.getBlockPos());
+                return;
+            }
+            int videoLength = Integer.valueOf(title_and_length.get(1));
+            if (videoLength > 1800) {
+                DisxSystemMessages.badDurationStampMakerAsync(this.getLevel().getServer(), this.getBlockPos());
                 return;
             }
             this.setItem(0, ItemStack.EMPTY);

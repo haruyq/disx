@@ -19,6 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class DisxConfigCommand {
     public static void registerCommand(){
@@ -102,28 +103,30 @@ public class DisxConfigCommand {
         if (!context.getSource().hasPermission(2)){
             context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
         } else {
-            List<Object> list = DisxConfigHandler.SERVER.getUseWhitelist();
-            ArrayList<Component> toSend = new ArrayList<>();
-            toSend.add(Component.literal("Disx Whitelisted Players:").withStyle(ChatFormatting.BOLD));
-            toSend.add(Component.literal("Whitelist Status: " + DisxConfigHandler.SERVER.getProperty("player_use_whitelist_enabled")).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-            for (Object o : list){
-                String name = "";
-                try{
-                    DisxLogger.debug("TRYING TO CONVERT STRING TO UUID: " + o.toString());
-                    name = DisxUUIDUtil.getUsernameFromUuid(UUID.fromString(o.toString()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    context.getSource().sendFailure(Component.literal("Error in trying to load whitelist. Is it corrupted?"));
-                    return 1;
+            CompletableFuture.runAsync(() -> {
+                List<Object> list = DisxConfigHandler.SERVER.getUseWhitelist();
+                ArrayList<Component> toSend = new ArrayList<>();
+                toSend.add(Component.literal("Disx Whitelisted Players:").withStyle(ChatFormatting.BOLD));
+                toSend.add(Component.literal("Whitelist Status: " + DisxConfigHandler.SERVER.getProperty("player_use_whitelist_enabled")).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+                for (Object o : list){
+                    String name = "";
+                    try{
+                        DisxLogger.debug("TRYING TO CONVERT STRING TO UUID: " + o.toString());
+                        name = DisxUUIDUtil.getUsernameFromUuid(UUID.fromString(o.toString()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        context.getSource().sendFailure(Component.literal("Error in trying to load whitelist. Is it corrupted?"));
+                        return;
+                    }
+                    toSend.add(Component.literal("- " + name));
                 }
-                toSend.add(Component.literal("- " + name));
-            }
-            if (list.isEmpty()){
-                toSend.add(Component.literal("NONE").withStyle(ChatFormatting.ITALIC));
-            }
-            for (Component c : toSend){
-                context.getSource().sendSystemMessage(c);
-            }
+                if (list.isEmpty()){
+                    toSend.add(Component.literal("NONE").withStyle(ChatFormatting.ITALIC));
+                }
+                for (Component c : toSend){
+                    context.getSource().sendSystemMessage(c);
+                }
+            });
         }
         return 1;
     }
@@ -133,14 +136,7 @@ public class DisxConfigCommand {
             context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
         } else {
             String username = context.getArgument("username", String.class);
-            String result = DisxConfigHandler.SERVER.addToUseWhitelist(username);
-            if (result.equals("success")){
-                context.getSource().sendSystemMessage(Component.literal("Added '" + username + "' to the Player-Use Whitelist!"));
-            } else if (result.equals("failure")){
-                context.getSource().sendFailure(Component.literal("Player not found. Is that username a registered Java Edition account?"));
-            } else if (result.equals("duplicate")){
-                context.getSource().sendFailure(Component.literal("This player is already on the whitelist!"));
-            }
+            CompletableFuture.runAsync(() -> DisxConfigHandler.SERVER.addToUseWhitelist(username, context));
         }
         return 1;
     }
@@ -150,14 +146,7 @@ public class DisxConfigCommand {
             context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
         } else {
             String username = context.getArgument("username", String.class);
-            String result = DisxConfigHandler.SERVER.removeFromUseWhitelist(username);
-            if (result.equals("success")){
-                context.getSource().sendSystemMessage(Component.literal("Removed '" + username + "' from the Player-Use Whitelist!"));
-            } else if (result.equals("failure")){
-                context.getSource().sendFailure(Component.literal("Player not found. Is that username a registered Java Edition account?"));
-            } else if (result.equals("notfoundonit")){
-                context.getSource().sendFailure(Component.literal("This player is not on the whitelist!"));
-            }
+            DisxConfigHandler.SERVER.removeFromUseWhitelist(username, context);
         }
         return 1;
     }
@@ -166,26 +155,28 @@ public class DisxConfigCommand {
         if (!context.getSource().hasPermission(2)){
             context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
         } else {
-            List<Object> list = DisxConfigHandler.SERVER.getUseBlacklist();
-            ArrayList<Component> toSend = new ArrayList<>();
-            toSend.add(Component.literal("Disx Blacklisted Players:").withStyle(ChatFormatting.BOLD));
-            for (Object o : list){
-                String name = "";
-                try{
-                    name = DisxUUIDUtil.getUsernameFromUuid(UUID.fromString(o.toString()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    context.getSource().sendFailure(Component.literal("Error in trying to load blacklist. Is it corrupted?"));
-                    return 1;
+            CompletableFuture.runAsync(() -> {
+                List<Object> list = DisxConfigHandler.SERVER.getUseBlacklist();
+                ArrayList<Component> toSend = new ArrayList<>();
+                toSend.add(Component.literal("Disx Blacklisted Players:").withStyle(ChatFormatting.BOLD));
+                for (Object o : list){
+                    String name = "";
+                    try{
+                        name = DisxUUIDUtil.getUsernameFromUuid(UUID.fromString(o.toString()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        context.getSource().sendFailure(Component.literal("Error in trying to load blacklist. Is it corrupted?"));
+                        return;
+                    }
+                    toSend.add(Component.literal("- " + name));
                 }
-                toSend.add(Component.literal("- " + name));
-            }
-            if (list.isEmpty()){
-                toSend.add(Component.literal("NONE").withStyle(ChatFormatting.ITALIC));
-            }
-            for (Component c : toSend){
-                context.getSource().sendSystemMessage(c);
-            }
+                if (list.isEmpty()){
+                    toSend.add(Component.literal("NONE").withStyle(ChatFormatting.ITALIC));
+                }
+                for (Component c : toSend){
+                    context.getSource().sendSystemMessage(c);
+                }
+            });
         }
         return 1;
     }
@@ -195,14 +186,7 @@ public class DisxConfigCommand {
             context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
         } else {
             String username = context.getArgument("username", String.class);
-            String result = DisxConfigHandler.SERVER.addToUseBlacklist(username);
-            if (result.equals("success")){
-                context.getSource().sendSystemMessage(Component.literal("Added '" + username + "' to the Player-Use Blacklist >:)"));
-            } else if (result.equals("failure")){
-                context.getSource().sendFailure(Component.literal("Player not found. Is that username a registered Java Edition account?"));
-            } else if (result.equals("duplicate")){
-                context.getSource().sendFailure(Component.literal("This player is already on the blacklist!"));
-            }
+            CompletableFuture.runAsync(() -> DisxConfigHandler.SERVER.addToUseBlacklist(username, context));
         }
         return 1;
     }
@@ -212,14 +196,7 @@ public class DisxConfigCommand {
             context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
         } else {
             String username = context.getArgument("username", String.class);
-            String result = DisxConfigHandler.SERVER.removeFromUseBlacklist(username);
-            if (result.equals("success")){
-                context.getSource().sendSystemMessage(Component.literal("Removed '" + username + "' from the Player-Use Blacklist!"));
-            } else if (result.equals("failure")){
-                context.getSource().sendFailure(Component.literal("Player not found. Is that username a registered Java Edition account?"));
-            } else if (result.equals("notfoundonit")){
-                context.getSource().sendFailure(Component.literal("This player is not on the blacklist!"));
-            }
+            CompletableFuture.runAsync(() -> DisxConfigHandler.SERVER.removeFromUseBlacklist(username, context));
         }
         return 1;
     }

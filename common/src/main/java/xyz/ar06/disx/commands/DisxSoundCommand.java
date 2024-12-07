@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
 public class DisxSoundCommand {
@@ -38,8 +39,6 @@ public class DisxSoundCommand {
     }
 
     private static int run(CommandContext<CommandSourceStack> context) {
-
-        Logger logger = LoggerFactory.getLogger("disx");
         if (!context.getSource().hasPermission(2)){
             context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
         } else
@@ -63,45 +62,61 @@ public class DisxSoundCommand {
                     DisxSystemMessages.maxAudioPlayerCtReached(context.getSource().getServer());
                 }
             }
+            context.getSource().sendSystemMessage(Component.literal("One moment please..."));
+            CompletableFuture.runAsync(() -> runAsync(context));
+        }
+        return 1;
+    }
+
+    private static void runAsync(CommandContext<CommandSourceStack> context){
+        try {
             String videoId = context.getArgument("videoId", String.class);
             ResourceLocation dimension = context.getArgument("dimension", ResourceLocation.class);
             BlockPos blockPos = BlockPosArgument.getBlockPos(context, "position");
             Integer startTime = context.getArgument("startTime", Integer.class);
             DisxLogger.debug("START TIME PROVIDED: " + startTime);
-            try {
-                boolean hasInternet = DisxInternetCheck.checkInternet();
-                if (!hasInternet){
-                    throw new Exception("No Internet Connection");
-                }
-                String videoTitle = DisxYoutubeInfoScraper.scrapeTitle(videoId);
-                if (videoTitle.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
-                    throw new Exception("Video Not Found");
-                }
-                CompletableFuture.runAsync(() -> context.getSource().sendSystemMessage(Component.literal("One moment please...")));
-                if (!context.getSource().isPlayer()){
-                    DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, true, null, context.getSource().getServer(), dimension, startTime.intValue(), false);
+            boolean hasInternet = DisxInternetCheck.checkInternet();
+            if (!hasInternet){
+                throw new Exception("No Internet Connection");
+            }
+            ArrayList<String> title_and_length = DisxYoutubeInfoScraper.scrapeLengthAndTitle(videoId);
+            String videoTitle = title_and_length.get(0);
+            if (videoTitle.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
+                throw new Exception("Video Not Found");
+            }
+            int videoLength = Integer.valueOf(title_and_length.get(1));
+            if (videoLength > 1800) {
+                throw new Exception("Too Long");
+            }
+            if (!context.getSource().isPlayer()){
+                DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, true, null, context.getSource().getServer(), dimension, startTime.intValue(), false);
+            } else {
+                DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, true, context.getSource().getPlayer(), context.getSource().getServer(), dimension, startTime.intValue(), false);
+            }
+            context.getSource().sendSystemMessage(Component.literal("Attempting to start playback of Video Id '" + videoId + "' at " + blockPos + " in " + dimension));
+        } catch (Exception e){
+            if (e.getMessage().equals("Video Not Found")) {
+                if (context.getSource().isPlayer()){
+                    DisxSystemMessages.noVideoFound(context.getSource().getPlayer());
                 } else {
-                    DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, true, context.getSource().getPlayer(), context.getSource().getServer(), dimension, startTime.intValue(), false);
+                    DisxSystemMessages.noVideoFound(context.getSource().getServer());
                 }
-                context.getSource().sendSystemMessage(Component.literal("Attempting to start playback of Video Id '" + videoId + "' at " + blockPos + " in " + dimension));
-            } catch (Exception e){
-                if (e.getMessage().equals("Video Not Found")) {
-                    if (context.getSource().isPlayer()){
-                        DisxSystemMessages.noVideoFound(context.getSource().getPlayer());
-                    } else {
-                        DisxSystemMessages.noVideoFound(context.getSource().getServer());
-                    }
+            }
+            if (e.getMessage().equals("No Internet Connection")) {
+                if (context.getSource().isPlayer()){
+                    DisxSystemMessages.noInternetErrorMessage(context.getSource().getPlayer());
+                } else {
+                    DisxSystemMessages.noInternetErrorMessage(context.getSource().getServer());
                 }
-                if (e.getMessage().equals("No Internet Connection")) {
-                    if (context.getSource().isPlayer()){
-                        DisxSystemMessages.noInternetErrorMessage(context.getSource().getPlayer());
-                    } else {
-                        DisxSystemMessages.noInternetErrorMessage(context.getSource().getServer());
-                    }
+            }
+            if (e.getMessage().equals("Too Long")){
+                if (context.getSource().isPlayer()){
+                    DisxSystemMessages.badDuration(context.getSource().getPlayer());
+                } else {
+                    DisxSystemMessages.badDuration(context.getSource().getServer());
                 }
             }
         }
-        return 1;
     }
 
 }

@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 
 public class DisxYoutubeInfoScraper {
     private static String apiURL = "http://disxytsourceapi.ar06.xyz/video_info";
@@ -53,6 +54,33 @@ public class DisxYoutubeInfoScraper {
         } catch (Exception e){
             e.printStackTrace();
             return -1;
+        }
+    }
+
+    public static ArrayList<String> scrapeLengthAndTitle(String videoId){
+        try {
+            String finalizedUrl = apiURL + "?id=" + videoId;
+            HttpClient httpClient = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder(URI.create(finalizedUrl))
+                    .GET()
+                    .build();
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200){
+                JSONObject jsonObject = new JSONObject(response.body());
+                int length = jsonObject.getInt("duration");
+                String title = jsonObject.getString("title");
+                ArrayList<String> result = new ArrayList<>();
+                result.add(title);
+                result.add(String.valueOf(length));
+                return result;
+            } else {
+                DisxMain.LOGGER.error("Disx Error: YT-SRC API 'video_info' response failed. Status Code: " + response.statusCode());
+                return null;
+            }
+
+        } catch (Exception e){
+            e.printStackTrace();
+            return null;
         }
     }
 }

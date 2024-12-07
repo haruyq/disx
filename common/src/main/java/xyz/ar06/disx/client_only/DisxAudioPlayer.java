@@ -39,6 +39,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.ar06.disx.utils.DisxYoutubeInfoScraper;
 
 import javax.sound.sampled.*;
 import java.io.IOException;

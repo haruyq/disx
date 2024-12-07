@@ -108,6 +108,20 @@ public class DisxSystemMessages {
         server.sendSystemMessage(Component.literal("Disx Error: Tried to make Record Stamp at " + blockPos.toString() + " but no video has been found for provided video id!"));
     }
 
+    public static void badDuration(Player player){
+        ServerPlayer serverPlayer = (ServerPlayer) player;
+        serverPlayer.sendSystemMessage(Component.literal("Disx Error: Video length too long! (Max Length: 30m)").withStyle(ChatFormatting.RED));
+    }
+
+    public static void badDuration(MinecraftServer server){
+        server.sendSystemMessage(Component.literal("Disx Error: Video length too long! (Max Length: 30m)").withStyle(ChatFormatting.RED));
+    }
+
+    public static void badDurationStampMakerAsync(MinecraftServer server, BlockPos blockPos){
+        server.sendSystemMessage(Component.literal("Disx Error: Tried to make Record Stamp at " + blockPos.toString() + " but video length was too long! (Max Length: 30m)"));
+    }
+
+
     public static void ageRestrictionEnabled(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
         serverPlayer.sendSystemMessage(Component.literal("Disx Error: This video is age restricted, and age restricted playback is not allowed on this server!").withStyle(ChatFormatting.RED));
