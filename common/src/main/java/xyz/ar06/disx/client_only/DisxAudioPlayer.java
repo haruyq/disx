@@ -327,7 +327,7 @@ public class DisxAudioPlayer {
     private String playTrack(String videoId, int seconds){
         String url = "http://disxytsourceapi.ar06.xyz/stream_audio?id=" + videoId;
         final String[] exceptionStr = {null};
-        playerManager.loadItem(url, new AudioLoadResultHandler() {
+        playerManager.loadItemSync(url, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
                 //DisxLogger.debug("setting track at " + (seconds * 1000L));
@@ -339,7 +339,6 @@ public class DisxAudioPlayer {
                 //DisxClientPacketIndex.ClientPackets.playerSuccessStatus("Success", blockPos, videoId, serverOwned, playerCanHear);
                 DisxAudioPlayer.this.startAudioLineStreaming();
                 DisxLogger.debug("ran track loaded function");
-                exceptionStr[0] = "success";
             }
 
             @Override
@@ -411,6 +410,12 @@ public class DisxAudioPlayer {
                 DisxSystemMessages.playingVideo(audioPlayerDetails.getVideoId());
             }
             super.onTrackStart(player, track);
+        }
+
+        @Override
+        public void onTrackException(AudioPlayer player, AudioTrack track, FriendlyException exception) {
+            exception.printStackTrace();
+            super.onTrackException(player, track, exception);
         }
     }
 

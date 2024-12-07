@@ -41,6 +41,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.ar06.disx.utils.DisxYoutubeInfoScraper;
+
+import java.util.concurrent.CompletableFuture;
 
 import static xyz.ar06.disx.DisxMain.debug;
 
@@ -134,6 +137,8 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                         debounce = false;
                         //player.getCooldowns().removeCooldown(item);
                         entity.setChanged();
+                        //attempt to get the latest video title if disc was made with no proper title
+                        CompletableFuture.runAsync(() -> entity.tryGetUpdatedDiscName(player));
                         return InteractionResult.SUCCESS;
                     }
                 }

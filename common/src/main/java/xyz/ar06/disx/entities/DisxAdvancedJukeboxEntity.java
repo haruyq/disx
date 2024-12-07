@@ -1,5 +1,8 @@
 package xyz.ar06.disx.entities;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.DisxMain;
 import xyz.ar06.disx.DisxServerAudioPlayerRegistry;
 import xyz.ar06.disx.blocks.DisxAdvancedJukebox;
@@ -18,6 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.ticks.ContainerSingleItem;
+import xyz.ar06.disx.utils.DisxYoutubeInfoScraper;
 
 public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerSingleItem {
 
@@ -71,5 +75,36 @@ public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerS
     @Override
     public boolean stillValid(Player player) {
         return false;
+    }
+
+    public void tryGetUpdatedDiscName(Player player){
+        ItemStack discStack = this.itemInventory.get(0);
+        if (!discStack.isEmpty()){
+            CompoundTag compoundTag = discStack.getTag();
+            DisxLogger.debug("Found disc in jukebox, checking name");
+            String discName = compoundTag.getString("discName");
+            String videoId = compoundTag.getString("videoId");
+            if (discName.equals("Video Not Found")){
+                DisxLogger.debug("Disc has no name. Attempting to find one...");
+                String videoName = DisxYoutubeInfoScraper.scrapeTitle(videoId);
+                if (!videoName.equals("Video Not Found")){
+                    DisxLogger.debug("Found updated name: " + videoName);
+                    compoundTag.putString("discName", videoName);
+                    if (discStack.equals(this.itemInventory.get(0))){
+                        DisxLogger.debug("Disc stack still the same in Advanced Jukebox, setting updated nbt tag");
+                        discStack.setTag(compoundTag);
+                        player.sendSystemMessage(Component.literal(
+                                "[Advanced Jukebox]: Found updated video name for your disc, it has been applied to it!"
+                        ));
+                        player.sendSystemMessage(Component.literal(
+                                "Name: " + videoName
+                        ).withStyle(ChatFormatting.GRAY));
+                    }
+                } else {
+                    DisxLogger.debug("Video name not found once more");
+                }
+            }
+        }
+
     }
 }
