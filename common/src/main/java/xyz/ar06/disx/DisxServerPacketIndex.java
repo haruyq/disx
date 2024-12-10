@@ -156,6 +156,14 @@ public class DisxServerPacketIndex {
             );
         }
 
+        public static void audioData(Player player, FriendlyByteBuf buf){
+            NetworkManager.sendToPlayer(
+                    (ServerPlayer) player,
+                    new ResourceLocation("disx","audiodata"),
+                    buf
+            );
+        }
+
     }
 
 }

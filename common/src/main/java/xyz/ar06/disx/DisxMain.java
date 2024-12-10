@@ -122,6 +122,8 @@ public class DisxMain {
 
         LifecycleEvent.SERVER_STARTED.register(DisxSystemMessages::devBuildNotice);
 
+        LifecycleEvent.SERVER_STARTED.register(LavaplayerTest::testTrack);
+
         //Register Server Packets
         DisxServerPacketIndex.registerServerPacketReceivers();
 

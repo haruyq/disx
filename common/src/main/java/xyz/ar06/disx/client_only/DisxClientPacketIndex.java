@@ -1,5 +1,6 @@
 package xyz.ar06.disx.client_only;
 
+import io.netty.buffer.ByteBuf;
 import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.DisxMain;
 import xyz.ar06.disx.DisxSystemMessages;
@@ -35,6 +36,7 @@ public class DisxClientPacketIndex  {
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","loadingvidmsg"), (ClientPacketReceivers::receiveLoadingMsgEvent));
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","openvideoidscreen"), (ClientPacketReceivers::receiveOpenVideoIdScreenEvent));
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx", "muteplayer"), ClientPacketReceivers::receivePlayerMute);
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","audiodata"), ClientPacketReceivers::receiveAudioData);
     }
 
     public class ClientPacketReceivers{
@@ -101,6 +103,15 @@ public class DisxClientPacketIndex  {
             } else if (action.equals("remove")){
                 DisxAudioPlayerRegistry.removeFromMuted(uuid);
             }
+        }
+
+        public static DisxAudioLine audioLine = new DisxAudioLine();
+
+        public static void receiveAudioData(FriendlyByteBuf buf, NetworkManager.PacketContext context){
+            DisxLogger.debug("audio data packet received");
+            //buf.readBytes(new byte[882000]);
+            ByteBuf bufCopy = buf.copy();
+            CompletableFuture.runAsync(() -> audioLine.writeToLine(bufCopy));
         }
 
     }
