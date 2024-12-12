@@ -50,7 +50,7 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
                 blockPos,
                 blockState);
         this.items = NonNullList.withSize(3, ItemStack.EMPTY);
-        DisxMain.LOGGER.info("MAKING NEW ENTITY AT " + blockPos);
+        DisxLogger.debug("MAKING NEW ENTITY AT " + blockPos);
     }
 
     @Override

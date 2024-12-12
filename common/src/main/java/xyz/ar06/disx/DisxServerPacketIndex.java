@@ -1,37 +1,30 @@
 package xyz.ar06.disx;
 
-import xyz.ar06.disx.blocks.DisxStampMaker;
-import xyz.ar06.disx.entities.DisxStampMakerEntity;
-import dev.architectury.event.events.common.LifecycleEvent;
-import dev.architectury.event.events.common.TickEvent;
-import dev.architectury.networking.NetworkManager;
-import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
+import xyz.ar06.disx.entities.DisxStampMakerEntity;
+import dev.architectury.networking.NetworkManager;
+import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.image.VolatileImage;
 import java.util.UUID;
 
 import static xyz.ar06.disx.DisxMain.debug;
 
+@Environment(EnvType.SERVER)
 public class DisxServerPacketIndex {
 
     public static void registerServerPacketReceivers(){
         //NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","playersuccessstatus"), (ServerPacketReceivers::onPlayerSuccessStatusReceive));
-        NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","retrieveserverplayerregistry"), ((ServerPacketReceivers::onPlayerRegistryRequest)));
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","retrieveserveraudioregistry"), ((ServerPacketReceivers::onPlayerRegistryRequest)));
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","videoidselection"), ServerPacketReceivers::onVideoIdPushRequest);
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","singleplayertrackend"), ServerPacketReceivers::onSingleplayerTrackEnd);
 
@@ -41,7 +34,7 @@ public class DisxServerPacketIndex {
 
         public static void onPlayerSuccessStatusReceive(FriendlyByteBuf buf, NetworkManager.PacketContext context) {
             Logger logger = LoggerFactory.getLogger("disx");
-            if (debug) logger.info("got packet");
+            DisxLogger.debug("got packet");
             String status = buf.readUtf();
             BlockPos blockPos = buf.readBlockPos();
             String videoId = buf.readUtf();
@@ -60,17 +53,15 @@ public class DisxServerPacketIndex {
         }
 
         public static void onPlayerRegistryRequest(FriendlyByteBuf buf, NetworkManager.PacketContext context){
-            String name = "retrieveserverplayerregistry";
+            String name = "retrieveserveraudioregistry";
             Player player = context.getPlayer();
-            for (DisxServerAudioPlayerDetails details : DisxServerAudioPlayerRegistry.registry){
+            for (DisxAudioStreamingNode node : DisxServerAudioRegistry.registry){
                 DisxLogger.debug("got registry grab request");
-                int seconds = (int) details.getVideoTimer().elapsedSeconds;
-                BlockPos blockPos = details.getBlockPos();
-                ResourceLocation dimensionLocation = details.getDimension();
-                String videoId = details.getVideoId();
-                UUID playerOwner = details.getAudioPlayerOwner();
-                boolean loop = details.isLoop();
-                ServerPackets.playerRegistryEvent("add", player, blockPos, videoId, false,  seconds, dimensionLocation, playerOwner, loop, blockPos, dimensionLocation);
+                BlockPos blockPos = node.getBlockPos();
+                ResourceLocation dimensionLocation = node.getDimension();
+                UUID playerOwner = node.getNodeOwner().getUUID();
+                boolean loop = node.isLoop();
+                ServerPackets.playerRegistryEvent("add", player, blockPos, dimensionLocation, playerOwner, loop, blockPos, dimensionLocation);
                 DisxLogger.debug("sent registry add event");
             }
         }
@@ -82,12 +73,12 @@ public class DisxServerPacketIndex {
             server.executeIfPossible(() -> {
                BlockEntity entity = context.getPlayer().level().getBlockEntity(blockPos);
                if (entity == null){
-                   DisxMain.LOGGER.info("ENTITY IS NULL");
+                   DisxLogger.debug("ENTITY IS NULL");
                } else {
-                   DisxMain.LOGGER.info("ENTITY IS NOT NULL");
+                   DisxLogger.debug("ENTITY IS NOT NULL");
                    if (entity instanceof DisxStampMakerEntity){
                        ((DisxStampMakerEntity) entity).setVideoId(videoId, context.getPlayer());
-                       DisxMain.LOGGER.info("SET VIDEO ID TO " + videoId);
+                       DisxLogger.debug("SET VIDEO ID TO " + videoId);
                    }
                }
             });
@@ -96,26 +87,29 @@ public class DisxServerPacketIndex {
         public static void onSingleplayerTrackEnd(FriendlyByteBuf buf, NetworkManager.PacketContext context){
             BlockPos blockPos = buf.readBlockPos();
             ResourceLocation dimension = buf.readResourceLocation();
-            DisxServerAudioPlayerRegistry.removeFromRegistry(blockPos, dimension);
+            DisxServerAudioRegistry.removeFromRegistry(blockPos, dimension);
         }
     }
 
     public class ServerPackets {
 
-        public static void playerRegistryEvent(String type, Player player, BlockPos pos, String videoId, boolean serverOwned, int seconds, ResourceLocation dimension, UUID playerOwner, boolean loop,
+        public static void playerRegistryEvent(String type, Player player, BlockPos pos, ResourceLocation dimension, UUID playerOwner, boolean loop,
                                                BlockPos newBlockPos, ResourceLocation newDimension){
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
             buf.writeUtf(type);
             buf.writeBlockPos(pos);
-            buf.writeUtf(videoId);
-            buf.writeBoolean(serverOwned);
-            buf.writeInt(seconds);
             buf.writeResourceLocation(dimension);
             buf.writeUUID(playerOwner);
             buf.writeBoolean(loop);
             buf.writeBlockPos(newBlockPos);
             buf.writeResourceLocation(newDimension);
             NetworkManager.sendToPlayer((ServerPlayer) player, new ResourceLocation("disx","serveraudioregistryevent"), buf);
+        }
+
+        public static void playingVideoIdMessage(String videoId, Player player){
+            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+            buf.writeUtf(videoId);
+            NetworkManager.sendToPlayer((ServerPlayer) player, new ResourceLocation("disx","playingvidmsg"), buf);
         }
 
         public static void loadingVideoIdMessage(String videoId, Player player){

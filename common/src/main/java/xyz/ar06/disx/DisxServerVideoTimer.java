@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static xyz.ar06.disx.DisxMain.debug;
 
+@Deprecated
 public class DisxServerVideoTimer {
     long startTime = 0;
     long elapsedSeconds = 0;
@@ -44,7 +45,7 @@ public class DisxServerVideoTimer {
             this.commenceTimer();
         } else {
             if (parent.getVideoTimer().equals(this)){
-                DisxServerAudioPlayerRegistry.removeFromRegistry(this.parent);
+                //DisxServerAudioPlayerRegistry.removeFromRegistry(this.parent);
             }
         }
     }

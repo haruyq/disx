@@ -14,7 +14,6 @@ import xyz.ar06.disx.recipe_types.DisxCustomDiscRecipe;
 import xyz.ar06.disx.recipe_types.DisxStampRecipe;
 import xyz.ar06.disx.utils.DisxJukeboxUsageCooldownManager;
 import com.google.common.base.Suppliers;
-import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.event.events.common.TickEvent;
@@ -23,7 +22,6 @@ import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.Registrar;
 import dev.architectury.registry.registries.RegistrarManager;
 import dev.architectury.registry.registries.RegistrySupplier;
-import net.fabricmc.api.EnvType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -99,15 +97,15 @@ public class DisxMain {
 
         //Event Registrations
         PlayerEvent.PLAYER_JOIN.register(player -> {
-            DisxServerAudioPlayerRegistry.players.add(player);
+            DisxServerAudioRegistry.players.add(player);
         });
 
         PlayerEvent.PLAYER_QUIT.register(player -> {
-            DisxServerAudioPlayerRegistry.players.remove(player);
+            DisxServerAudioRegistry.players.remove(player);
         });
 
         LifecycleEvent.SERVER_STOPPING.register((instance -> {
-            DisxServerAudioPlayerRegistry.onServerClose();
+            DisxServerAudioRegistry.onServerClose();
         }));
 
         TickEvent.SERVER_POST.register(instance -> {
@@ -122,7 +120,7 @@ public class DisxMain {
 
         LifecycleEvent.SERVER_STARTED.register(DisxSystemMessages::devBuildNotice);
 
-        LifecycleEvent.SERVER_STARTED.register(LavaplayerTest::testTrack);
+        LifecycleEvent.SERVER_STARTED.register(DisxAudioStreamingNode::initPlayerManager);
 
         //Register Server Packets
         DisxServerPacketIndex.registerServerPacketReceivers();
@@ -132,6 +130,6 @@ public class DisxMain {
             DisxClientMain.onInitializeClient();
         }
 
-        LOGGER.info("Success in Mod Launch (SERVER)");
+        DisxLogger.info("Success in Mod Launch (SERVER)");
     }
 }

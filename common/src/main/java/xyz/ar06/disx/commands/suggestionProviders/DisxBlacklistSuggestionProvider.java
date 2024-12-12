@@ -1,6 +1,6 @@
 package xyz.ar06.disx.commands.suggestionProviders;
 
-import xyz.ar06.disx.DisxServerAudioPlayerRegistry;
+import xyz.ar06.disx.DisxServerAudioRegistry;
 import xyz.ar06.disx.config.DisxConfigHandler;
 import xyz.ar06.disx.utils.DisxUUIDUtil;
 import com.mojang.brigadier.context.CommandContext;
@@ -28,7 +28,7 @@ public class DisxBlacklistSuggestionProvider {
     }
 
     public static CompletableFuture<Suggestions> getAdditionSuggestions(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder) {
-        for (Player player : DisxServerAudioPlayerRegistry.getMcPlayers()){
+        for (Player player : DisxServerAudioRegistry.getMcPlayers()){
             suggestionsBuilder.suggest(player.getName().getString());
         }
         return suggestionsBuilder.buildFuture();

@@ -120,7 +120,7 @@ public class DisxRecordPress extends BaseEntityBlock {
             Item inHandItem = inHandStack.getItem();
             Registrar<Item> itemRegistrar = DisxMain.REGISTRAR_MANAGER.get().get(Registries.ITEM);
             if (inHandItem.equals(itemRegistrar.get(new ResourceLocation("disx", "blank_disc")))){
-                DisxMain.LOGGER.info("item in hand is blank disc");
+                DisxLogger.debug("item in hand is blank disc");
                 if (blockEntity.getItem(0).isEmpty()){
                     ItemStack inHandStackCopy = inHandStack.copyWithCount(1);
                     inHandStack.shrink(1);
@@ -129,7 +129,7 @@ public class DisxRecordPress extends BaseEntityBlock {
                     blockEntity.setChanged();
                 }
             } else if (inHandItem.equals(itemRegistrar.get(new ResourceLocation("disx", "record_stamp")))){
-                DisxMain.LOGGER.info("item in hand is record stamp");
+                DisxLogger.debug("item in hand is record stamp");
                 if (blockEntity.getItem(1).isEmpty()){
                     ItemStack inHandStackCopy = inHandStack.copyWithCount(1);
                     inHandStack.shrink(1);
@@ -138,7 +138,7 @@ public class DisxRecordPress extends BaseEntityBlock {
                     blockEntity.setChanged();
                 }
             } else if(inHandStack.isEmpty()){
-                DisxMain.LOGGER.info("item in hand is empty");
+                DisxLogger.debug("item in hand is empty");
                 for (int i = 0; i <= 2; i++){
                     ItemStack item = blockEntity.getItem(i);
                     if (!item.isEmpty()){
@@ -166,7 +166,7 @@ public class DisxRecordPress extends BaseEntityBlock {
                     }
                 }
             }
-            DisxMain.LOGGER.info("item in hand is none of the above");
+            DisxLogger.debug("item in hand is none of the above");
         }
 
         return InteractionResult.SUCCESS;

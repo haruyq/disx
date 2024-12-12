@@ -1,6 +1,7 @@
 package xyz.ar06.disx.utils;
 
 import org.json.JSONObject;
+import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.DisxMain;
 
 import java.net.URI;
@@ -24,7 +25,7 @@ public class DisxYoutubeInfoScraper {
                 String url = jsonObject.getString("requested");
                 return url;
             } else {
-                DisxMain.LOGGER.error("Disx Error: YT-SRC API 'video_info (title)' response failed. Status Code: " + response.statusCode());
+                DisxLogger.error("Disx Error: YT-SRC API 'video_info (title)' response failed. Status Code: " + response.statusCode());
                 return "Video Not Found";
             }
 
@@ -47,7 +48,7 @@ public class DisxYoutubeInfoScraper {
                 int info = jsonObject.getInt("requested");
                 return info;
             } else {
-                DisxMain.LOGGER.error("Disx Error: YT-SRC API 'video_info (length)' response failed. Status Code: " + response.statusCode());
+                DisxLogger.error("Disx Error: YT-SRC API 'video_info (length)' response failed. Status Code: " + response.statusCode());
                 return -1;
             }
 
@@ -74,7 +75,7 @@ public class DisxYoutubeInfoScraper {
                 result.add(String.valueOf(length));
                 return result;
             } else {
-                DisxMain.LOGGER.error("Disx Error: YT-SRC API 'video_info' response failed. Status Code: " + response.statusCode());
+                DisxLogger.error("Disx Error: YT-SRC API 'video_info' response failed. Status Code: " + response.statusCode());
                 return null;
             }
 

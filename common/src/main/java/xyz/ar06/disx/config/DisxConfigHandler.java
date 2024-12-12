@@ -5,17 +5,11 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.DisxMain;
-import xyz.ar06.disx.DisxServerAudioPlayerRegistry;
-import xyz.ar06.disx.DisxSystemMessages;
-import xyz.ar06.disx.utils.DisxInternetCheck;
 import xyz.ar06.disx.utils.DisxUUIDUtil;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.json.*;
 
@@ -62,7 +56,7 @@ public class DisxConfigHandler {
             try {
                 InputStream input = new FileInputStream(new File(filePath));
                 if (input == null){
-                    DisxMain.LOGGER.error("Disx Server Config Not Found and or Not Generated!");
+                    DisxLogger.error("Disx Server Config Not Found and or Not Generated!");
                 } else {
                     properties.load(input);
                     input.close();
@@ -90,7 +84,7 @@ public class DisxConfigHandler {
             try {
                 InputStream input = new FileInputStream(dir2);
                 if (input == null){
-                    DisxMain.LOGGER.error("Disx Use Whitelist Json File Not Found and or Not Generated!");
+                    DisxLogger.error("Disx Use Whitelist Json File Not Found and or Not Generated!");
                 } else {
                     JSONTokener jsonTokener = new JSONTokener(input);
                     JSONObject jsonObject = new JSONObject(jsonTokener);
@@ -118,7 +112,7 @@ public class DisxConfigHandler {
             try {
                 InputStream input = new FileInputStream(dir3);
                 if (input == null){
-                    DisxMain.LOGGER.error("Disx Use Blacklist Json File Not Found and or Not Generated!");
+                    DisxLogger.error("Disx Use Blacklist Json File Not Found and or Not Generated!");
                 } else {
                     JSONTokener jsonTokener = new JSONTokener(input);
                     JSONObject jsonObject = new JSONObject(jsonTokener);
@@ -146,7 +140,7 @@ public class DisxConfigHandler {
             try {
                 InputStream input = new FileInputStream(dir4);
                 if (input == null){
-                    DisxMain.LOGGER.error("Disx Dimension Blacklist Json File Not Found and or Not Generated!");
+                    DisxLogger.error("Disx Dimension Blacklist Json File Not Found and or Not Generated!");
                 } else {
                     JSONTokener jsonTokener = new JSONTokener(input);
                     JSONObject jsonObject = new JSONObject(jsonTokener);

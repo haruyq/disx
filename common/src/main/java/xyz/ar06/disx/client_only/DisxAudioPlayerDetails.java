@@ -11,6 +11,7 @@ import net.minecraft.world.level.Level;
 import java.util.UUID;
 
 @Environment(EnvType.CLIENT)
+@Deprecated
 public class DisxAudioPlayerDetails {
     private DisxAudioPlayer disxAudioPlayer;
     private BlockPos blockPos;

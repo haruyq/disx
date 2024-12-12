@@ -1,6 +1,6 @@
 package xyz.ar06.disx.commands;
 
-import xyz.ar06.disx.DisxServerAudioPlayerRegistry;
+import xyz.ar06.disx.DisxServerAudioRegistry;
 import com.mojang.brigadier.context.CommandContext;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import net.minecraft.ChatFormatting;
@@ -21,7 +21,7 @@ public class DisxForceStopCommand {
             context.getSource().sendSystemMessage(Component.literal("You do not have permission to do that!").withStyle(ChatFormatting.RED));
             return 1;
         }
-        DisxServerAudioPlayerRegistry.forceStopAll();
+        DisxServerAudioRegistry.forceStopAll();
         context.getSource().sendSystemMessage(Component.literal("Force stopping all audios currently playing!"));
         return 1;
     }

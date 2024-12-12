@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.UUID;
 
+@Deprecated
 public class DisxServerAudioPlayerDetails {
     private BlockPos blockPos;
     private ResourceLocation dimension;

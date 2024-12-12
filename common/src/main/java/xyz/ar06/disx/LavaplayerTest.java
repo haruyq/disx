@@ -18,6 +18,7 @@ import org.apache.http.client.config.RequestConfig;
 import javax.sound.sampled.*;
 import java.io.InputStream;
 
+@Deprecated
 public class LavaplayerTest {
     private static AudioDataFormat FORMAT = StandardAudioDataFormats.COMMON_PCM_S16_BE;
     private static DefaultAudioPlayerManager PLAYER_MANAGER = new DefaultAudioPlayerManager();
@@ -110,7 +111,7 @@ public class LavaplayerTest {
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         buf.writeBytes(audioData, 0, length);
 
-        for (Player p : DisxServerAudioPlayerRegistry.getMcPlayers()) {
+        for (Player p : DisxServerAudioRegistry.getMcPlayers()) {
             DisxServerPacketIndex.ServerPackets.audioData(p, buf);
         }
     }

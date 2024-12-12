@@ -1,57 +1,36 @@
 package xyz.ar06.disx.client_only;
 
-import com.mojang.authlib.minecraft.client.MinecraftClient;
-import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager;
 import org.apache.http.client.config.RequestConfig;
 import xyz.ar06.disx.DisxLogger;
-import xyz.ar06.disx.DisxMain;
 import xyz.ar06.disx.DisxSystemMessages;
-import xyz.ar06.disx.utils.DisxYoutubeAudioURLScraper;
 import com.sedmelluq.discord.lavaplayer.format.AudioDataFormat;
 import com.sedmelluq.discord.lavaplayer.format.AudioPlayerInputStream;
 import com.sedmelluq.discord.lavaplayer.player.*;
-import com.sedmelluq.discord.lavaplayer.player.event.AudioEvent;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
-import com.sedmelluq.discord.lavaplayer.player.event.AudioEventListener;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.*;
-import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.event.events.client.ClientTickEvent;
-import dev.architectury.event.events.common.TickEvent;
-import dev.architectury.injectables.annotations.ExpectPlatform;
-import dev.architectury.injectables.annotations.PlatformOnly;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.sounds.MusicManager;
-import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.Music;
-import net.minecraft.sounds.Musics;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.ar06.disx.utils.DisxYoutubeInfoScraper;
 
 import javax.sound.sampled.*;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats.COMMON_PCM_S16_BE;
-import static com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats.COMMON_PCM_S16_LE;
 
+@Deprecated
 @Environment(EnvType.CLIENT)
 public class DisxAudioPlayer {
 
@@ -87,7 +66,7 @@ public class DisxAudioPlayer {
         DisxLogger.debug("generating new audio player");
         this.audioPlayerDetails = new DisxAudioPlayerDetails(this, blockPos, dimension, audioPlayerOwner, serverOwned, loop, videoId, seconds);
         DisxLogger.debug("generated audio player details");
-        DisxAudioPlayerRegistry.registerAudioPlayer(audioPlayerDetails);
+        DisxAudioInstanceRegistry.registerAudioPlayer(audioPlayerDetails);
         DisxLogger.debug("registered audio player on client side");
         if (!playerManagerConfigured){
             //playerManager.registerSourceManager(youtube);
@@ -138,7 +117,7 @@ public class DisxAudioPlayer {
             if (plr != null){
                 if (plr.level() != null){
                     if (plr.level().dimension().location().equals(dimension)) {
-                        if (DisxAudioPlayerRegistry.isMuted(this.audioPlayerDetails.getAudioPlayerOwner())){
+                        if (DisxAudioInstanceRegistry.isMuted(this.audioPlayerDetails.getAudioPlayerOwner())){
                             DisxLogger.debug("is muted");
                             player.setVolume(0);
                             volumeControl.setValue(-80f);

@@ -51,7 +51,7 @@ public class DisxGenCommand {
 
     private static int run(CommandContext<CommandSourceStack> context) {
         Logger logger = LoggerFactory.getLogger("disx");
-        if (debug) logger.info("Command Run");
+        DisxLogger.debug("Command Run");
         if (!context.getSource().hasPermission(2)){
             context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
         } else

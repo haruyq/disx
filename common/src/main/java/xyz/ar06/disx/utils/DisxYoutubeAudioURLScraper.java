@@ -1,5 +1,6 @@
 package xyz.ar06.disx.utils;
 
+import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.DisxMain;
 import me.shedaniel.cloth.clothconfig.shadowed.org.yaml.snakeyaml.util.UriEncoder;
 import org.apache.commons.codec.net.URLCodec;
@@ -28,7 +29,7 @@ public class DisxYoutubeAudioURLScraper {
                 String url = jsonObject.getString("url");
                 return url;
             } else {
-                DisxMain.LOGGER.error("Disx Error: YT-SRC API response failed. Status Code: " + response.statusCode());
+                DisxLogger.error("Disx Error: YT-SRC API response failed. Status Code: " + response.statusCode());
                 return "ERROR";
             }
 

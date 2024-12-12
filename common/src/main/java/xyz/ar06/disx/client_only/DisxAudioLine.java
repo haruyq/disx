@@ -11,6 +11,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import java.util.concurrent.CompletableFuture;
 
+@Deprecated
 public class DisxAudioLine {
     private SourceDataLine line;
     AudioFormat audioFormat = new AudioFormat(
@@ -56,4 +57,6 @@ public class DisxAudioLine {
         line.write(audioData, 0, audioData.length);
         DisxLogger.debug("wrote data (or called for it)");
     }
+
+
 }

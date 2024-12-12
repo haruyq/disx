@@ -2,10 +2,9 @@ package xyz.ar06.disx.commands;
 
 import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.utils.DisxInternetCheck;
-import xyz.ar06.disx.DisxServerAudioPlayerRegistry;
+import xyz.ar06.disx.DisxServerAudioRegistry;
 import xyz.ar06.disx.DisxSystemMessages;
 import xyz.ar06.disx.utils.DisxYoutubeInfoScraper;
-import xyz.ar06.disx.utils.DisxYoutubeTitleScraper;
 import xyz.ar06.disx.config.DisxConfigHandler;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -19,8 +18,6 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
@@ -53,7 +50,7 @@ public class DisxSoundCommand {
                     return 1;
                 }
             }
-            int currentAudioPlayerCount = DisxServerAudioPlayerRegistry.getRegistryCount();
+            int currentAudioPlayerCount = DisxServerAudioRegistry.getRegistryCount();
             int maxAudioPlayerCount = Integer.valueOf(DisxConfigHandler.SERVER.getProperty("max_audio_players"));
             if (currentAudioPlayerCount >= maxAudioPlayerCount){
                 if (context.getSource().isPlayer()){
@@ -89,9 +86,9 @@ public class DisxSoundCommand {
                 throw new Exception("Too Long");
             }
             if (!context.getSource().isPlayer()){
-                DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, true, null, context.getSource().getServer(), dimension, startTime.intValue(), false);
+                DisxServerAudioRegistry.addToRegistry(blockPos, videoId, null, context.getSource().getServer(), dimension, startTime.intValue(), false);
             } else {
-                DisxServerAudioPlayerRegistry.addToRegistry(blockPos, videoId, true, context.getSource().getPlayer(), context.getSource().getServer(), dimension, startTime.intValue(), false);
+                DisxServerAudioRegistry.addToRegistry(blockPos, videoId, context.getSource().getPlayer(), context.getSource().getServer(), dimension, startTime.intValue(), false);
             }
             context.getSource().sendSystemMessage(Component.literal("Attempting to start playback of Video Id '" + videoId + "' at " + blockPos + " in " + dimension));
         } catch (Exception e){

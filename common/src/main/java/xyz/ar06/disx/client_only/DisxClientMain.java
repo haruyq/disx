@@ -1,5 +1,6 @@
 package xyz.ar06.disx.client_only;
 
+import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.DisxMain;
 import xyz.ar06.disx.client_only.renderers.DisxRecordPressEntityRenderer;
 import xyz.ar06.disx.client_only.renderers.DisxStampMakerEntityRenderer;
@@ -9,7 +10,6 @@ import dev.architectury.event.events.client.*;
 import dev.architectury.platform.Platform;
 import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import dev.architectury.utils.Env;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -20,9 +20,10 @@ public class DisxClientMain {
     public static void onInitializeClient() {
         if (Platform.getEnvironment().equals(Env.CLIENT)){
             DisxClientPacketIndex.registerClientPacketReceivers();
-            ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player -> DisxAudioPlayerRegistry.onPlayDisconnect());
-            ClientLifecycleEvent.CLIENT_STOPPING.register(instance -> DisxAudioPlayerRegistry.onClientStopping(instance));
-            ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(player -> DisxAudioPlayerRegistry.grabServerRegistry());
+            ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player -> DisxAudioInstanceRegistry.clearAllRegisteredInstances());
+            ClientLifecycleEvent.CLIENT_STOPPING.register(instance -> DisxAudioInstanceRegistry.clearAllRegisteredInstances());
+            ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(player -> DisxAudioInstanceRegistry.grabServerRegistry());
+            /*
             ClientPlayerEvent.CLIENT_PLAYER_JOIN.register((player -> ClientTickEvent.CLIENT_POST.register(plr -> {
                 if (Minecraft.getInstance().isPaused() && Minecraft.getInstance().isSingleplayer()){
                     DisxAudioPlayerRegistry.onClientPause();
@@ -32,6 +33,7 @@ public class DisxClientMain {
                     }
                 }
             })));
+             */
             ClientLifecycleEvent.CLIENT_SETUP.register(instance -> {
                 BlockEntityRendererProvider<DisxStampMakerEntity> provider0 = DisxStampMakerEntityRenderer::new;
                 BlockEntityRendererRegistry.register(
@@ -44,7 +46,7 @@ public class DisxClientMain {
             });
             //ClientLifecycleEvent.CLIENT_SETUP.register(DisxConfigHandler.CLIENT::initializeConfig);
 
-            DisxMain.LOGGER.info("Success in Mod Launch (CLIENT)");
+            DisxLogger.info("Success in Mod Launch (CLIENT)");
         }
     }
 
