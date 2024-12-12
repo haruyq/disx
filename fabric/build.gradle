@@ -56,6 +56,8 @@ dependencies {
     //include "dev.arbjerg:lavaplayer:2.1.2"
     include group: 'org.jsoup', name: 'jsoup', version: '+'
     //include "dev.lavalink.youtube:common:1.2.0"
+    include 'org.apache.httpcomponents:httpclient:+'
+    include 'commons-logging:commons-logging:+'
 
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${rootProject.fabric_REI_version}"
 }

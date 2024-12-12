@@ -19,7 +19,6 @@ import java.util.UUID;
 
 import static xyz.ar06.disx.DisxMain.debug;
 
-@Environment(EnvType.SERVER)
 public class DisxServerPacketIndex {
 
     public static void registerServerPacketReceivers(){

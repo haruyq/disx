@@ -66,7 +66,12 @@ public class DisxAudioInstance {
     private static String getPreferredAudioDeviceName(){
         String soundDevice = Minecraft.getInstance().options.soundDevice().get();
         if (!soundDevice.isEmpty()){
-            return soundDevice.substring(15);
+            String soundDeviceTrimmed = soundDevice.substring(15);
+            if (soundDeviceTrimmed.isEmpty()){
+                return null;
+            } else {
+                return soundDeviceTrimmed;
+            }
         } else {
             return null;
         }
@@ -82,14 +87,10 @@ public class DisxAudioInstance {
                 Mixer.Info[] mixers = AudioSystem.getMixerInfo();
                 for (Mixer.Info mixerInfo : mixers) {
                     if (mixerInfo.getName().equals(preferredDeviceName)) {
-                        DisxLogger.debug("Found preferred audio device, making line");
                         DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
-                        DisxLogger.debug("Created DataLine Info");
                         Mixer mixer = AudioSystem.getMixer(mixerInfo);
-                        DisxLogger.debug("Got mixer");
                         resultLine = (SourceDataLine) mixer.getLine(info);
                         resultLine.open(audioFormat);
-                        DisxLogger.debug("got line");
                     }
                 }
             } else {
@@ -106,7 +107,16 @@ public class DisxAudioInstance {
     }
 
     private boolean hasPreferredAudioDeviceChanged(){
-        return (!this.cachedAudioDeviceName.equals(getPreferredAudioDeviceName()));
+        boolean result;
+        String preferredDeviceName = getPreferredAudioDeviceName();
+        if (this.cachedAudioDeviceName != null && preferredDeviceName != null){
+            result = !this.cachedAudioDeviceName.equals(preferredDeviceName);
+        } else if ((this.cachedAudioDeviceName == null && preferredDeviceName != null) || this.cachedAudioDeviceName != null && preferredDeviceName == null) {
+            result = true;
+        } else {
+            result = false;
+        }
+        return result;
     }
 
     private boolean writingToLine = false;
@@ -122,11 +132,12 @@ public class DisxAudioInstance {
                 DisxLogger.debug("Audio Line not null and Audio Data in queue");
                 byte[] audioData = audioDataPacketQueue.poll();
                 DisxLogger.debug("Polled audio data packet data");
-                if (hasPreferredAudioDeviceChanged()){
+                if (this.hasPreferredAudioDeviceChanged()){
                     DisxLogger.debug("Preferred audio device changed; rebuilding audio line");
                     this.destroyLine();
                     this.buildAudioLine();
                 }
+                DisxLogger.debug("Checking if audio line is open");
                 if (!this.audioLine.isOpen()){
                     try {
                         DisxLogger.debug("Audio Line not opened, opening...");
@@ -135,11 +146,13 @@ public class DisxAudioInstance {
                         e.printStackTrace();
                     }
                 }
+                DisxLogger.debug("Checking if audio line is running");
                 if (!this.audioLine.isRunning()){
                     DisxLogger.debug("Audio Line not running, starting...");
                     this.audioLine.start();
                 }
                 DisxLogger.debug("Writing enqueued audio data to Audio Line...");
+                DisxLogger.debug("Audio data length: " + audioData.length);
                 this.audioLine.write(audioData, 0, audioData.length);
                 DisxLogger.debug("Enqueued audio data written to line");
                 writingToLine = false;
@@ -175,10 +188,13 @@ public class DisxAudioInstance {
                             BlockPos blockPos = this.blockPos;
                             Vec3 blockPosVec = new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
                             double distance = currentpos.distanceTo(blockPosVec);
+                            double maxDistance = 25;
                             double plrVolumeConfig_RECORDS = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.RECORDS).get();
                             double plrVolumeConfig_MASTER = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.MASTER).get();
-                            float volumeCalc_line = 0f - (1.0f * (float) distance);
-                            volumeCalc_line *= (plrVolumeConfig_MASTER * plrVolumeConfig_RECORDS);
+                            double volumeCalc = Math.max(0.0f, 1.0f - (distance / maxDistance));
+                            volumeCalc *= (plrVolumeConfig_MASTER * plrVolumeConfig_RECORDS);
+                            float volumeCalc_line = 20.0f * (float) Math.log10(Math.max(0.01f, volumeCalc));
+
                             if (volumeCalc_line < -80f) {
                                 volumeCalc_line = -80f;
                             }
@@ -187,13 +203,13 @@ public class DisxAudioInstance {
                             }
                             volumeControl.setValue(volumeCalc_line);
 
-                            if (volumeCalc_line == -80f) {
+                            if (volumeCalc_line <= -80f) {
                                 playerCanHear = false;
                             } else {
                                 playerCanHear = true;
                             }
 
-                            if (plrVolumeConfig_RECORDS != 0.0 && volumeCalc_line > -80f && plrVolumeConfig_MASTER != 0 && playerCanHear) {
+                            if (plrVolumeConfig_RECORDS != 0.0 && volumeCalc_line > -80f && plrVolumeConfig_MASTER != 0.0 && playerCanHear) {
                                 try {
                                     MusicManager musicManager = Minecraft.getInstance().getMusicManager();
                                     Minecraft.getInstance().getMusicManager().tick();

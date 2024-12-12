@@ -92,6 +92,8 @@ allprojects {
         implementation 'com.github.aikaterna:lavaplayer-natives:original-SNAPSHOT'
         implementation "dev.arbjerg:lavaplayer:2.1.2"
         implementation "dev.lavalink.youtube:common:1.2.0"
+        implementation 'org.apache.httpcomponents:httpclient:+'
+        implementation 'commons-logging:commons-logging:+'
 
         implementation group: 'org.jsoup', name: 'jsoup', version: '1.16.2'
     }

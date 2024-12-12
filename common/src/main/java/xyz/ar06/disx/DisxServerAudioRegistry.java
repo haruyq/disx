@@ -11,7 +11,6 @@ import net.minecraft.world.level.Level;
 
 import java.util.*;
 
-@Environment(EnvType.SERVER)
 public class DisxServerAudioRegistry {
 
     public static LinkedList<Player> players = new LinkedList<>();

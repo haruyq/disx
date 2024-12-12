@@ -23,16 +23,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import org.apache.http.client.config.RequestConfig;
-import xyz.ar06.disx.client_only.DisxAudioInstance;
-import xyz.ar06.disx.client_only.DisxAudioPlayer;
-import xyz.ar06.disx.client_only.DisxClientPacketIndex;
 
 import javax.sound.sampled.AudioInputStream;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-@Environment(EnvType.SERVER)
 public class DisxAudioStreamingNode {
     private static AudioDataFormat FORMAT = StandardAudioDataFormats.COMMON_PCM_S16_BE;
     private static DefaultAudioPlayerManager playerManager;
