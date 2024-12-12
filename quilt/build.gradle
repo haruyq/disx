@@ -90,6 +90,11 @@ dependencies {
     //include "dev.arbjerg:lavaplayer:2.1.2"
     include group: 'org.jsoup', name: 'jsoup', version: '+'
     //include "dev.lavalink.youtube:common:1.2.0"
+
+    include 'org.apache.httpcomponents:httpclient:+'
+    include 'commons-logging:commons-logging:+'
+    include 'org.apache.httpcomponents:httpcore:+'
+    include 'commons-io:commons-io:2.11.0'
 }
 
 processResources {

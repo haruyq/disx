@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "com.gradleup.shadow" version "9.0.0-beta4"
 }
 
 architectury {
@@ -22,6 +22,7 @@ configurations {
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentForge.extendsFrom common
+    shadowDependencies
 }
 
 repositories {
@@ -91,6 +92,9 @@ dependencies {
     //forgeRuntimeLibrary "dev.arbjerg:lavaplayer:2.1.2"
     forgeRuntimeLibrary group: 'org.jsoup', name: 'jsoup', version: '+'
     //forgeRuntimeLibrary "dev.lavalink.youtube:common:1.2.0"
+    forgeRuntimeLibrary 'org.apache.httpcomponents:httpclient:+'
+    forgeRuntimeLibrary 'commons-logging:commons-logging:+'
+    forgeRuntimeLibrary 'org.apache.httpcomponents:httpcore:+'
 
     include 'com.alibaba:fastjson:+'
     include 'com.fasterxml.jackson.core:jackson-annotations:2.17.2'
@@ -112,6 +116,14 @@ dependencies {
     //include "dev.arbjerg:lavaplayer:2.1.2"
     include group: 'org.jsoup', name: 'jsoup', version: '+'
     //include "dev.lavalink.youtube:common:1.2.0"
+    //include 'org.apache.httpcomponents:httpclient:+'
+    //include 'commons-logging:commons-logging:+'
+    //include 'org.apache.httpcomponents:httpcore:+'
+
+    shadowDependencies 'org.apache.httpcomponents:httpcore:+'
+    shadowDependencies 'commons-logging:commons-logging:+'
+    shadowDependencies 'org.apache.httpcomponents:httpclient:+'
+    shadowDependencies 'commons-io:commons-io:2.11.0'
 
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-forge:${rootProject.forge_REI_version}"
 }
@@ -128,8 +140,11 @@ shadowJar {
     exclude "fabric.mod.json"
     exclude "architectury.common.json"
 
-    configurations = [project.configurations.shadowCommon]
+    relocate 'org.apache', 'disxshadowed.org.apache'
+
+    configurations = [project.configurations.shadowCommon, project.configurations.shadowDependencies]
     archiveClassifier = "dev-shadow"
+
 }
 
 remapJar {

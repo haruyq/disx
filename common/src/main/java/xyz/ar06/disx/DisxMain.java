@@ -35,12 +35,11 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 public class DisxMain {
     public static final String MOD_ID = "disx";
-
-    public static final Logger LOGGER = LoggerFactory.getLogger("disx");
 
     public static final boolean debug = true;
 
@@ -121,6 +120,11 @@ public class DisxMain {
         LifecycleEvent.SERVER_STARTED.register(DisxSystemMessages::devBuildNotice);
 
         LifecycleEvent.SERVER_STARTED.register(DisxAudioStreamingNode::initPlayerManager);
+
+        LifecycleEvent.SERVER_STARTED.register((server) -> {
+            CompletableFuture.runAsync(() -> DisxLavaplayerTest.testTrack(server));
+        });
+
 
         //Register Server Packets
         DisxServerPacketIndex.registerServerPacketReceivers();

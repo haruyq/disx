@@ -1,15 +1,9 @@
 package xyz.ar06.disx.utils;
 
 import xyz.ar06.disx.DisxLogger;
-import xyz.ar06.disx.DisxMain;
-import me.shedaniel.cloth.clothconfig.shadowed.org.yaml.snakeyaml.util.UriEncoder;
-import org.apache.commons.codec.net.URLCodec;
 import org.json.JSONObject;
 
 import java.net.URI;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
