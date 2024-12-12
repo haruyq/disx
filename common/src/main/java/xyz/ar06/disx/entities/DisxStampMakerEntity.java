@@ -35,6 +35,7 @@ import net.minecraft.world.ticks.ContainerSingleItem;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 
 
 public class DisxStampMakerEntity extends BlockEntity implements Container, WorldlyContainer {
@@ -194,87 +195,92 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
     }
 
     public void produceStamp(Player player){
-        if (!DisxInternetCheck.checkInternet()){
-            DisxSystemMessages.noInternetErrorMessage(player);
-        } else {
-            ArrayList<String> title_and_length = DisxYoutubeInfoScraper.scrapeLengthAndTitle(this.videoId);
-            String videoName = title_and_length.get(0);
-            if (videoName.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
-                DisxSystemMessages.noVideoFound(player);
-                return;
-            }
-            int videoLength = Integer.valueOf(title_and_length.get(1));
-            if (videoLength > 1800) {
-                DisxSystemMessages.badDuration(player);
-                return;
-            }
-            this.setItem(0, ItemStack.EMPTY);
-            BlockPos blockPos = this.getBlockPos();
-            Level lvl = getLevel();
-            lvl.playSound(null, blockPos, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, SoundSource.BLOCKS);
-            DisxRecordStamp stamp = (DisxRecordStamp) DisxMain.REGISTRAR_MANAGER.get().get(Registries.ITEM).get(new ResourceLocation("disx", "record_stamp"));
-            CompoundTag tag = new CompoundTag();
-            tag.putString("videoId", this.videoId);
-            tag.putString("videoName", videoName);
-            ItemStack stampStack = new ItemStack(stamp);
-            stampStack.setTag(tag);
-            stampStack.setCount(1);
-            if (lvl.getBlockEntity(blockPos.below()) != null && lvl.getBlockEntity(blockPos.below()) instanceof HopperBlockEntity){
-                this.items.set(2, stampStack);
-                this.items.set(1, ItemStack.EMPTY);
-                this.videoId = null;
-                lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
+        CompletableFuture.runAsync(() -> {
+            if (!DisxInternetCheck.checkInternet()){
+                DisxSystemMessages.noInternetErrorMessage(player);
             } else {
-                ItemEntity itemEntity = new ItemEntity(getLevel(), ((double) blockPos.getX()) + 0.5, ((double) blockPos.getY()) + 0.2, ((double) blockPos.getZ()) + 0.5, stampStack);
-                itemEntity.setDefaultPickUpDelay();
-                this.items.set(1, ItemStack.EMPTY);
-                this.videoId = null;
-                lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
-                level.addFreshEntity(itemEntity);
+                ArrayList<String> title_and_length = DisxYoutubeInfoScraper.scrapeLengthAndTitle(this.videoId);
+                String videoName = title_and_length.get(0);
+                if (videoName.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
+                    DisxSystemMessages.noVideoFound(player);
+                    return;
+                }
+                int videoLength = Integer.valueOf(title_and_length.get(1));
+                if (videoLength > 1800) {
+                    DisxSystemMessages.badDuration(player);
+                    return;
+                }
+                this.setItem(0, ItemStack.EMPTY);
+                BlockPos blockPos = this.getBlockPos();
+                Level lvl = getLevel();
+                lvl.playSound(null, blockPos, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, SoundSource.BLOCKS);
+                DisxRecordStamp stamp = (DisxRecordStamp) DisxMain.REGISTRAR_MANAGER.get().get(Registries.ITEM).get(new ResourceLocation("disx", "record_stamp"));
+                CompoundTag tag = new CompoundTag();
+                tag.putString("videoId", this.videoId);
+                tag.putString("videoName", videoName);
+                ItemStack stampStack = new ItemStack(stamp);
+                stampStack.setTag(tag);
+                stampStack.setCount(1);
+                if (lvl.getBlockEntity(blockPos.below()) != null && lvl.getBlockEntity(blockPos.below()) instanceof HopperBlockEntity){
+                    this.items.set(2, stampStack);
+                    this.items.set(1, ItemStack.EMPTY);
+                    this.videoId = null;
+                    lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
+                } else {
+                    ItemEntity itemEntity = new ItemEntity(getLevel(), ((double) blockPos.getX()) + 0.5, ((double) blockPos.getY()) + 0.2, ((double) blockPos.getZ()) + 0.5, stampStack);
+                    itemEntity.setDefaultPickUpDelay();
+                    this.items.set(1, ItemStack.EMPTY);
+                    this.videoId = null;
+                    lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
+                    level.addFreshEntity(itemEntity);
+                }
             }
-        }
+        });
+
     }
 
     public void produceStampAsync(){
-        if (!DisxInternetCheck.checkInternet()){
+        CompletableFuture.runAsync(() -> {
+            if (!DisxInternetCheck.checkInternet()){
                 DisxSystemMessages.noInternetFoundStampMakerAsync(this.getLevel().getServer(), this.getBlockPos());
-        } else {
-            ArrayList<String> title_and_length = DisxYoutubeInfoScraper.scrapeLengthAndTitle(this.videoId);
-            String videoName = title_and_length.get(0);
-            if (videoName.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
-                DisxSystemMessages.videoNotFoundStampMakerAsync(this.getLevel().getServer(), this.getBlockPos());
-                return;
-            }
-            int videoLength = Integer.valueOf(title_and_length.get(1));
-            if (videoLength > 1800) {
-                DisxSystemMessages.badDurationStampMakerAsync(this.getLevel().getServer(), this.getBlockPos());
-                return;
-            }
-            this.setItem(0, ItemStack.EMPTY);
-            BlockPos blockPos = this.getBlockPos();
-            Level lvl = getLevel();
-            lvl.playSound(null, blockPos, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, SoundSource.BLOCKS);
-            DisxRecordStamp stamp = (DisxRecordStamp) DisxMain.REGISTRAR_MANAGER.get().get(Registries.ITEM).get(new ResourceLocation("disx", "record_stamp"));
-            CompoundTag tag = new CompoundTag();
-            tag.putString("videoId", this.videoId);
-            tag.putString("videoName", videoName);
-            ItemStack stampStack = new ItemStack(stamp);
-            stampStack.setTag(tag);
-            stampStack.setCount(1);
-            if (lvl.getBlockEntity(blockPos.below()) != null && lvl.getBlockEntity(blockPos.below()) instanceof HopperBlockEntity){
-                this.items.set(2, stampStack);
-                this.items.set(1, ItemStack.EMPTY);
-                this.videoId = null;
-                lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
             } else {
-                ItemEntity itemEntity = new ItemEntity(getLevel(), ((double) blockPos.getX()) + 0.5, ((double) blockPos.getY()) + 0.2, ((double) blockPos.getZ()) + 0.5, stampStack);
-                itemEntity.setDefaultPickUpDelay();
-                lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
-                level.addFreshEntity(itemEntity);
-                this.items.set(1, ItemStack.EMPTY);
-                this.videoId = null;
+                ArrayList<String> title_and_length = DisxYoutubeInfoScraper.scrapeLengthAndTitle(this.videoId);
+                String videoName = title_and_length.get(0);
+                if (videoName.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")){
+                    DisxSystemMessages.videoNotFoundStampMakerAsync(this.getLevel().getServer(), this.getBlockPos());
+                    return;
+                }
+                int videoLength = Integer.valueOf(title_and_length.get(1));
+                if (videoLength > 1800) {
+                    DisxSystemMessages.badDurationStampMakerAsync(this.getLevel().getServer(), this.getBlockPos());
+                    return;
+                }
+                this.setItem(0, ItemStack.EMPTY);
+                BlockPos blockPos = this.getBlockPos();
+                Level lvl = getLevel();
+                lvl.playSound(null, blockPos, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, SoundSource.BLOCKS);
+                DisxRecordStamp stamp = (DisxRecordStamp) DisxMain.REGISTRAR_MANAGER.get().get(Registries.ITEM).get(new ResourceLocation("disx", "record_stamp"));
+                CompoundTag tag = new CompoundTag();
+                tag.putString("videoId", this.videoId);
+                tag.putString("videoName", videoName);
+                ItemStack stampStack = new ItemStack(stamp);
+                stampStack.setTag(tag);
+                stampStack.setCount(1);
+                if (lvl.getBlockEntity(blockPos.below()) != null && lvl.getBlockEntity(blockPos.below()) instanceof HopperBlockEntity){
+                    this.items.set(2, stampStack);
+                    this.items.set(1, ItemStack.EMPTY);
+                    this.videoId = null;
+                    lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
+                } else {
+                    ItemEntity itemEntity = new ItemEntity(getLevel(), ((double) blockPos.getX()) + 0.5, ((double) blockPos.getY()) + 0.2, ((double) blockPos.getZ()) + 0.5, stampStack);
+                    itemEntity.setDefaultPickUpDelay();
+                    lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
+                    level.addFreshEntity(itemEntity);
+                    this.items.set(1, ItemStack.EMPTY);
+                    this.videoId = null;
+                }
             }
-        }
+        });
     }
 
 
