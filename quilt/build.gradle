@@ -20,6 +20,10 @@ repositories {
     maven{url "https://maven.lavalink.dev/releases"}
 
     maven { url "https://maven.shedaniel.me" }
+
+    maven { url 'https://mvnrepository.com/artifact/com.grack/nanojson'}
+
+    maven { url 'https://mvnrepository.com/artifact/org.mozilla/rhino'}
 }
 
 architectury {
@@ -83,8 +87,6 @@ dependencies {
     include 'org.junit.jupiter:junit-jupiter-params:+'
     include 'org.junit.platform:junit-platform-commons:+'
     include 'org.junit.platform:junit-platform-engine:+'
-    //include 'org.mozilla:rhino:+'
-    //include 'org.mozilla:rhino-engine:+'
     include 'org.opentest4j:opentest4j:+'
     //include 'com.github.aikaterna:lavaplayer-natives:original-SNAPSHOT'
     //include "dev.arbjerg:lavaplayer:2.1.2"
@@ -95,6 +97,12 @@ dependencies {
     include 'commons-logging:commons-logging:+'
     include 'org.apache.httpcomponents:httpcore:+'
     include 'commons-io:commons-io:2.11.0'
+    include group: 'com.grack', name: 'nanojson', version: '+'
+    include 'dev.arbjerg:lavaplayer:+'
+    include 'dev.arbjerg:lavaplayer-natives:+'
+    include 'dev.arbjerg:lava-common:+'
+    include 'org.mozilla:rhino:+'
+    include 'org.mozilla:rhino-engine:+'
 }
 
 processResources {

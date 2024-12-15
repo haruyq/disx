@@ -42,6 +42,10 @@ repositories {
 
     maven { url "https://maven.shedaniel.me" }
 
+    maven { url 'https://mvnrepository.com/artifact/com.grack/nanojson'}
+
+    maven { url 'https://mvnrepository.com/artifact/org.mozilla/rhino'}
+
 }
 
 
@@ -78,7 +82,6 @@ dependencies {
     include 'com.github.walkyst:lavaplayer-natives-fork:1.0.2'
     */
     forgeRuntimeLibrary group: 'org.json', name: 'json', version: '+'
-    forgeRuntimeLibrary group: 'com.github.sealedtx', name: 'java-youtube-downloader', version: '+'
     forgeRuntimeLibrary 'org.junit.jupiter:junit-jupiter:+'
     forgeRuntimeLibrary 'org.junit.jupiter:junit-jupiter-api:+'
     forgeRuntimeLibrary 'org.junit.jupiter:junit-jupiter-engine:+'
@@ -89,20 +92,21 @@ dependencies {
     //forgeRuntimeLibrary 'org.mozilla:rhino-engine:+'
     forgeRuntimeLibrary 'org.opentest4j:opentest4j:+'
     //forgeRuntimeLibrary 'com.github.aikaterna:lavaplayer-natives:original-SNAPSHOT'
-    //forgeRuntimeLibrary "dev.arbjerg:lavaplayer:2.1.2"
+    forgeRuntimeLibrary 'dev.arbjerg:lavaplayer:+'
+    forgeRuntimeLibrary 'dev.arbjerg:lavaplayer-natives:+'
+    forgeRuntimeLibrary 'dev.arbjerg:lava-common:+'
     forgeRuntimeLibrary group: 'org.jsoup', name: 'jsoup', version: '+'
-    //forgeRuntimeLibrary "dev.lavalink.youtube:common:1.2.0"
     forgeRuntimeLibrary 'org.apache.httpcomponents:httpclient:+'
     forgeRuntimeLibrary 'commons-logging:commons-logging:+'
     forgeRuntimeLibrary 'org.apache.httpcomponents:httpcore:+'
 
     include 'com.alibaba:fastjson:+'
-    include 'com.fasterxml.jackson.core:jackson-annotations:2.17.2'
-    include 'com.fasterxml.jackson.core:jackson-core:2.17.2'
-    include 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
-    include 'com.github.walkyst.JAADec-fork:jaadec-ext-aac:+'
+    ///include 'com.fasterxml.jackson.core:jackson-annotations:2.17.2'
+    ///include 'com.fasterxml.jackson.core:jackson-core:2.17.2'
+    ///include 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
+    //include 'com.github.walkyst.JAADec-fork:jaadec-ext-aac:+'
     //include 'com.github.sealedtx:java-youtube-downloader:+'
-    include group: 'org.json', name: 'json', version: '+'
+    ///include group: 'org.json', name: 'json', version: '+'
     include 'org.junit.jupiter:junit-jupiter:+'
     include 'org.junit.jupiter:junit-jupiter-api:+'
     include 'org.junit.jupiter:junit-jupiter-engine:+'
@@ -112,18 +116,18 @@ dependencies {
     //include 'org.mozilla:rhino:+'
     //include 'org.mozilla:rhino-engine:+'
     include 'org.opentest4j:opentest4j:+'
-    //include 'com.github.aikaterna:lavaplayer-natives:original-SNAPSHOT'
-    //include "dev.arbjerg:lavaplayer:2.1.2"
-    include group: 'org.jsoup', name: 'jsoup', version: '+'
-    //include "dev.lavalink.youtube:common:1.2.0"
-    //include 'org.apache.httpcomponents:httpclient:+'
-    //include 'commons-logging:commons-logging:+'
-    //include 'org.apache.httpcomponents:httpcore:+'
+    ///include group: 'org.jsoup', name: 'jsoup', version: '+'
 
     shadowDependencies 'org.apache.httpcomponents:httpcore:+'
     shadowDependencies 'commons-logging:commons-logging:+'
     shadowDependencies 'org.apache.httpcomponents:httpclient:+'
     shadowDependencies 'commons-io:commons-io:2.11.0'
+    shadowDependencies group: 'com.grack', name: 'nanojson', version: '+'
+    shadowDependencies 'dev.arbjerg:lavaplayer:+'
+    shadowDependencies 'dev.arbjerg:lavaplayer-natives:+'
+    shadowDependencies 'dev.arbjerg:lava-common:+'
+    shadowDependencies 'org.mozilla:rhino:+'
+    shadowDependencies 'org.mozilla:rhino-engine:+'
 
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-forge:${rootProject.forge_REI_version}"
 }
@@ -141,6 +145,17 @@ shadowJar {
     exclude "architectury.common.json"
 
     relocate 'org.apache', 'disxshadowed.org.apache'
+    relocate 'org.intellij', 'disxshadowed.org.intellij'
+    relocate 'org.jetbrains', 'disxshadowed.org.jetbrains'
+    relocate 'org.json', 'disxshadowed.org.json'
+    relocate 'org.jsoup', 'disxshadowed.org.jsoup'
+    relocate 'org.mozilla', 'disxshadowed.org.mozilla'
+    relocate 'org.slf4j', 'disxshadowed.org.slf4j'
+    relocate 'com.fasterxml', 'disxshadowed.com.fasterxml'
+    relocate 'com.grack', 'disxshadowed.com.grack'
+    relocate 'com.sedmelluq', 'disxshadowed.com.sedmelluq'
+    relocate 'net.iharder', 'disxshadowed.net.iharder'
+    //relocate 'natives', 'disxshadowed.natives'
 
     configurations = [project.configurations.shadowCommon, project.configurations.shadowDependencies]
     archiveClassifier = "dev-shadow"
