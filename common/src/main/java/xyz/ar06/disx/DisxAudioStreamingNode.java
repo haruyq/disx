@@ -52,10 +52,13 @@ public class DisxAudioStreamingNode {
             @Override
             public void trackLoaded(AudioTrack track) {
                 DisxLogger.debug("Loaded requested video");
-                cachedTrack = track.makeClone();
                 if (startTime != 0){
+                    DisxLogger.debug("Setting position to " + startTime + " seconds");
                     track.setPosition(startTime);
+                    DisxLogger.debug("Is track seekable?: " + track.isSeekable());
                 }
+                cachedTrack = track.makeClone();
+
                 audioPlayer.playTrack(track);
                 DisxLogger.debug("Playback starting");
             }
@@ -67,6 +70,9 @@ public class DisxAudioStreamingNode {
 
             @Override
             public void noMatches() {
+                if (nodeOwner != null){
+                    DisxSystemMessages.noVideoFound(nodeOwner);
+                }
                 DisxLogger.error("Unable to load specified video");
             }
 
@@ -74,6 +80,7 @@ public class DisxAudioStreamingNode {
             public void loadFailed(FriendlyException exception) {
                 DisxLogger.error("Unable to load specified video:");
                 exception.printStackTrace();
+                DisxSystemMessages.errorLoading(nodeOwner);
             }
         });
         this.sendAudioData();

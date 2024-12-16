@@ -98,9 +98,6 @@ dependencies {
     include 'org.apache.httpcomponents:httpcore:+'
     include 'commons-io:commons-io:2.11.0'
     include group: 'com.grack', name: 'nanojson', version: '+'
-    include 'dev.arbjerg:lavaplayer:+'
-    include 'dev.arbjerg:lavaplayer-natives:+'
-    include 'dev.arbjerg:lava-common:+'
     include 'org.mozilla:rhino:+'
     include 'org.mozilla:rhino-engine:+'
 }
