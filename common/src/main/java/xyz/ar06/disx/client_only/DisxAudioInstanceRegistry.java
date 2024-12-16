@@ -49,12 +49,16 @@ public class DisxAudioInstanceRegistry {
     };
 
     public static void removeAudioInstance(BlockPos blockPos, ResourceLocation dimension){
+        DisxAudioInstance toRemove = null;
         for (DisxAudioInstance instance : registry){
             if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension)){
-                registry.remove(instance);
+                toRemove = instance;
                 instance.deconstruct();
                 break;
             }
+        }
+        if (toRemove != null){
+            registry.remove(toRemove);
         }
     }
 
