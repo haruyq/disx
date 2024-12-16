@@ -5,7 +5,6 @@ import xyz.ar06.disx.utils.DisxYoutubeLengthScraper;
 
 import java.util.concurrent.CompletableFuture;
 
-import static xyz.ar06.disx.DisxMain.debug;
 
 @Deprecated
 public class DisxServerVideoTimer {

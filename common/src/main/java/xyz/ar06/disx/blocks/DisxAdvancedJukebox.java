@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 
-import static xyz.ar06.disx.DisxMain.debug;
 
 public class DisxAdvancedJukebox extends BaseEntityBlock {
 

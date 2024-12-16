@@ -40,10 +40,6 @@ import java.util.function.Supplier;
 
 public class DisxMain {
     public static final String MOD_ID = "disx";
-
-    public static final boolean debug = true;
-
-
     public static final Supplier<RegistrarManager> REGISTRAR_MANAGER = Suppliers.memoize(() -> RegistrarManager.get(MOD_ID));
 
     public static void init() {

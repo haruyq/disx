@@ -17,8 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
-import static xyz.ar06.disx.DisxMain.debug;
-
 public class DisxServerPacketIndex {
 
     public static void registerServerPacketReceivers(){

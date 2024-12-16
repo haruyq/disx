@@ -14,7 +14,7 @@ public class DisxLogger {
         return callerPrefix;
     }
     public static void debug(Object input){
-        if (DisxMain.debug) {
+        if (DisxModInfo.isDEBUG()) {
             logger.info(getCallerPrefix() + String.valueOf(input));
         }
     }

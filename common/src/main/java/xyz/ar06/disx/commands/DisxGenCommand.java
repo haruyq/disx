@@ -32,8 +32,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-import static xyz.ar06.disx.DisxMain.debug;
-
 public class DisxGenCommand {
     //OLD TITLE SCRAPER
     //static YoutubeDownloader ytDownloader = new YoutubeDownloader();
