@@ -103,11 +103,9 @@ public class DisxAudioInstanceRegistry {
         }
         for (DisxAudioInstance instance : registry){
             if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension)){
-                System.out.println("routing packet!");
                 byte[] audioData = new byte[882000];
                 buf.readBytes(audioData);
                 instance.addToPacketDataQueue(audioData);
-                System.out.println("packet routed!");
             }
         }
     }

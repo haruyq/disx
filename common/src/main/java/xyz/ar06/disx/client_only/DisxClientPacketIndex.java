@@ -100,11 +100,8 @@ public class DisxClientPacketIndex  {
             }
         }
 
-        public static DisxAudioLine audioLine = new DisxAudioLine();
-
         public static void receiveAudioData(FriendlyByteBuf buf, NetworkManager.PacketContext context){
             DisxLogger.debug("audio data packet received");
-            //buf.readBytes(new byte[882000]);
             if (!buf.isReadable()){
                 DisxLogger.error("No readable data found in received audio data packet!");
                 return;
