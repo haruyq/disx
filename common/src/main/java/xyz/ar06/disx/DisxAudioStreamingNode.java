@@ -178,8 +178,8 @@ public class DisxAudioStreamingNode {
     public static void initPlayerManager(MinecraftServer server){
         playerManager = new DefaultAudioPlayerManager();
         playerManager.setHttpRequestConfigurator(requestConfig -> RequestConfig.copy(requestConfig)
-                .setSocketTimeout(10000)
-                .setConnectTimeout(10000)
+                .setSocketTimeout(20000)
+                .setConnectTimeout(20000)
                 .build()
         );
         AudioSourceManagers.registerRemoteSources(playerManager);
