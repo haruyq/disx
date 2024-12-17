@@ -13,7 +13,7 @@ Visit the GitHub project wiki to learn information about usage of the mod!
 This mod uses the [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) License, meaning you are free to use, distribute, and modify this project. ***HOWEVER***, if you modify this project, you must declare it explicitly as a modified version, and I ask that you link back to the original project.
 
 ## Links
-[Discord](https://discord.aviatorrob06.com)
+[Discord](https://discord.ar06.xyz)
 
 [Mod Roadmap](https://trello.com/b/JwbWrPbE)
 
