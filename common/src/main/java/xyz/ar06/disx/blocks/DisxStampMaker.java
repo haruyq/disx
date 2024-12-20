@@ -1,5 +1,6 @@
 package xyz.ar06.disx.blocks;
 
+import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.DisxMain;
 import xyz.ar06.disx.DisxServerPacketIndex;
 import xyz.ar06.disx.entities.DisxStampMakerEntity;
@@ -134,14 +135,17 @@ public class DisxStampMaker extends BaseEntityBlock {
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         if (interactionHand == InteractionHand.MAIN_HAND){
+            DisxLogger.debug("Interaction hand was main hand");
             ItemStack itemStack = player.getMainHandItem();
             DisxStampMakerEntity blockEntity = (DisxStampMakerEntity) level.getBlockEntity(blockPos);
             if (itemStack.getItem().equals(DisxLacquerBlock.itemRegistration.get()) && !level.isClientSide()){
-                if (player.isShiftKeyDown()){
+                DisxLogger.debug("Level is client side and player is holding lacquer block");
+                if (player.isCrouching()){
+                    DisxLogger.debug("Player is crouching; opening video id gui");
                     DisxServerPacketIndex.ServerPackets.openVideoIdScreen(player, blockHitResult.getBlockPos());
                     return InteractionResult.SUCCESS;
-                } else
-                if (blockEntity.getItem(0).isEmpty()){
+                } else if (blockEntity.getItem(0).isEmpty()){
+                    DisxLogger.debug("Player is not crouching; putting in Lacquer Block");
                     player.getCooldowns().addCooldown(itemStack.getItem(), 9999999);
                     ItemStack newStack = itemStack.copyWithCount(1);
                     itemStack.shrink(1);
@@ -151,13 +155,16 @@ public class DisxStampMaker extends BaseEntityBlock {
                     player.getCooldowns().removeCooldown(newStack.getItem());
                     return InteractionResult.CONSUME;
                 }
-            } else if (itemStack.isEmpty() && !level.isClientSide()){
-                if (player.isShiftKeyDown()){
+            } else if (!level.isClientSide()){
+                DisxLogger.debug("Level is not client side");
+                if (player.isCrouching()){
+                    DisxLogger.debug("Player is crouching; opening video id gui");
                     DisxServerPacketIndex.ServerPackets.openVideoIdScreen(player, blockPos);
                     return InteractionResult.SUCCESS;
-                } else {
-                    assert blockEntity != null;
+                } else if (itemStack.isEmpty()){
+                    DisxLogger.debug("Main hand item is empty; checking if lacquer block is in already");
                     if (!blockEntity.getItem(0).isEmpty()){
+                        DisxLogger.debug("Lacquer block was found; ejecting");
                         ItemStack returnToPlayer = blockEntity.removeItem(0, 1);
                         blockEntity.setItem(0, ItemStack.EMPTY);
                         ItemEntity itemEntity = new ItemEntity(level, ((double) blockPos.getX()) + 0.5, ((double) blockPos.getY()) + 0.2, ((double) blockPos.getZ()) + 0.5, returnToPlayer);
@@ -168,7 +175,6 @@ public class DisxStampMaker extends BaseEntityBlock {
                     }
                 }
             }
-            return InteractionResult.SUCCESS;
         }
         return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
     }

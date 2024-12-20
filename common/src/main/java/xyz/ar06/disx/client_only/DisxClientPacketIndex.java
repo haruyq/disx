@@ -30,6 +30,9 @@ public class DisxClientPacketIndex  {
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx", "muteplayer"), ClientPacketReceivers::receivePlayerMute);
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","audiodata"), ClientPacketReceivers::receiveAudioData);
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","loadingvidmsg"), ClientPacketReceivers::receiveLoadingMsgEvent);
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","loopmsg"), ClientPacketReceivers::receiveLoopMsg);
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","pausemsg"), ClientPacketReceivers::receivePauseMsg);
+
     }
 
     public class ClientPacketReceivers{
@@ -55,10 +58,11 @@ public class DisxClientPacketIndex  {
             Boolean loop = buf.readBoolean();
             BlockPos newBlockPos = buf.readBlockPos();
             ResourceLocation newDimLocation = buf.readResourceLocation();
+            int preferredVolume = buf.readInt();
             if (type.equals("add")){
                 DisxLogger.debug("calling for add");
                 CompletableFuture.runAsync(() -> {
-                    DisxAudioInstanceRegistry.newAudioPlayer(blockPos, dimensionLocation, instanceOwner, loop);
+                    DisxAudioInstanceRegistry.newAudioPlayer(blockPos, dimensionLocation, instanceOwner, loop, preferredVolume);
                 });
             }
             if (type.equals("remove")){
@@ -68,13 +72,14 @@ public class DisxClientPacketIndex  {
             }
             if (type.equals("modify")){
                 CompletableFuture.runAsync(() -> {
-                    DisxAudioInstanceRegistry.modifyAudioInstance(blockPos, dimensionLocation, newBlockPos, newDimLocation, loop);
+                    DisxAudioInstanceRegistry.modifyAudioInstance(blockPos, dimensionLocation, newBlockPos, newDimLocation, loop, preferredVolume);
                 });
             }
         }
 
         public static void receiveLoadedMsgEvent(FriendlyByteBuf buf, NetworkManager.PacketContext context){
             String videoId = buf.readUtf();
+            DisxLogger.debug("Sending playing video message");
             DisxSystemMessages.playingVideo(videoId);
         }
 
@@ -110,6 +115,16 @@ public class DisxClientPacketIndex  {
             ResourceLocation dimension = buf.readResourceLocation();
             ByteBuf bufCopy = buf.copy();
             CompletableFuture.runAsync(() -> DisxAudioInstanceRegistry.routeAudioData(bufCopy, blockPos, dimension));
+        }
+
+        public static void receiveLoopMsg(FriendlyByteBuf buf, NetworkManager.PacketContext context){
+            boolean b = buf.readBoolean();
+            DisxSystemMessages.loopStatusMsg(b);
+        }
+
+        public static void receivePauseMsg(FriendlyByteBuf buf, NetworkManager.PacketContext context){
+            boolean b = buf.readBoolean();
+            DisxSystemMessages.pauseStatusMsg(b);
         }
 
     }
@@ -150,7 +165,15 @@ public class DisxClientPacketIndex  {
             );
         }
 
-
+        public static void scrolledCheckHit(BlockPos blockPos, double amount){
+            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+            buf.writeBlockPos(blockPos);
+            buf.writeDouble(amount);
+            NetworkManager.sendToServer(
+                    new ResourceLocation("disx","scrolledcheckhit"),
+                    buf
+            );
+        }
     }
 
 }

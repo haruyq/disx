@@ -1,7 +1,18 @@
 package xyz.ar06.disx.client_only;
 
+import dev.architectury.event.CompoundEventResult;
+import dev.architectury.event.EventResult;
+import dev.architectury.event.events.common.InteractionEvent;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.DisxMain;
+import xyz.ar06.disx.DisxSystemMessages;
+import xyz.ar06.disx.blocks.DisxAdvancedJukebox;
+import xyz.ar06.disx.blocks.DisxStampMaker;
 import xyz.ar06.disx.client_only.renderers.DisxRecordPressEntityRenderer;
 import xyz.ar06.disx.client_only.renderers.DisxStampMakerEntityRenderer;
 import xyz.ar06.disx.entities.DisxRecordPressEntity;
@@ -44,10 +55,15 @@ public class DisxClientMain {
                         (BlockEntityType<DisxRecordPressEntity>) DisxMain.REGISTRAR_MANAGER.get().get(Registries.BLOCK_ENTITY_TYPE).get(new ResourceLocation("disx", "record_press_entity")),
                 provider1);
             });
+
+            ClientRawInputEvent.MOUSE_SCROLLED.register(DisxBehaviorHandling::scrollListener);
+
+            InteractionEvent.RIGHT_CLICK_ITEM.register(DisxBehaviorHandling::itemRightClickListener);
             //ClientLifecycleEvent.CLIENT_SETUP.register(DisxConfigHandler.CLIENT::initializeConfig);
 
             DisxLogger.info("Success in Mod Launch (CLIENT)");
         }
     }
+
 
 }

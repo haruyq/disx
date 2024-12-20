@@ -23,8 +23,8 @@ public class DisxAudioInstanceRegistry {
         DisxClientPacketIndex.ClientPackets.getServerAudioRegistry();
     }
 
-    public static void newAudioPlayer(BlockPos blockPos, ResourceLocation dimension, UUID instanceOwner, boolean loop){
-        registry.add(new DisxAudioInstance(blockPos, dimension, instanceOwner, loop));
+    public static void newAudioPlayer(BlockPos blockPos, ResourceLocation dimension, UUID instanceOwner, boolean loop, int preferredVolume){
+        registry.add(new DisxAudioInstance(blockPos, dimension, instanceOwner, loop, preferredVolume));
         DisxLogger.debug("New DisxAudioInstance registered");
     }
 
@@ -50,25 +50,38 @@ public class DisxAudioInstanceRegistry {
 
     public static void removeAudioInstance(BlockPos blockPos, ResourceLocation dimension){
         DisxAudioInstance toRemove = null;
-        for (DisxAudioInstance instance : registry){
-            if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension)){
-                toRemove = instance;
-                instance.deconstruct();
-                break;
+        try {
+            for (DisxAudioInstance instance : registry){
+                if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension)){
+                    toRemove = instance;
+                    instance.deconstruct();
+                    break;
+                }
             }
+            if (toRemove != null){
+                registry.remove(toRemove);
+            }
+        } catch (ConcurrentModificationException e){
+            DisxLogger.error("Encountered error in request to remove audio instance:");
+            e.printStackTrace();
         }
-        if (toRemove != null){
-            registry.remove(toRemove);
-        }
+
     }
 
-    public static void modifyAudioInstance(BlockPos blockPos, ResourceLocation dimension, BlockPos newBlockPos, ResourceLocation newDimension, boolean loop){
-        for (DisxAudioInstance instance : registry){
-            if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension)){
-                instance.setBlockPos(newBlockPos);
-                instance.setDimension(newDimension);
-                instance.setLoop(loop);
+    public static void modifyAudioInstance(BlockPos blockPos, ResourceLocation dimension, BlockPos newBlockPos, ResourceLocation newDimension, boolean loop, int preferredVolume){
+        try {
+            for (DisxAudioInstance instance : registry){
+                if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension)){
+                    instance.setBlockPos(newBlockPos);
+                    instance.setDimension(newDimension);
+                    instance.setLoop(loop);
+                    instance.setPreferredVolume(preferredVolume);
+                    break;
+                }
             }
+        } catch (ConcurrentModificationException e){
+            DisxLogger.error("Encountered error in request to remove audio instance:");
+            e.printStackTrace();
         }
     }
 
@@ -105,12 +118,18 @@ public class DisxAudioInstanceRegistry {
             DisxLogger.error("No readable data found in received audio data packet!");
             return;
         }
-        for (DisxAudioInstance instance : registry){
-            if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension)){
-                byte[] audioData = new byte[882000];
-                buf.readBytes(audioData);
-                instance.addToPacketDataQueue(audioData);
+        try {
+            for (DisxAudioInstance instance : registry){
+                if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension)){
+                    byte[] audioData = new byte[882000];
+                    buf.readBytes(audioData);
+                    instance.addToPacketDataQueue(audioData);
+                    break;
+                }
             }
+        } catch (ConcurrentModificationException e){
+            DisxLogger.error("Encountered error in request to route audio data to audio instance:");
+            e.printStackTrace();
         }
     }
 
@@ -161,4 +180,12 @@ public class DisxAudioInstanceRegistry {
         }
     }
 
+    public static int getPreferredVolume(BlockPos blockPos, ResourceLocation dimension){
+        for (DisxAudioInstance instance : registry){
+            if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension)){
+                return instance.getPreferredVolume();
+            }
+        }
+        return -1;
+    }
 }

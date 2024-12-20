@@ -2,6 +2,8 @@ package xyz.ar06.disx;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.world.phys.Vec3;
+import xyz.ar06.disx.client_only.DisxBehaviorHandling;
 import xyz.ar06.disx.entities.DisxStampMakerEntity;
 import dev.architectury.networking.NetworkManager;
 import io.netty.buffer.Unpooled;
@@ -24,6 +26,7 @@ public class DisxServerPacketIndex {
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","retrieveserveraudioregistry"), ((ServerPacketReceivers::onPlayerRegistryRequest)));
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","videoidselection"), ServerPacketReceivers::onVideoIdPushRequest);
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","singleplayertrackend"), ServerPacketReceivers::onSingleplayerTrackEnd);
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","scrolledcheckhit"), ServerPacketReceivers::onScrolledHitCheck);
 
     }
 
@@ -58,7 +61,8 @@ public class DisxServerPacketIndex {
                 ResourceLocation dimensionLocation = node.getDimension();
                 UUID playerOwner = node.getNodeOwner().getUUID();
                 boolean loop = node.isLoop();
-                ServerPackets.playerRegistryEvent("add", player, blockPos, dimensionLocation, playerOwner, loop, blockPos, dimensionLocation);
+                int preferredVolume = node.getPreferredVolume();
+                ServerPackets.playerRegistryEvent("add", player, blockPos, dimensionLocation, playerOwner, loop, blockPos, dimensionLocation, preferredVolume);
                 DisxLogger.debug("sent registry add event");
             }
         }
@@ -86,12 +90,22 @@ public class DisxServerPacketIndex {
             ResourceLocation dimension = buf.readResourceLocation();
             DisxServerAudioRegistry.removeFromRegistry(blockPos, dimension);
         }
+
+        public static void onScrolledHitCheck(FriendlyByteBuf buf, NetworkManager.PacketContext context){
+            BlockPos blockPos = buf.readBlockPos();
+            double amount = buf.readDouble();
+            Player player = context.getPlayer();
+            Vec3 vec3 = new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
+            if (player.position().distanceTo(vec3) <= 25){
+                DisxServerAudioRegistry.incrementVolume(blockPos, player.level().dimension(), amount);
+            }
+        }
     }
 
     public class ServerPackets {
 
         public static void playerRegistryEvent(String type, Player player, BlockPos pos, ResourceLocation dimension, UUID playerOwner, boolean loop,
-                                               BlockPos newBlockPos, ResourceLocation newDimension){
+                                               BlockPos newBlockPos, ResourceLocation newDimension, int preferredVolume){
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
             buf.writeUtf(type);
             buf.writeBlockPos(pos);
@@ -100,12 +114,14 @@ public class DisxServerPacketIndex {
             buf.writeBoolean(loop);
             buf.writeBlockPos(newBlockPos);
             buf.writeResourceLocation(newDimension);
+            buf.writeInt(preferredVolume);
             NetworkManager.sendToPlayer((ServerPlayer) player, new ResourceLocation("disx","serveraudioregistryevent"), buf);
         }
 
         public static void playingVideoIdMessage(String videoId, Player player){
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
             buf.writeUtf(videoId);
+            DisxLogger.debug("Sent playing vid msg packet");
             NetworkManager.sendToPlayer((ServerPlayer) player, new ResourceLocation("disx","playingvidmsg"), buf);
         }
 
@@ -155,6 +171,27 @@ public class DisxServerPacketIndex {
             );
         }
 
+        public static void loopMsg(Player player, boolean b){
+            DisxLogger.debug("Sending loop message packet");
+            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+            buf.writeBoolean(b);
+            NetworkManager.sendToPlayer(
+                    (ServerPlayer) player,
+                    new ResourceLocation("disx", "loopmsg"),
+                    buf
+            );
+        }
+
+        public static void pauseMsg(ServerPlayer serverPlayer, boolean b){
+            DisxLogger.debug("Sending pause message packet");
+            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+            buf.writeBoolean(b);
+            NetworkManager.sendToPlayer(
+                    serverPlayer,
+                    new ResourceLocation("disx", "pausemsg"),
+                    buf
+            );
+        }
     }
 
 }

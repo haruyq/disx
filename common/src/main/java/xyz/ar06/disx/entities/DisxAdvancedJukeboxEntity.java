@@ -1,9 +1,13 @@
 package xyz.ar06.disx.entities;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.WorldlyContainer;
+import org.jetbrains.annotations.Nullable;
 import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.DisxMain;
+import xyz.ar06.disx.DisxServerAudioRegistry;
 import xyz.ar06.disx.blocks.DisxAdvancedJukebox;
 import dev.architectury.registry.registries.Registrar;
 import dev.architectury.registry.registries.RegistrySupplier;
@@ -19,9 +23,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.ticks.ContainerSingleItem;
+import xyz.ar06.disx.items.DisxCustomDisc;
 import xyz.ar06.disx.utils.DisxYoutubeInfoScraper;
 
-public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerSingleItem {
+public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerSingleItem, WorldlyContainer {
 
     private NonNullList<ItemStack> itemInventory = NonNullList.withSize(1, ItemStack.EMPTY);
 
@@ -35,6 +40,13 @@ public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerS
 
     public boolean isHas_record() {
         return !itemInventory.get(0).equals(ItemStack.EMPTY);
+    }
+
+    public boolean isRecordPlaying(){
+        if (this.isHas_record()){
+            return DisxServerAudioRegistry.isNodeAtLocation(this.getBlockPos(), this.getLevel().dimension());
+        }
+        return false;
     }
 
     @Override
@@ -62,12 +74,22 @@ public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerS
     public ItemStack removeItem(int i, int j) {
         ItemStack returnStack = itemInventory.get(i).copy();
         itemInventory.set(i, ItemStack.EMPTY);
+        DisxServerAudioRegistry.removeFromRegistry(this.getBlockPos(), this.getLevel().dimension());
         return returnStack;
     }
 
     @Override
     public void setItem(int i, ItemStack itemStack) {
-        itemInventory.set(i, itemStack);
+        if (i == 0 && itemStack.getItem() instanceof DisxCustomDisc){
+            itemInventory.set(i, itemStack);
+            String videoId = itemStack.getTag().getString("videoId");
+            int jukeboxPower = this.getLevel().getBestNeighborSignal(this.getBlockPos());
+            boolean loop = jukeboxPower > 0;
+            DisxServerAudioRegistry.addToRegistry(this.getBlockPos(), videoId, null, level.dimension(), loop);
+        } else {
+            itemInventory.set(i, itemStack);
+        }
+
     }
 
     @Override
@@ -105,4 +127,38 @@ public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerS
         }
 
     }
+
+    @Override
+    public int[] getSlotsForFace(Direction direction) {
+        if (direction.equals(Direction.UP)){
+            return new int[]{0};
+        }
+        if (direction.equals(Direction.DOWN)){
+            return new int[]{0};
+        }
+        return new int[0];
+    }
+
+    @Override
+    public boolean canPlaceItemThroughFace(int i, ItemStack itemStack, @Nullable Direction direction) {
+        if (itemStack.getItem() instanceof DisxCustomDisc && direction.equals(Direction.UP)){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean canTakeItemThroughFace(int i, ItemStack itemStack, Direction direction) {
+        if (direction.equals(Direction.DOWN) && !this.isRecordPlaying()){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public BlockState getBlockState() {
+        return super.getBlockState();
+    }
+
+
 }
