@@ -1,6 +1,15 @@
 package xyz.ar06.disx.blocks;
 
 
+import dev.architectury.event.EventResult;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.level.block.*;
+import xyz.ar06.disx.DisxSoundEvents;
 import xyz.ar06.disx.*;
 import xyz.ar06.disx.config.DisxConfigHandler;
 import xyz.ar06.disx.entities.DisxAdvancedJukeboxEntity;
@@ -22,10 +31,6 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -48,7 +53,6 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
     }
 
     private boolean debounce = false;
-
     private int power;
 
     @Nullable
@@ -65,13 +69,14 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
     @Override
     public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
         super.neighborChanged(blockState, level, blockPos, block, blockPos2, bl);
+
         int p = level.getBestNeighborSignal(blockPos);
-        this.power = p;
-        boolean loop = false;
-        if (p > 0){
-            loop = true;
+        if (this.power != p){
+            this.power = p;
+            boolean loop = p > 0;
+            DisxServerAudioRegistry.modifyRegistryEntry(blockPos, level.dimension(), blockPos, level.dimension(), loop, -1);
         }
-        DisxServerAudioRegistry.modifyRegistryEntry(blockPos, level.dimension(), blockPos, level.dimension(), loop);
+
     }
 
     @Override
@@ -91,7 +96,6 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                 ItemStack newItemStack = entity.removeItem(0, 1);
                 player.getInventory().add(newItemStack);
                 entity.setChanged();
-                DisxServerAudioRegistry.removeFromRegistry(blockPos, level.dimension());
                 DisxLogger.debug("[advanced jukebox] current has record value: " + entity.isHas_record());
                 debounce = false;
                 return InteractionResult.SUCCESS;
@@ -101,8 +105,6 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                         if (!isPassingAudioPrerequisiteChecks(player, level)){
                             return InteractionResult.FAIL;
                         }
-                        int p = level.getBestNeighborSignal(blockPos);
-                        this.power = p;
                         DisxLogger.debug("[advanced jukebox] doesn't have record, putting it in");
                         debounce = true;
                         String discName = stack.getTag().getString("discName");
@@ -117,11 +119,6 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                         entity.setItem(0, stack.copy());
                         stack.setCount(stack.getCount() - 1);
                         DisxJukeboxUsageCooldownManager.updateCooldown(blockPos, level.dimension());
-                        boolean loop = false;
-                        if (this.power > 0){
-                            loop = true;
-                        }
-                        DisxServerAudioRegistry.addToRegistry(blockPos, videoId, player, level.dimension(), loop);
                         DisxServerPacketIndex.ServerPackets.loadingVideoIdMessage(videoId, player);
                         DisxLogger.debug("[advanced jukebox] current has record value: " + entity.isHas_record());
                         debounce = false;
@@ -155,7 +152,6 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                     ItemEntity itemEntity = new ItemEntity(entity.getLevel(), blockPos.getX(), blockPos.getY(), blockPos.getZ(), newItemStack);
                     itemEntity.setDefaultPickUpDelay();
                     level.addFreshEntity(itemEntity);
-                    DisxServerAudioRegistry.removeFromRegistry(blockPos, level.dimension());
                 }
             }
         }
@@ -228,4 +224,71 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
     public static void registerBlockItem(Registrar<Item> registry, RegistrySupplier<CreativeModeTab> tab){
         blockItemRegistration = registry.register(new ResourceLocation("disx","advanced_jukebox"), () -> new BlockItem(blockRegistration.get(), new Item.Properties().arch$tab(tab)));
     }
+
+    @Override
+    public boolean hasAnalogOutputSignal(BlockState blockState) {
+        return true;
+    }
+
+    @Override
+    public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
+        if (((DisxAdvancedJukeboxEntity) level.getBlockEntity(blockPos)).isRecordPlaying()){
+            DisxLogger.debug("Comparator Reading: yes there is a record playing");
+            return 16;
+        }
+        DisxLogger.debug("Comparator Reading: no there is not a record playing");
+        return 0;
+    }
+
+    public static EventResult leverListener(Player player, InteractionHand interactionHand, BlockPos blockPos, Direction direction) {
+        Level level = player.level();
+        if (!player.level().isClientSide() && interactionHand.equals(InteractionHand.MAIN_HAND)){
+            BlockState blockState = level.getBlockState(blockPos);
+            Block block = blockState.getBlock();
+            if (block instanceof LeverBlock){
+                Direction facingDirection = blockState.getValue(LeverBlock.FACING).getOpposite();
+                BlockState adjacentBlockState = level.getBlockState(blockPos.relative(facingDirection));
+                if (adjacentBlockState.is(DisxAdvancedJukebox.blockRegistration.get())){
+                    DisxServerPacketIndex.ServerPackets.loopMsg(player, !blockState.getValue(LeverBlock.POWERED));
+                }
+            }
+        }
+
+        return EventResult.pass();
+    }
+
+    private boolean pauseResumeDebounce = false;
+    @Override
+    public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
+
+        if (!level.isClientSide() && !pauseResumeDebounce) {
+            boolean audioExists = DisxServerAudioRegistry.isNodeAtLocation(blockHitResult.getBlockPos(), level.dimension());
+            if (!audioExists){
+                return;
+            }
+            pauseResumeDebounce = true;
+            boolean paused = DisxServerAudioRegistry.pauseOrPlayNode(blockHitResult.getBlockPos(), level.dimension());
+            if (projectile.getOwner() != null) {
+                if (projectile.getOwner().getType().equals(EntityType.PLAYER) && audioExists){
+                    ServerPlayer player = level.getServer().getPlayerList().getPlayer(projectile.getOwner().getUUID());
+                    DisxServerPacketIndex.ServerPackets.pauseMsg(player, paused);
+                }
+            }
+            if (paused){
+                DisxLogger.debug("Playing static sound?");
+                level.playSound(null, blockHitResult.getBlockPos(), DisxSoundEvents.SoundInstances.ADVANCED_JUKEBOX_STATIC, SoundSource.RECORDS, 1.0f, 1.0f);
+            }
+            CompletableFuture.runAsync(() -> {
+                try {
+                    Thread.sleep(6500);
+                    pauseResumeDebounce = false;
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+
+        super.onProjectileHit(level, blockState, blockHitResult, projectile);
+    }
+
 }

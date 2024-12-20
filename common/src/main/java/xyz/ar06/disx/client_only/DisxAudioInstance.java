@@ -13,6 +13,7 @@ import net.minecraft.world.phys.Vec3;
 import xyz.ar06.disx.DisxLogger;
 
 import javax.sound.sampled.*;
+import java.util.ConcurrentModificationException;
 import java.util.LinkedList;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -38,24 +39,37 @@ public class DisxAudioInstance {
     private FloatControl balanceControl;
     private boolean playerCanHear;
     private String cachedAudioDeviceName = null;
-    public DisxAudioInstance(BlockPos blockPos, ResourceLocation dimension, UUID instanceOwner, boolean loop){
+    private int preferredVolume;
+    public DisxAudioInstance(BlockPos blockPos, ResourceLocation dimension, UUID instanceOwner, boolean loop, int preferredVolume){
         DisxLogger.debug("New DisxAudioInstance called for; setting details:");
         this.blockPos = blockPos;
         this.dimension = dimension;
         this.instanceOwner = instanceOwner;
         this.loop = loop;
+        this.preferredVolume = preferredVolume;
         DisxLogger.debug("Details set successfully");
         DisxLogger.debug("Building audio line and controls");
         this.buildAudioLine();
         DisxLogger.debug("Audio line and controls built");
-        ClientTickEvent.CLIENT_POST.register(this::writingLoop);
-        ClientTickEvent.CLIENT_POST.register(this::volumeLoop);
+        try {
+            ClientTickEvent.CLIENT_POST.register(this::writingLoop);
+            ClientTickEvent.CLIENT_POST.register(this::volumeLoop);
+        } catch (ConcurrentModificationException e){
+            DisxLogger.error("Error registering writing and volume loops:");
+            e.printStackTrace();
+        }
+
         DisxLogger.debug("DisxAudioInstance initialized successfully!");
     }
 
     public void deconstruct(){
-        ClientTickEvent.CLIENT_POST.unregister(this::writingLoop);
-        ClientTickEvent.CLIENT_POST.unregister(this::volumeLoop);
+        try {
+            ClientTickEvent.CLIENT_POST.unregister(this::writingLoop);
+            ClientTickEvent.CLIENT_POST.unregister(this::volumeLoop);
+        } catch (ConcurrentModificationException e){
+            DisxLogger.error("Error deregistering writing and volume loops:");
+            e.printStackTrace();
+        }
         destroyLine();
         this.blockPos = null;
         this.dimension = null;
@@ -193,8 +207,9 @@ public class DisxAudioInstance {
                             double plrVolumeConfig_MASTER = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.MASTER).get();
                             double volumeCalc = Math.max(0.0f, 1.0f - (distance / maxDistance));
                             volumeCalc *= (plrVolumeConfig_MASTER * plrVolumeConfig_RECORDS);
+                            volumeCalc *= ((double) this.preferredVolume / 100);
                             float volumeCalc_line = 20.0f * (float) Math.log10(Math.max(0.01f, volumeCalc));
-                            if (distance >= maxDistance){
+                            if (distance >= maxDistance || preferredVolume == 0){
                                 volumeCalc_line = -80f;
                             }
                             if (volumeCalc_line < -80f) {
@@ -252,5 +267,13 @@ public class DisxAudioInstance {
 
     public void setLoop(boolean loop) {
         this.loop = loop;
+    }
+
+    public void setPreferredVolume(int preferredVolume) {
+        this.preferredVolume = preferredVolume;
+    }
+
+    public int getPreferredVolume() {
+        return preferredVolume;
     }
 }

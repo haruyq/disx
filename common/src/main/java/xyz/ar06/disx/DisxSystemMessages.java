@@ -18,7 +18,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 import static xyz.ar06.disx.DisxModInfo.getPotentialModConflicts;
 
@@ -127,11 +129,82 @@ public class DisxSystemMessages {
     }
 
     public static void loadingVideo(String videoId){
-        Minecraft.getInstance().gui.setOverlayMessage(Component.literal("Loading Video '" + videoId + "'").withStyle(ChatFormatting.ITALIC), false);
+        sendOverlayMessage(Component.literal("Loading Video '" + videoId + "'").withStyle(ChatFormatting.ITALIC), false);
     }
 
     public static void playingVideo(String videoId){
         Minecraft.getInstance().gui.setNowPlaying(Component.literal("Video '" + videoId + "'"));
+    }
+
+    public static void sendOverlayMessage(MutableComponent mutableComponent, boolean animated){
+        Minecraft.getInstance().gui.setOverlayMessage(mutableComponent, animated);
+    }
+    public static void loopStatusMsg(boolean enabled){
+        MutableComponent enabledMessage = Component.literal("Loop Enabled!").withStyle(ChatFormatting.GRAY);
+        MutableComponent disabledMessage = Component.literal("Loop Disabled!").withStyle(ChatFormatting.GRAY);
+        MutableComponent toSendMessage = enabled ? enabledMessage : disabledMessage;
+        sendOverlayMessage(toSendMessage, false);
+    }
+
+    public static void pauseStatusMsg(boolean paused){
+        MutableComponent enabledMessage = Component.literal("Paused audio!").withStyle(ChatFormatting.GRAY);
+        MutableComponent disabledMessage = Component.literal("Resumed audio!").withStyle(ChatFormatting.GRAY);
+        MutableComponent toSendMessage = paused ? enabledMessage : disabledMessage;
+        sendOverlayMessage(toSendMessage, false);
+    }
+
+    public static void changingVolume(){
+
+    }
+
+
+    public static void volumeSetMessage(int volume){
+        List<TextColor> colors = List.of(
+          TextColor.fromRgb(0x00FF00),
+                TextColor.fromRgb(0x00E600),
+                TextColor.fromRgb(0x00CD00),
+                TextColor.fromRgb(0x00B400),
+                TextColor.fromRgb(0x009B00),
+                TextColor.fromRgb(0x008200),
+                TextColor.fromRgb(0x006900),
+                TextColor.fromRgb(0x005000),
+                TextColor.fromRgb(0x003700),
+                TextColor.fromRgb(0x000500)
+        );
+        List<TextColor> colorsInverted = List.of(
+                TextColor.fromRgb(0x000500),
+                TextColor.fromRgb(0x003700),
+                TextColor.fromRgb(0x005000),
+                TextColor.fromRgb(0x006900),
+                TextColor.fromRgb(0x008200),
+                TextColor.fromRgb(0x009B00),
+                TextColor.fromRgb(0x00B400),
+                TextColor.fromRgb(0x00CD00),
+                TextColor.fromRgb(0x00E600),
+                TextColor.fromRgb(0x00FF00)
+        );
+        TextColor empty = TextColor.fromRgb(0x000000);
+        if (volume > 200){
+            volume = 200;
+        }
+        int length = volume / 10;
+        if (length > 10){
+            length = 10;
+        }
+        MutableComponent message = Component.literal("VOL: [").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD);
+        int index = length - 1;
+        for (int i = 0; i < 10; i++){
+            if (index >= 0){
+                message.append(Component.literal("▮").withStyle(Style.EMPTY.withColor(colors.get(index))));
+                index--;
+            } else {
+                message.append(Component.literal("▮").withStyle(Style.EMPTY.withColor(empty)));
+            }
+        }
+        message.append(Component.literal("] (").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD));
+        message.append(Component.literal(String.valueOf(volume)));
+        message.append(Component.literal("%)").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD));
+        sendOverlayMessage(message, false);
     }
 
     public static void outdatedModVersion(MinecraftServer server){

@@ -1,8 +1,7 @@
 {
-  "custom_sound": {
-    "category": "master",
+  "advancedjukeboxstatic": {
     "sounds": [
-      "disx_sounds:custom_sound"
+      "disx:advancedjukeboxstatic"
     ]
   }
 

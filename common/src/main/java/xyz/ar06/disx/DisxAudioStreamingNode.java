@@ -37,6 +37,8 @@ public class DisxAudioStreamingNode {
     private String videoId;
     private AudioTrack cachedTrack;
 
+    private int preferredVolume;
+
     public DisxAudioStreamingNode(String videoId, BlockPos blockPos, ResourceLocation dimension, Player nodeOwner, boolean loop, int startTime){
         DisxLogger.debug("New Audio Streaming Node called for; setting details");
         this.videoId = videoId;
@@ -45,6 +47,7 @@ public class DisxAudioStreamingNode {
         this.nodeOwner = nodeOwner;
         this.loop = loop;
         this.audioPlayer.addListener(new TrackHandler());
+        this.preferredVolume = 100;
         DisxLogger.debug("Track handler intialized");
         String url = "http://disxytsourceapi.ar06.xyz/stream_audio?id=" + videoId;
         DisxLogger.debug("Attempting to load requested video");
@@ -83,7 +86,6 @@ public class DisxAudioStreamingNode {
                 DisxSystemMessages.errorLoading(nodeOwner);
             }
         });
-        this.sendAudioData();
     }
 
     private boolean audioDataLoopRunning = false;
@@ -93,7 +95,7 @@ public class DisxAudioStreamingNode {
                 byte[] buffer = new byte[882000];
                 int bytesRead;
                 if (inputStream != null){
-                    while ((bytesRead = inputStream.read(buffer)) >= 0 && inputStream != null) {
+                    while ((bytesRead = inputStream.read(buffer)) >= 0 && inputStream != null && !this.audioPlayer.isPaused()) {
                         if (this.blockPos != null && this.dimension != null){
                             for (Player p : DisxServerAudioRegistry.getMcPlayers()) {
                                 FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
@@ -149,6 +151,7 @@ public class DisxAudioStreamingNode {
 
     public void resumePlayer(){
         this.audioPlayer.setPaused(false);
+        this.sendAudioData();
     }
 
     public BlockPos getBlockPos() {
@@ -171,6 +174,10 @@ public class DisxAudioStreamingNode {
         return loop;
     }
 
+    public boolean isPaused(){
+        return this.audioPlayer.isPaused();
+    }
+
     public static void shutdownPlayerManager(){
         playerManager.shutdown();
     }
@@ -187,6 +194,27 @@ public class DisxAudioStreamingNode {
         playerManager.getConfiguration().setOutputFormat(FORMAT);
     }
 
+    public int getVolume(){
+        return this.audioPlayer.getVolume();
+    }
+
+    public int incrementVolume(double amount){
+        int currentVolume = this.preferredVolume;
+        int castedAmount = (int) amount;
+        int newVolume = currentVolume + (castedAmount * 10);
+        if (newVolume > 200){
+            newVolume = 200;
+        }
+        if (newVolume < 0){
+            newVolume = 0;
+        }
+        return this.preferredVolume = newVolume;
+    }
+
+    public int getPreferredVolume() {
+        return preferredVolume;
+    }
+
     public class TrackHandler extends AudioEventAdapter {
         @Override
         public void onTrackStart(AudioPlayer player, AudioTrack track) {
@@ -194,6 +222,7 @@ public class DisxAudioStreamingNode {
             if (DisxAudioStreamingNode.this.getNodeOwner() != null){
                 DisxServerPacketIndex.ServerPackets.playingVideoIdMessage(DisxAudioStreamingNode.this.videoId, DisxAudioStreamingNode.this.nodeOwner);
             }
+            DisxAudioStreamingNode.this.sendAudioData();
             super.onTrackStart(player, track);
         }
 
