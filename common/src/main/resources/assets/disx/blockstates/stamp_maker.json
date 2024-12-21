@@ -14,6 +14,12 @@
     "facing=east": {
       "model": "disx:block/stamp_maker",
       "y": 180
+    },
+    "facing=down": {
+      "model": "disx:block/stamp_maker"
+    },
+    "facing=up": {
+      "model": "disx:block/stamp_maker"
     }
   }
 }
