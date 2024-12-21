@@ -16,6 +16,5 @@ public class DisxMainForge {
         EventBuses.registerModEventBus(DisxMain.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
         DisxMain.init();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(DisxClientForge::onClientInitialize);
-        MinecraftForge.EVENT_BUS.register(new DisxBehaviorHandlingForge());
     }
 }

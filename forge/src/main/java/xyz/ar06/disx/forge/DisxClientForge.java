@@ -23,6 +23,7 @@ public class DisxClientForge {
         if (Platform.getEnvironment().equals(Env.CLIENT)){
             ItemBlockRenderTypes.setRenderLayer(DisxLacquerBlock.blockRegistration.get(), RenderType.translucent());
             ItemBlockRenderTypes.setRenderLayer(DisxStampMaker.blockRegistration.get(), RenderType.cutout());
+            MinecraftForge.EVENT_BUS.register(new DisxBehaviorHandlingForge());
         }
     }
 }

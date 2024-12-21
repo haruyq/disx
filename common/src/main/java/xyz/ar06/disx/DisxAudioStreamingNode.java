@@ -220,6 +220,7 @@ public class DisxAudioStreamingNode {
         public void onTrackStart(AudioPlayer player, AudioTrack track) {
             DisxLogger.debug("Audio starting; registered audio data send loop");
             if (DisxAudioStreamingNode.this.getNodeOwner() != null){
+                DisxLogger.debug("Calling for now playing message packet to be sent");
                 DisxServerPacketIndex.ServerPackets.playingVideoIdMessage(DisxAudioStreamingNode.this.videoId, DisxAudioStreamingNode.this.nodeOwner);
             }
             DisxAudioStreamingNode.this.sendAudioData();
