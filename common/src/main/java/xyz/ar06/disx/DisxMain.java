@@ -118,8 +118,11 @@ public class DisxMain {
 
         LifecycleEvent.SERVER_STARTED.register(DisxAudioStreamingNode::initPlayerManager);
 
+
         LifecycleEvent.SERVER_STARTED.register((server) -> {
-            CompletableFuture.runAsync(() -> DisxLavaplayerTest.testTrack(server));
+            if (DisxModInfo.isTESTTRACK()){
+                CompletableFuture.runAsync(() -> DisxLavaplayerTest.testTrack(server));
+            }
         });
 
         InteractionEvent.RIGHT_CLICK_BLOCK.register(DisxAdvancedJukebox::leverListener);

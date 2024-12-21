@@ -44,7 +44,7 @@ public class DisxBehaviorHandling {
                             DisxLogger.debug("sending scrolled packet");
                             DisxClientPacketIndex.ClientPackets.scrolledCheckHit(blockPos, amount);
                         }
-                        return EventResult.interruptTrue();
+                        return EventResult.interrupt(true);
                     }
                 }
 
