@@ -1,6 +1,7 @@
 package xyz.ar06.disx.entities;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.Blocks;
 import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.utils.DisxInternetCheck;
 import xyz.ar06.disx.DisxMain;
@@ -50,7 +51,7 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
                 DisxMain.REGISTRAR_MANAGER.get().get(Registries.BLOCK_ENTITY_TYPE).get(new ResourceLocation("disx","stamp_maker_entity")),
                 blockPos,
                 blockState);
-        this.items = NonNullList.withSize(3, ItemStack.EMPTY);
+        this.items = NonNullList.withSize(2, ItemStack.EMPTY);
         DisxLogger.debug("MAKING NEW ENTITY AT " + blockPos);
     }
 
@@ -99,12 +100,13 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
         } else {
             this.items.set(i, itemStack);
         }
+        this.setChanged();
         checkTryAsyncProductionCond();
     }
 
     @Override
     public void load(CompoundTag compoundTag) {
-        this.items = NonNullList.withSize(3, ItemStack.EMPTY);
+        this.items = NonNullList.withSize(2, ItemStack.EMPTY);
         ContainerHelper.loadAllItems(compoundTag, this.items);
         super.load(compoundTag);
     }
@@ -112,14 +114,23 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
     public void setItem(int i, ItemStack itemStack, Player player) {;
         this.items.set(i, itemStack);
         if (itemStack.getItem().equals(DisxLacquerBlock.itemRegistration.get())){
+            DisxLogger.debug("lacquer block has been detected");
+            if (itemStack.hasCustomHoverName()){
+                DisxLogger.debug("Found lacquer block has video id as the name, setting video id");
+                String videoId = itemStack.getHoverName().getString();
+                DisxLogger.debug("Detected video id: " + videoId);
+                this.videoId = videoId;
+            }
             if (!this.isVideoIdNull()){
                 produceStamp(player);
             }
         }
+        this.setChanged();
     }
 
     public void setItems(NonNullList<ItemStack> items) {
         this.items = items;
+        this.setChanged();
         checkTryAsyncProductionCond();
     }
 
@@ -132,6 +143,12 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
         }*/
         if (this.items.get(0).getItem().equals(DisxLacquerBlock.itemRegistration.get())){
             DisxLogger.debug("lacquer block found");
+            if (this.items.get(0).hasCustomHoverName()){
+                DisxLogger.debug("Found lacquer block has video id as the name, setting video id");
+                String videoId = items.get(0).getHoverName().getString();
+                DisxLogger.debug("Detected video id: " + videoId);
+                this.videoId = videoId;
+            }
             if (!this.isVideoIdNull()){
                 DisxLogger.debug("video id is not null, running produce async");
                 produceStampAsync();
@@ -210,6 +227,9 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
                     DisxSystemMessages.badDuration(player);
                     return;
                 }
+                if (this.items.get(0).equals(ItemStack.EMPTY)){
+                    return;
+                }
                 this.setItem(0, ItemStack.EMPTY);
                 BlockPos blockPos = this.getBlockPos();
                 Level lvl = getLevel();
@@ -221,15 +241,13 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
                 ItemStack stampStack = new ItemStack(stamp);
                 stampStack.setTag(tag);
                 stampStack.setCount(1);
-                if (lvl.getBlockEntity(blockPos.below()) != null && lvl.getBlockEntity(blockPos.below()) instanceof HopperBlockEntity){
-                    this.items.set(2, stampStack);
-                    this.items.set(1, ItemStack.EMPTY);
+                if (lvl.getBlockState(blockPos.below()).is(Blocks.HOPPER)){
+                    this.items.set(1, stampStack);
                     this.videoId = null;
                     lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
                 } else {
                     ItemEntity itemEntity = new ItemEntity(getLevel(), ((double) blockPos.getX()) + 0.5, ((double) blockPos.getY()) + 0.2, ((double) blockPos.getZ()) + 0.5, stampStack);
                     itemEntity.setDefaultPickUpDelay();
-                    this.items.set(1, ItemStack.EMPTY);
                     this.videoId = null;
                     lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
                     level.addFreshEntity(itemEntity);
@@ -240,6 +258,8 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
     }
 
     public void produceStampAsync(){
+        BlockPos blockPos = this.getBlockPos();
+        Level lvl = getLevel();
         CompletableFuture.runAsync(() -> {
             if (!DisxInternetCheck.checkInternet()){
                 DisxSystemMessages.noInternetFoundStampMakerAsync(this.getLevel().getServer(), this.getBlockPos());
@@ -255,9 +275,10 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
                     DisxSystemMessages.badDurationStampMakerAsync(this.getLevel().getServer(), this.getBlockPos());
                     return;
                 }
+                if (this.items.get(0).equals(ItemStack.EMPTY)){
+                    return;
+                }
                 this.setItem(0, ItemStack.EMPTY);
-                BlockPos blockPos = this.getBlockPos();
-                Level lvl = getLevel();
                 lvl.playSound(null, blockPos, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, SoundSource.BLOCKS);
                 DisxRecordStamp stamp = (DisxRecordStamp) DisxMain.REGISTRAR_MANAGER.get().get(Registries.ITEM).get(new ResourceLocation("disx", "record_stamp"));
                 CompoundTag tag = new CompoundTag();
@@ -266,17 +287,21 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
                 ItemStack stampStack = new ItemStack(stamp);
                 stampStack.setTag(tag);
                 stampStack.setCount(1);
-                if (lvl.getBlockEntity(blockPos.below()) != null && lvl.getBlockEntity(blockPos.below()) instanceof HopperBlockEntity){
-                    this.items.set(2, stampStack);
-                    this.items.set(1, ItemStack.EMPTY);
+                if (lvl.getBlockState(blockPos.below()).is(Blocks.HOPPER)){
+                    DisxLogger.debug("Found hopper below, placing record stamp in appropriate inventory for taking");
+                    this.items.set(1, stampStack);
                     this.videoId = null;
+                    this.setChanged();
                     lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
                 } else {
+                    DisxLogger.debug("Did not find hopper below; Ejecting record stamp");
+                    DisxLogger.debug("Below is: " + lvl.getBlockState(blockPos.below()));
+                    DisxLogger.debug("BlockPos of Below: " + blockPos.below());
                     ItemEntity itemEntity = new ItemEntity(getLevel(), ((double) blockPos.getX()) + 0.5, ((double) blockPos.getY()) + 0.2, ((double) blockPos.getZ()) + 0.5, stampStack);
                     itemEntity.setDefaultPickUpDelay();
                     lvl.playSound(null, blockPos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS);
                     level.addFreshEntity(itemEntity);
-                    this.items.set(1, ItemStack.EMPTY);
+                    this.setChanged();
                     this.videoId = null;
                 }
             }
@@ -286,10 +311,12 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
 
     @Override
     public int[] getSlotsForFace(Direction direction) {
+        /*
         if (direction.equals(Direction.UP)){
             int[] returnValue = new int[]{1};
             return returnValue;
         }
+         */
         ArrayList<Object> sideDirections = new ArrayList<>();
         sideDirections.add(Direction.NORTH);
         sideDirections.add(Direction.EAST);
@@ -302,7 +329,7 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
             }
         }
         if (direction.equals(Direction.DOWN)){
-            int[] returnValue = new int[]{2};
+            int[] returnValue = new int[]{1};
             return returnValue;
         }
         return new int[0];
@@ -324,13 +351,6 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
                 }
             }
         }
-        if (direction.equals(Direction.UP)){
-            if (itemStack.getItem().equals(Items.PAPER) && itemStack.hasCustomHoverName()){
-                if (this.items.get(1).equals(ItemStack.EMPTY)){
-                    return true;
-                }
-            }
-        }
         return false;
     }
 
@@ -344,6 +364,6 @@ public class DisxStampMakerEntity extends BlockEntity implements Container, Worl
 
     @Override
     public void clearContent() {
-        this.items = NonNullList.withSize(3, ItemStack.EMPTY);
+        this.items = NonNullList.withSize(2, ItemStack.EMPTY);
     }
 }

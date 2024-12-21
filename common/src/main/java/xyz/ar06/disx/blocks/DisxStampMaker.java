@@ -176,6 +176,14 @@ public class DisxStampMaker extends BaseEntityBlock {
                 }
             }
         }
+        if (interactionHand.equals(InteractionHand.OFF_HAND) && !level.isClientSide()){
+            DisxLogger.debug("Hand is off hand and level is not client side");
+            if (player.isCrouching()){
+                DisxLogger.debug("Player is crouching; opening video id gui");
+                DisxServerPacketIndex.ServerPackets.openVideoIdScreen(player, blockPos);
+                return InteractionResult.SUCCESS;
+            }
+        }
         return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
     }
 
