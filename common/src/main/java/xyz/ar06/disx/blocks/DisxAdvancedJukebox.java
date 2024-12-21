@@ -276,7 +276,7 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
             }
             if (paused){
                 DisxLogger.debug("Playing static sound?");
-                level.playSound(null, blockHitResult.getBlockPos(), DisxSoundEvents.SoundInstances.ADVANCED_JUKEBOX_STATIC, SoundSource.RECORDS, 1.0f, 1.0f);
+                level.playSound(null, blockHitResult.getBlockPos(), DisxSoundEvents.SoundInstances.ADVANCED_JUKEBOX_STATIC.get(), SoundSource.RECORDS, 1.0f, 1.0f);
             }
             CompletableFuture.runAsync(() -> {
                 try {

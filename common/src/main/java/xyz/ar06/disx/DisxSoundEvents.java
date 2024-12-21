@@ -7,7 +7,7 @@ import net.minecraft.sounds.SoundEvent;
 
 public class DisxSoundEvents {
     public class SoundInstances {
-        public static SoundEvent ADVANCED_JUKEBOX_STATIC;
+        public static RegistrySupplier<SoundEvent> ADVANCED_JUKEBOX_STATIC;
     }
     public static void registerAdvancedJukeboxStatic(Registrar<SoundEvent> registrar){
         SoundInstances.ADVANCED_JUKEBOX_STATIC = registrar.register(
@@ -15,7 +15,7 @@ public class DisxSoundEvents {
                 () -> SoundEvent.createFixedRangeEvent(
                         new ResourceLocation("disx","advancedjukeboxstatic"),
                         25f)
-        ).get();
+        );
 
     }
 }

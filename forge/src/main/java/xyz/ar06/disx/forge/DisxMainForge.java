@@ -1,5 +1,6 @@
 package xyz.ar06.disx.forge;
 
+import net.minecraftforge.common.MinecraftForge;
 import xyz.ar06.disx.DisxMain;
 import dev.architectury.platform.forge.EventBuses;
 import net.minecraftforge.fml.common.Mod;
@@ -15,5 +16,6 @@ public class DisxMainForge {
         EventBuses.registerModEventBus(DisxMain.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
         DisxMain.init();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(DisxClientForge::onClientInitialize);
+        MinecraftForge.EVENT_BUS.register(new DisxBehaviorHandlingForge());
     }
 }

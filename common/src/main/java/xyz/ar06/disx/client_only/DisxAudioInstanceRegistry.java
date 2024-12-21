@@ -75,7 +75,9 @@ public class DisxAudioInstanceRegistry {
                     instance.setBlockPos(newBlockPos);
                     instance.setDimension(newDimension);
                     instance.setLoop(loop);
-                    instance.setPreferredVolume(preferredVolume);
+                    if (preferredVolume != -1){
+                        instance.setPreferredVolume(preferredVolume);
+                    }
                     break;
                 }
             }
