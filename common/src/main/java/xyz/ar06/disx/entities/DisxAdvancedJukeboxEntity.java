@@ -92,6 +92,19 @@ public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerS
 
     }
 
+    public void setItem(int i, ItemStack itemStack, Player player) {
+        if (i == 0 && itemStack.getItem() instanceof DisxCustomDisc){
+            itemInventory.set(i, itemStack);
+            String videoId = itemStack.getTag().getString("videoId");
+            int jukeboxPower = this.getLevel().getBestNeighborSignal(this.getBlockPos());
+            boolean loop = jukeboxPower > 0;
+            DisxServerAudioRegistry.addToRegistry(this.getBlockPos(), videoId, player, level.dimension(), loop);
+        } else {
+            itemInventory.set(i, itemStack);
+        }
+
+    }
+
     @Override
     public boolean stillValid(Player player) {
         return false;

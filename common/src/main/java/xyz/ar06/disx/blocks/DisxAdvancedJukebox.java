@@ -116,7 +116,7 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                             stack.setTag(updatedTag);
                         }
                         //player.getCooldowns().addCooldown(item, 999999999);
-                        entity.setItem(0, stack.copy());
+                        entity.setItem(0, stack.copy(), player);
                         stack.setCount(stack.getCount() - 1);
                         DisxJukeboxUsageCooldownManager.updateCooldown(blockPos, level.dimension());
                         DisxServerPacketIndex.ServerPackets.loadingVideoIdMessage(videoId, player);

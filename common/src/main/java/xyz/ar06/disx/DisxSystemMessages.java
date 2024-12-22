@@ -1,11 +1,6 @@
 package xyz.ar06.disx;
 
 import dev.architectury.event.events.common.PlayerEvent;
-import dev.architectury.event.events.common.TickEvent;
-import dev.architectury.platform.Platform;
-import dev.architectury.utils.Env;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -13,16 +8,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-
-import static xyz.ar06.disx.DisxModInfo.getPotentialModConflicts;
 
 public class DisxSystemMessages {
     public static void onPlayReadyNoInternet(Player player) {
@@ -153,37 +144,21 @@ public class DisxSystemMessages {
         sendOverlayMessage(toSendMessage, false);
     }
 
-    public static void changingVolume(){
-
-    }
-
+    static List<TextColor> volMsgColors = List.of(
+            TextColor.fromRgb(0x00FF00),
+            TextColor.fromRgb(0x00E600),
+            TextColor.fromRgb(0x00CD00),
+            TextColor.fromRgb(0x00B400),
+            TextColor.fromRgb(0x009B00),
+            TextColor.fromRgb(0x008200),
+            TextColor.fromRgb(0x006900),
+            TextColor.fromRgb(0x005000),
+            TextColor.fromRgb(0x003700),
+            TextColor.fromRgb(0x000500)
+    );
+    static TextColor volMsgEmptyColor = TextColor.fromRgb(0x000000);
 
     public static void volumeSetMessage(int volume){
-        List<TextColor> colors = List.of(
-          TextColor.fromRgb(0x00FF00),
-                TextColor.fromRgb(0x00E600),
-                TextColor.fromRgb(0x00CD00),
-                TextColor.fromRgb(0x00B400),
-                TextColor.fromRgb(0x009B00),
-                TextColor.fromRgb(0x008200),
-                TextColor.fromRgb(0x006900),
-                TextColor.fromRgb(0x005000),
-                TextColor.fromRgb(0x003700),
-                TextColor.fromRgb(0x000500)
-        );
-        List<TextColor> colorsInverted = List.of(
-                TextColor.fromRgb(0x000500),
-                TextColor.fromRgb(0x003700),
-                TextColor.fromRgb(0x005000),
-                TextColor.fromRgb(0x006900),
-                TextColor.fromRgb(0x008200),
-                TextColor.fromRgb(0x009B00),
-                TextColor.fromRgb(0x00B400),
-                TextColor.fromRgb(0x00CD00),
-                TextColor.fromRgb(0x00E600),
-                TextColor.fromRgb(0x00FF00)
-        );
-        TextColor empty = TextColor.fromRgb(0x000000);
         if (volume > 200){
             volume = 200;
         }
@@ -195,10 +170,10 @@ public class DisxSystemMessages {
         int index = length - 1;
         for (int i = 0; i < 10; i++){
             if (index >= 0){
-                message.append(Component.literal("▮").withStyle(Style.EMPTY.withColor(colors.get(index))));
+                message.append(Component.literal("▮").withStyle(Style.EMPTY.withColor(volMsgColors.get(index))));
                 index--;
             } else {
-                message.append(Component.literal("▮").withStyle(Style.EMPTY.withColor(empty)));
+                message.append(Component.literal("▮").withStyle(Style.EMPTY.withColor(volMsgEmptyColor)));
             }
         }
         message.append(Component.literal("] (").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD));

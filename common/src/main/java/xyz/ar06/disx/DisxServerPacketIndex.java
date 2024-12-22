@@ -119,10 +119,14 @@ public class DisxServerPacketIndex {
         }
 
         public static void playingVideoIdMessage(String videoId, Player player){
-            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-            buf.writeUtf(videoId);
-            DisxLogger.debug("Sent playing vid msg packet");
-            NetworkManager.sendToPlayer((ServerPlayer) player, new ResourceLocation("disx","playingvidmsg"), buf);
+            if (player != null){
+                FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+                buf.writeUtf(videoId);
+                DisxLogger.debug("Sent playing vid msg packet");
+                NetworkManager.sendToPlayer((ServerPlayer) player, new ResourceLocation("disx","playingvidmsg"), buf);
+            } else {
+                DisxLogger.debug("Player to send playing message to is null");
+            }
         }
 
         public static void loadingVideoIdMessage(String videoId, Player player){

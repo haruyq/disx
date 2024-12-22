@@ -218,11 +218,9 @@ public class DisxAudioStreamingNode {
     public class TrackHandler extends AudioEventAdapter {
         @Override
         public void onTrackStart(AudioPlayer player, AudioTrack track) {
+            DisxLogger.debug("Calling for now playing message packet to be sent");
+            DisxServerPacketIndex.ServerPackets.playingVideoIdMessage(DisxAudioStreamingNode.this.videoId, DisxAudioStreamingNode.this.nodeOwner);
             DisxLogger.debug("Audio starting; registered audio data send loop");
-            if (DisxAudioStreamingNode.this.getNodeOwner() != null){
-                DisxLogger.debug("Calling for now playing message packet to be sent");
-                DisxServerPacketIndex.ServerPackets.playingVideoIdMessage(DisxAudioStreamingNode.this.videoId, DisxAudioStreamingNode.this.nodeOwner);
-            }
             DisxAudioStreamingNode.this.sendAudioData();
             super.onTrackStart(player, track);
         }
