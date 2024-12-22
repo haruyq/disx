@@ -12,9 +12,9 @@ import java.net.http.HttpResponse;
 import java.util.HashMap;
 
 public class DisxModInfo {
-    private static final String VERSION = "0.1.3-patch1-dev-";
+    private static final String VERSION = "0.1.3-patch1";
     private static final boolean DEV_BUILD = false;
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static String LATEST_VERSION = "N/A - NO INTERNET";
     private static final String DISCORD_URL = "http://discord.ar06.xyz";
     private static final String MODRINTH_URL = "https://modrinth.com/mod/disx";
