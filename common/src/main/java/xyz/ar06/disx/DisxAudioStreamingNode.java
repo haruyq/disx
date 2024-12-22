@@ -95,11 +95,11 @@ public class DisxAudioStreamingNode {
                 if (inputStream != null){
                     while ((bytesRead = inputStream.read(buffer)) >= 0 && inputStream != null) {
                         if (this.blockPos != null && this.dimension != null){
-                            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-                            buf.writeBlockPos(this.blockPos);
-                            buf.writeResourceLocation(this.dimension);
-                            buf.writeBytes(buffer, 0, bytesRead);
                             for (Player p : DisxServerAudioRegistry.getMcPlayers()) {
+                                FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+                                buf.writeBlockPos(this.blockPos);
+                                buf.writeResourceLocation(this.dimension);
+                                buf.writeBytes(buffer, 0, bytesRead);
                                 DisxServerPacketIndex.ServerPackets.audioData(p, buf);
                             }
                         }
