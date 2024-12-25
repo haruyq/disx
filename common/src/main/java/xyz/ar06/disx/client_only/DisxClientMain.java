@@ -15,6 +15,7 @@ import xyz.ar06.disx.blocks.DisxAdvancedJukebox;
 import xyz.ar06.disx.blocks.DisxStampMaker;
 import xyz.ar06.disx.client_only.renderers.DisxRecordPressEntityRenderer;
 import xyz.ar06.disx.client_only.renderers.DisxStampMakerEntityRenderer;
+import xyz.ar06.disx.config.DisxConfigHandler;
 import xyz.ar06.disx.entities.DisxRecordPressEntity;
 import xyz.ar06.disx.entities.DisxStampMakerEntity;
 import dev.architectury.event.events.client.*;
@@ -55,6 +56,7 @@ public class DisxClientMain {
                         (BlockEntityType<DisxRecordPressEntity>) DisxMain.REGISTRAR_MANAGER.get().get(Registries.BLOCK_ENTITY_TYPE).get(new ResourceLocation("disx", "record_press_entity")),
                 provider1);
             });
+            ClientLifecycleEvent.CLIENT_STARTED.register(DisxConfigHandler.CLIENT::initializeConfig);
 
             ClientRawInputEvent.MOUSE_SCROLLED.register(DisxBehaviorHandling::scrollListener);
 

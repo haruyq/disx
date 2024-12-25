@@ -1,5 +1,8 @@
 package xyz.ar06.disx.fabric;
 
+import dev.architectury.event.events.client.ClientChatEvent;
+import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
+import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
 import xyz.ar06.disx.blocks.DisxLacquerBlock;
 import xyz.ar06.disx.blocks.DisxStampMaker;
 import dev.architectury.platform.Platform;
@@ -15,6 +18,7 @@ public class DisxClientMainFabric {
         if (Platform.getEnvironment().equals(Env.CLIENT)){
             BlockRenderLayerMap.INSTANCE.putBlock(DisxLacquerBlock.blockRegistration.get(), RenderType.translucent());
             BlockRenderLayerMap.INSTANCE.putBlock(DisxStampMaker.blockRegistration.get(), RenderType.cutout());
+            ClientSendMessageEvents.ALLOW_CHAT.register(DisxBehaviorHandlingFabric::chatListener);
         }
     }
 }

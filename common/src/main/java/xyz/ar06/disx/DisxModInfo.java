@@ -14,7 +14,8 @@ import java.util.HashMap;
 public class DisxModInfo {
     private static final String VERSION = "0.2.0-dev-0830ba62";
     private static final boolean DEV_BUILD = true;
-    private static final boolean DEBUG = true;
+    private static final boolean FORCE_DEBUG = false;
+    private static boolean DEBUG = false;
     private static final boolean TEST_TRACK_ENABLED = false;
     private static String LATEST_VERSION = "N/A - NO INTERNET";
     private static final String DISCORD_URL = "http://discord.ar06.xyz";
@@ -144,10 +145,14 @@ public class DisxModInfo {
     }
 
     public static boolean isDEBUG() {
-        return DEBUG;
+        return (FORCE_DEBUG || DEBUG);
     }
 
     public static boolean isTESTTRACK() {
         return TEST_TRACK_ENABLED;
+    }
+
+    public static void setDEBUG(boolean DEBUG) {
+        DisxModInfo.DEBUG = DEBUG;
     }
 }

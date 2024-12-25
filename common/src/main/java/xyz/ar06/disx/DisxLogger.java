@@ -2,6 +2,7 @@ package xyz.ar06.disx;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.ar06.disx.config.DisxConfigHandler;
 
 public class DisxLogger {
     private static final Logger logger = LoggerFactory.getLogger("disx");

@@ -9,6 +9,7 @@ import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
@@ -158,6 +159,16 @@ public class DisxSystemMessages {
 
     public static void successfulUnmutation(){
         Minecraft.getInstance().player.sendSystemMessage(Component.translatable("sysmsg.disx.unmutecmd.success"));
+    }
+
+    public static void debugStatus(boolean b){
+        if (b){
+            Minecraft.getInstance().player.sendSystemMessage(Component.translatable("sysmsg.disx.debug_enabled"));
+            Minecraft.getInstance().player.playSound(SoundEvents.LIGHTNING_BOLT_THUNDER);
+        } else {
+            Minecraft.getInstance().player.sendSystemMessage(Component.translatable("sysmsg.disx.debug_disabled"));
+            Minecraft.getInstance().player.playSound(SoundEvents.TOTEM_USE);
+        }
     }
 
     static List<TextColor> volMsgColors = List.of(

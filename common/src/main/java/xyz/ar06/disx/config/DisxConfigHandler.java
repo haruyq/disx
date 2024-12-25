@@ -2,9 +2,17 @@ package xyz.ar06.disx.config;
 
 
 import com.mojang.brigadier.context.CommandContext;
+import dev.architectury.event.EventResult;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import org.jetbrains.annotations.Nullable;
 import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.DisxMain;
+import xyz.ar06.disx.DisxModInfo;
+import xyz.ar06.disx.DisxSystemMessages;
 import xyz.ar06.disx.utils.DisxUUIDUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -33,7 +41,7 @@ public class DisxConfigHandler {
         private static JSONObject useBlacklist;
         private static JSONObject dimensionBlacklist;
         public static void initializeConfig(MinecraftServer minecraftServer){
-            //Config Properties File Check/Create/Initialization
+            //Config Properties File Check/Create/Initialization/Update
             File dir = new File(filePath);
             File parent = dir.getParentFile();
             File configFolder = parent.getParentFile();
@@ -64,6 +72,8 @@ public class DisxConfigHandler {
             } catch (IOException e){
                 e.printStackTrace();
             }
+            updateConfig();
+            DisxModInfo.setDEBUG(Boolean.parseBoolean(properties.getProperty("debug_mode")));
             //JSON Check/Create/Initialization
             //Player Use Whitelist JSON
             File dir2 = new File(useWhitelistJsonPath);
@@ -151,12 +161,21 @@ public class DisxConfigHandler {
             }
         }
 
+        public static void updateConfig(){
+            int config_version = Integer.parseInt(properties.getProperty("config_version"));
+            if (config_version < 1){
+                updateProperty("debug_mode", "false");
+                updateProperty("config_version", "1");
+            }
+        }
+
         public static String getProperty(String key){
             return properties.getProperty(key);
         }
 
         public static void updateProperty(String key, String value){
             properties.setProperty(key, value);
+            DisxModInfo.setDEBUG(Boolean.parseBoolean(properties.getProperty("debug_mode")));
             updateConfigFile();
         }
 
@@ -392,6 +411,63 @@ public class DisxConfigHandler {
 
 
     public static class CLIENT {
+        private static final String filePath = "config/disx/disx_client_config.properties";
+        private static final InputStream defaultCopy = DisxConfigHandler.class.getClassLoader().getResourceAsStream("disx_client_config.properties");
+
+        private static final Properties properties = new Properties();
+        public static void initializeConfig(Minecraft minecraft){
+            //Config Properties File Check/Create/Initialization/Update
+            File dir = new File(filePath);
+            File parent = dir.getParentFile();
+            File configFolder = parent.getParentFile();
+            if (!parent.exists() || !dir.exists() || !configFolder.exists()){
+                configFolder.mkdir();
+                parent.mkdir();
+                try {
+                    FileOutputStream outputStream = new FileOutputStream(dir);
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = defaultCopy.read(buffer)) != -1){
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+                    outputStream.close();
+                    defaultCopy.close();
+                } catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+            try {
+                InputStream input = new FileInputStream(new File(filePath));
+                if (input == null){
+                    DisxLogger.error("Disx Client Config Not Found and or Not Generated!");
+                } else {
+                    properties.load(input);
+                    input.close();
+                }
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+            DisxModInfo.setDEBUG(Boolean.parseBoolean(getProperty("debug_mode")));
+        }
+
+        public static String getProperty(String key){
+            return properties.getProperty(key);
+        }
+
+        public static void updateProperty(String key, String value){
+            properties.setProperty(key, value);
+            updateConfigFile();
+        }
+
+        private static void updateConfigFile(){
+            try (OutputStream outputStream = new FileOutputStream(filePath)) {
+                properties.store(outputStream, "DO NOT EDIT, MODIFY, OR TOUCH CONFIG_ENV OR CONFIG_VERSION");
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
     }
 }

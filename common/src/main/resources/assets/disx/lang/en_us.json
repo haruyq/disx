@@ -100,5 +100,9 @@
   "sysmsg.disx.soundcmd.attempting_playback": "Attempting to start playback of Video '%s' at %s in %s",
   "sysmsg.disx.stampcmd.one_moment": "Your stamp is generating, one moment please...",
   "sysmsg.disx.stampcmd.no_player_err": "Disx Error: Unable to get player(s) provided!",
-  "sysmsg.disx.stampcmd.success": "Your stamp has been distributed!"
+  "sysmsg.disx.stampcmd.success": "Your stamp has been distributed!",
+  "key.disx.debug": "skibidi gooning",
+  "key.disx.undebug": "uninstall brainrot.exe",
+  "sysmsg.disx.debug_enabled": "There's something clearly wrong here. Enabling Disx debug mode!",
+  "sysmsg.disx.debug_disabled": "Crisis adverted! Disx debug mode disabled!"
 }
