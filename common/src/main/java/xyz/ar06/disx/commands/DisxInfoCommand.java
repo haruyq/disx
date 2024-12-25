@@ -52,7 +52,7 @@ public class DisxInfoCommand {
                 .withStyle(ChatFormatting.YELLOW).withStyle(ChatFormatting.UNDERLINE).withStyle(Style.EMPTY
                         .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, DisxModInfo.getPatreonUrl())));
         MutableComponent spacing = Component.literal(" // ");
-        MutableComponent linkMessage1 = Component.empty().append(link1).append(spacing).append(link2);
+        MutableComponent linkMessage1 = Component.empty().append(link1); //.append(spacing).append(link2);
         MutableComponent linkMessage2 = Component.empty().append(link3).append(spacing).append(link5);
         MutableComponent linkMessage3 = Component.empty().append(link4).append(spacing).append(link6);
         messages.add(linkMessage1);
