@@ -126,7 +126,6 @@ public class DisxRecordPress extends BaseEntityBlock {
                     inHandStack.shrink(1);
                     level.playSound(null, blockPos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS);
                     blockEntity.setItem(0, inHandStackCopy);
-                    blockEntity.setChanged();
                 }
             } else if (inHandItem.equals(itemRegistrar.get(new ResourceLocation("disx", "record_stamp")))){
                 DisxLogger.debug("item in hand is record stamp");
@@ -135,7 +134,6 @@ public class DisxRecordPress extends BaseEntityBlock {
                     inHandStack.shrink(1);
                     level.playSound(null, blockPos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS);
                     blockEntity.setItem(1, inHandStackCopy);
-                    blockEntity.setChanged();
                 }
             } else if(inHandStack.isEmpty()){
                 DisxLogger.debug("item in hand is empty");
@@ -148,7 +146,6 @@ public class DisxRecordPress extends BaseEntityBlock {
                         itemEntity.setDefaultPickUpDelay();
                         level.addFreshEntity(itemEntity);
                         level.playSound(null, blockPos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS);
-                        blockEntity.setChanged();
                     }
                 }
             } else {
@@ -161,7 +158,6 @@ public class DisxRecordPress extends BaseEntityBlock {
                             inHandStack.shrink(1);
                             level.playSound(null, blockPos, SoundEvents.UI_LOOM_TAKE_RESULT, SoundSource.BLOCKS);
                             blockEntity.setItem(2, inHandStackCopy);
-                            blockEntity.setChanged();
                         }
                     }
                 }

@@ -36,8 +36,8 @@ public class DisxSoundCommand {
     }
 
     private static int run(CommandContext<CommandSourceStack> context) {
-        if (!context.getSource().hasPermission(2)){
-            context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
+        if (!context.getSource().hasPermission(1)){
+            context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
         } else
         {
             if (context.getSource().isPlayer()){
@@ -59,7 +59,7 @@ public class DisxSoundCommand {
                     DisxSystemMessages.maxAudioPlayerCtReached(context.getSource().getServer());
                 }
             }
-            context.getSource().sendSystemMessage(Component.literal("One moment please..."));
+            context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.soundcmd.one_moment"));
             CompletableFuture.runAsync(() -> runAsync(context));
         }
         return 1;
@@ -90,7 +90,7 @@ public class DisxSoundCommand {
             } else {
                 DisxServerAudioRegistry.addToRegistry(blockPos, videoId, context.getSource().getPlayer(), context.getSource().getServer(), dimension, startTime.intValue(), false);
             }
-            context.getSource().sendSystemMessage(Component.literal("Attempting to start playback of Video Id '" + videoId + "' at " + blockPos + " in " + dimension));
+            context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.soundcmd.attempting_playback", videoId, blockPos.toString(), dimension.toString()));
         } catch (Exception e){
             if (e.getMessage().equals("Video Not Found")) {
                 if (context.getSource().isPlayer()){

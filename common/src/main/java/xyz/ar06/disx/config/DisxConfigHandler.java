@@ -224,7 +224,7 @@ public class DisxConfigHandler {
                 UUID uuid = DisxUUIDUtil.getUuidFromUsername(username);
                 List<Object> whitelist = getUseWhitelist();
                 if (whitelist.contains(uuid.toString())){
-                    context.getSource().sendFailure(Component.literal("This player is already on the whitelist!"));
+                    context.getSource().sendFailure(Component.translatable("sysmsg.disx.configcmd.whitelist_modify_add_dupe"));
                     return "duplicate";
                 }
                 whitelist.add(uuid.toString());
@@ -240,11 +240,11 @@ public class DisxConfigHandler {
                 jsonObject.write(fileWriter);
                 fileWriter.close();
                 useWhitelist = jsonObject;
-                context.getSource().sendSystemMessage(Component.literal("Added '" + username + "' to the Player-Use Whitelist!"));
+                context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.configcmd_whitelist_modified_add", username));
                 return "success";
             } catch (Exception e) {
                 e.printStackTrace();
-                context.getSource().sendFailure(Component.literal("Player not found. Is that username a registered Java Edition account?"));
+                context.getSource().sendFailure(Component.translatable("sysmsg.disx.configcmd.whitelist_modify_err"));
                 return "failure";
             }
         }
@@ -259,7 +259,7 @@ public class DisxConfigHandler {
                     DisxLogger.debug("user is, removing them");
                     whitelist.remove(uuid.toString());
                 } else {
-                    context.getSource().sendFailure(Component.literal("This player is not on the whitelist!"));
+                    context.getSource().sendFailure(Component.translatable("sysmsg.disx.configcmd.whitelist_modify_remove_err"));
                     return "notfoundonit";
                 }
                 JSONObject jsonObject = new JSONObject();
@@ -273,11 +273,11 @@ public class DisxConfigHandler {
                 jsonObject.write(fileWriter);
                 fileWriter.close();
                 useWhitelist = jsonObject;
-                context.getSource().sendSystemMessage(Component.literal("Removed '" + username + "' from the Player-Use Whitelist!"));
+                context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.configcmd_whitelist_modified_remove", username));
                 return "success";
             } catch (Exception e) {
                 e.printStackTrace();
-                context.getSource().sendFailure(Component.literal("Player not found. Is that username a registered Java Edition account?"));
+                context.getSource().sendFailure(Component.translatable("sysmsg.disx.configcmd.whitelist_modify_err"));
                 return "failure";
             }
         }
@@ -287,7 +287,7 @@ public class DisxConfigHandler {
                 UUID uuid = DisxUUIDUtil.getUuidFromUsername(username);
                 List<Object> blacklist = getUseBlacklist();
                 if (blacklist.contains(uuid.toString())){
-                    context.getSource().sendFailure(Component.literal("This player is already on the blacklist!"));
+                    context.getSource().sendFailure(Component.translatable("sysmsg.disx.configcmd.blacklist_modify_add_dupe"));
                     return "duplicate";
                 }
                 blacklist.add(uuid.toString());
@@ -301,11 +301,11 @@ public class DisxConfigHandler {
                 jsonObject.write(fileWriter);
                 fileWriter.close();
                 useBlacklist = jsonObject;
-                context.getSource().sendSystemMessage(Component.literal("Added '" + username + "' to the Player-Use Blacklist >:)"));
+                context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.configcmd_blacklist_modified_add", username));
                 return "success";
             } catch (Exception e) {
                 e.printStackTrace();
-                context.getSource().sendFailure(Component.literal("Player not found. Is that username a registered Java Edition account?"));
+                context.getSource().sendFailure(Component.translatable("sysmsg.disx.configcmd.blacklist_modify_err"));
                 return "failure";
             }
         }
@@ -317,7 +317,7 @@ public class DisxConfigHandler {
                 if (blacklist.contains(uuid.toString())){
                     blacklist.remove(uuid.toString());
                 } else {
-                    context.getSource().sendFailure(Component.literal("This player is not on the blacklist!"));
+                    context.getSource().sendFailure(Component.translatable("sysmsg.disx.configcmd.blacklist_modify_remove_err"));
                     return "notfoundonit";
                 }
                 JSONObject jsonObject = new JSONObject();
@@ -330,11 +330,11 @@ public class DisxConfigHandler {
                 jsonObject.write(fileWriter);
                 fileWriter.close();
                 useBlacklist = jsonObject;
-                context.getSource().sendSystemMessage(Component.literal("Removed '" + username + "' from the Player-Use Blacklist!"));
+                context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.configcmd_blacklist_modified_remove", username));
                 return "success";
             } catch (Exception e) {
                 e.printStackTrace();
-                context.getSource().sendFailure(Component.literal("Player not found. Is that username a registered Java Edition account?"));
+                context.getSource().sendFailure(Component.translatable("sysmsg.disx.configcmd.blacklist_modify_err"));
                 return "failure";
             }
         }

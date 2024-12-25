@@ -1,6 +1,7 @@
 package xyz.ar06.disx.commands;
 
 import net.minecraft.ChatFormatting;
+import xyz.ar06.disx.DisxSystemMessages;
 import xyz.ar06.disx.config.DisxConfigHandler;
 import xyz.ar06.disx.items.DisxRecordStamp;
 import xyz.ar06.disx.utils.DisxYoutubeInfoScraper;
@@ -36,11 +37,11 @@ public class DisxStampCommand {
         }));
     }
     private static int run(CommandContext<CommandSourceStack> context){
-        if (!context.getSource().hasPermission(2)){
-            context.getSource().sendFailure(Component.literal("You do not have permission to do that!"));
+        if (!context.getSource().hasPermission(1)){
+            context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
             return 1;
         } else {
-            context.getSource().sendSystemMessage(Component.literal("Your stamp is generating, one moment please..."));
+            context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.stampcmd.one_moment"));
             CompletableFuture.runAsync(() -> runAsync(context));
         }
         return 1;
@@ -53,18 +54,26 @@ public class DisxStampCommand {
             playerCollection = EntityArgument.getPlayers(context, "player");
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
-            context.getSource().sendFailure(Component.literal("Disx Error: Unable to get player(s) provided!"));
+            context.getSource().sendFailure(Component.translatable("sysmsg.disx.stampcmd.no_player_err"));
             throw new RuntimeException(e);
         }
         ArrayList<String> title_and_length = DisxYoutubeInfoScraper.scrapeLengthAndTitle(videoId);
         String videoName = title_and_length.get(0);
         if (videoName.equals("Video Not Found") && DisxConfigHandler.SERVER.getProperty("video_existence_check").equals("true")) {
-            context.getSource().sendFailure(Component.literal("Disx Error: Video not found!"));
+            if (context.getSource().isPlayer()){
+                DisxSystemMessages.noVideoFound(context.getSource().getPlayer());
+            } else {
+                DisxSystemMessages.noVideoFound(context.getSource().getServer());
+            }
             return;
         }
         int videoLength = Integer.valueOf(title_and_length.get(1));
         if (videoLength > 1800) {
-            context.getSource().sendFailure(Component.literal("Disx Error: Video length too long! (Max Length: 30 m)"));
+            if (context.getSource().isPlayer()){
+                DisxSystemMessages.badDuration(context.getSource().getPlayer());
+            } else {
+                DisxSystemMessages.badDuration(context.getSource().getServer());
+            }
             return;
         }
         Item item = DisxRecordStamp.getItemRegistration().get();
@@ -79,6 +88,6 @@ public class DisxStampCommand {
             plr.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.MASTER, 1f, 1f);
             plr.addItem(recordStampStack);
         }
-        context.getSource().sendSystemMessage(Component.literal("Your stamp has been distributed!"));
+        context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.stampcmd.success"));
     }
 }

@@ -50,11 +50,11 @@ public class DisxGenCommand {
     private static int run(CommandContext<CommandSourceStack> context) {
         Logger logger = LoggerFactory.getLogger("disx");
         DisxLogger.debug("Command Run");
-        if (!context.getSource().hasPermission(2)){
-            context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
+        if (!context.getSource().hasPermission(1)){
+            context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
         } else
         {
-            context.getSource().sendSystemMessage(Component.literal("Your disc is generating, one moment please..."));
+            context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.gencmd.one_moment"));
             CompletableFuture.runAsync(() -> runAsync(context));
         }
         return 1;
@@ -107,7 +107,7 @@ public class DisxGenCommand {
                 player.playNotifySound(SoundEvents.PISTON_EXTEND, SoundSource.MASTER, 1, 1);
                 player.getInventory().add(stack);
             }
-            context.getSource().sendSystemMessage(Component.literal("Your disc has been distributed!"));
+            context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.gencmd.success"));
             DisxLogger.debug("success??..." + "custom_disc_" + argumentResult);
         } catch (Exception e) {
             if (e.getMessage().equals("Video Not Found")) {

@@ -17,12 +17,12 @@ import java.util.List;
 
 public class DisxSystemMessages {
     public static void onPlayReadyNoInternet(Player player) {
-        player.sendSystemMessage(Component.literal("Disx Warning: no internet connection found!").withStyle(ChatFormatting.RED));
+        player.sendSystemMessage(Component.translatable("sysmsg.disx.no_internet").withStyle(ChatFormatting.RED));
     }
 
     public static void noInternetErrorMessage(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
-        serverPlayer.sendSystemMessage(Component.literal("Disx Error: No internet connection!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
+        serverPlayer.sendSystemMessage(Component.translatable("sysmsg.disx.no_internet").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
     }
 
     public static void noInternetErrorMessage(MinecraftServer server){
@@ -31,20 +31,20 @@ public class DisxSystemMessages {
 
     public static void errorLoading(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
-        serverPlayer.sendSystemMessage(Component.literal("Disx Error: Unknown error loading video!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
+        serverPlayer.sendSystemMessage(Component.translatable("sysmsg.disx.error_loading_vid").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
     }
 
     public static void errorLoading(LocalPlayer player){
-        player.sendSystemMessage(Component.literal("Disx Error: Unknown error loading video!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
+        player.sendSystemMessage(Component.translatable("sysmsg.disx.error_loading_vid").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
     }
 
     public static void apiError(LocalPlayer player){
-        player.sendSystemMessage(Component.literal("Disx Error: Invalid or incomplete response from Disx YT-SRC API. Check client logs for more information.").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
+        player.sendSystemMessage(Component.translatable("sysmsg.disx.error_api_response").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
     }
 
     public static void noVideoFound(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
-        serverPlayer.sendSystemMessage(Component.literal("Disx Error: No video found!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
+        serverPlayer.sendSystemMessage(Component.translatable("sysmsg.disx.error_no_match").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
     }
 
     public static void noVideoFound(MinecraftServer server){
@@ -52,7 +52,7 @@ public class DisxSystemMessages {
     }
 
     public static void noVideoFound(LocalPlayer player){
-        player.sendSystemMessage(Component.literal("Disx Error: No video found!").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
+        player.sendSystemMessage(Component.translatable("sysmsg.disx.error_no_match").withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.RED))));
     }
 
     public static void playingAtLocation(MinecraftServer server, String playerName, BlockPos pos, String videoId, ResourceLocation dimension){
@@ -61,7 +61,7 @@ public class DisxSystemMessages {
 
     public static void invalidDiscType(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
-        serverPlayer.sendSystemMessage(Component.literal("Disx Error: Invalid disc type provided!").withStyle(ChatFormatting.RED));
+        serverPlayer.sendSystemMessage(Component.translatable("sysmsg.disx.error_invalid_disc_type").withStyle(ChatFormatting.RED));
     }
 
     public static void invalidDiscType(MinecraftServer server){
@@ -70,26 +70,26 @@ public class DisxSystemMessages {
 
     public static void blacklistedByServer(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
-        serverPlayer.sendSystemMessage(Component.literal("Disx Error: You've been blacklisted by server administration!").withStyle(ChatFormatting.RED));
+        serverPlayer.sendSystemMessage(Component.translatable("sysmsg.disx.error_blacklisted").withStyle(ChatFormatting.RED));
     }
 
     public static void notWhitelistedByServer(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
-        serverPlayer.sendSystemMessage(Component.literal("Disx Error: Player-use whitelist is enabled, and you are not whitelisted.").withStyle(ChatFormatting.RED));
+        serverPlayer.sendSystemMessage(Component.translatable("sysmsg.disx.error_not_whitelisted").withStyle(ChatFormatting.RED));
     }
 
     public static void dimensionBlacklisted(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
-        serverPlayer.sendSystemMessage(Component.literal("Disx Error: You are not allowed to play audio in this dimension, per server administration!").withStyle(ChatFormatting.RED));
+        serverPlayer.sendSystemMessage(Component.translatable("sysmsg.disx.error_dimension_blacklisted").withStyle(ChatFormatting.RED));
     }
 
     public static void maxAudioPlayerCtReached(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
-        serverPlayer.sendSystemMessage(Component.literal("Disx Error: Maximum number of audio players reached in this server! Please contact a server admin if you believe this to be an error.").withStyle(ChatFormatting.RED));
+        serverPlayer.sendSystemMessage(Component.translatable("sysmsg.disx.error_max_audio_count").withStyle(ChatFormatting.RED));
     }
 
     public static void maxAudioPlayerCtReached(MinecraftServer server){
-        server.sendSystemMessage(Component.literal("Disx Error: Maximum number of audio players defined in disx server config has been reached!").withStyle(ChatFormatting.RED));
+        server.sendSystemMessage(Component.literal("Disx Error: Maximum number of audio instances defined in disx server config has been reached!").withStyle(ChatFormatting.RED));
     }
 
     public static void noInternetFoundStampMakerAsync(MinecraftServer server, BlockPos blockPos){
@@ -102,11 +102,11 @@ public class DisxSystemMessages {
 
     public static void badDuration(Player player){
         ServerPlayer serverPlayer = (ServerPlayer) player;
-        serverPlayer.sendSystemMessage(Component.literal("Disx Error: Video length too long! (Max Length: 30m)").withStyle(ChatFormatting.RED));
+        serverPlayer.sendSystemMessage(Component.translatable("sysmsg.disx.error_bad_duration", "30").withStyle(ChatFormatting.RED));
     }
 
     public static void badDuration(MinecraftServer server){
-        server.sendSystemMessage(Component.literal("Disx Error: Video length too long! (Max Length: 30m)").withStyle(ChatFormatting.RED));
+        server.sendSystemMessage(Component.literal("Disx Error: Video length too long! (Max Length: 30 min)").withStyle(ChatFormatting.RED));
     }
 
     public static void badDurationStampMakerAsync(MinecraftServer server, BlockPos blockPos){
@@ -124,24 +124,40 @@ public class DisxSystemMessages {
     }
 
     public static void playingVideo(String videoId){
-        Minecraft.getInstance().gui.setNowPlaying(Component.literal("Video '" + videoId + "'"));
+        Minecraft.getInstance().gui.setNowPlaying(Component.translatable("sysmsg.disx.playing_video", videoId));
     }
 
     public static void sendOverlayMessage(MutableComponent mutableComponent, boolean animated){
         Minecraft.getInstance().gui.setOverlayMessage(mutableComponent, animated);
     }
     public static void loopStatusMsg(boolean enabled){
-        MutableComponent enabledMessage = Component.literal("Loop Enabled!").withStyle(ChatFormatting.GRAY);
-        MutableComponent disabledMessage = Component.literal("Loop Disabled!").withStyle(ChatFormatting.GRAY);
+        MutableComponent enabledMessage = Component.translatable("sysmsg.disx.loop_enabled").withStyle(ChatFormatting.GRAY);
+        MutableComponent disabledMessage = Component.translatable("sysmsg.disx.loop_disabled").withStyle(ChatFormatting.GRAY);
         MutableComponent toSendMessage = enabled ? enabledMessage : disabledMessage;
         sendOverlayMessage(toSendMessage, false);
     }
 
     public static void pauseStatusMsg(boolean paused){
-        MutableComponent enabledMessage = Component.literal("Paused audio!").withStyle(ChatFormatting.GRAY);
-        MutableComponent disabledMessage = Component.literal("Resumed audio!").withStyle(ChatFormatting.GRAY);
+        MutableComponent enabledMessage = Component.translatable("sysmsg.disx.paused_audio").withStyle(ChatFormatting.GRAY);
+        MutableComponent disabledMessage = Component.translatable("sysmsg.disx.resumed_audio").withStyle(ChatFormatting.GRAY);
         MutableComponent toSendMessage = paused ? enabledMessage : disabledMessage;
         sendOverlayMessage(toSendMessage, false);
+    }
+
+    public static void mutedAlready(){
+        Minecraft.getInstance().player.sendSystemMessage(Component.translatable("sysmsg.disx.mutecmd.error").withStyle(ChatFormatting.RED));
+    }
+
+    public static void notMuted(){
+        Minecraft.getInstance().player.sendSystemMessage(Component.translatable("sysmsg.disx.unmutecmd.error").withStyle(ChatFormatting.RED));
+    }
+
+    public static void successfulMutation(){
+        Minecraft.getInstance().player.sendSystemMessage(Component.translatable("sysmsg.disx.mutecmd.success"));
+    }
+
+    public static void successfulUnmutation(){
+        Minecraft.getInstance().player.sendSystemMessage(Component.translatable("sysmsg.disx.unmutecmd.success"));
     }
 
     static List<TextColor> volMsgColors = List.of(
@@ -185,15 +201,11 @@ public class DisxSystemMessages {
     public static void outdatedModVersion(MinecraftServer server){
         if (!DisxModInfo.getIsUpToDate()){
             ArrayList<MutableComponent> messages = new ArrayList<MutableComponent>();
-            messages.add(Component.literal("Disx Notice: Mod is Outdated!").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
-            messages.add(Component.literal(
-                    "Installed Version: "
-                            + DisxModInfo.getVERSION()
-                            + ", Latest Version: " + DisxModInfo.getLatestVersion()
-            ).withStyle(ChatFormatting.GRAY));
-            messages.add(Component.literal("You are " + Integer.toString(DisxModInfo.getVersionsOutdated()) + " version(s) behind!").withStyle(ChatFormatting.ITALIC));
-            messages.add(Component.literal("Please consider updating for the best mod functionality!"));
-            messages.add(Component.literal("Use /disxinfo to get a download url if applicable!"));
+            messages.add(Component.translatable("sysmsg.disx.notice_outdated").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+            messages.add(Component.translatable("sysmsg.disx.outdated_version_info", DisxModInfo.getVERSION(), DisxModInfo.getLatestVersion()).withStyle(ChatFormatting.GRAY));
+            messages.add(Component.translatable("sysmsg.disx.outdated_version_count", DisxModInfo.getVersionsOutdated()).withStyle(ChatFormatting.ITALIC));
+            messages.add(Component.translatable("sysmsg.disx.outdated_consider_updating"));
+            messages.add(Component.translatable("sysmsg.disx.outdated_run_disxinfo"));
             if (server.isSingleplayer()){
                 PlayerEvent.PLAYER_JOIN.register(player -> {
                     for (MutableComponent component : messages){
@@ -225,17 +237,14 @@ public class DisxSystemMessages {
             if (conflicts.get(o).equals(true)) {
                 if (oneConflictFound == false) {
                     oneConflictFound = true;
-                    messages.add(Component.literal("Disx Notice: Potential Mod Conflict(s) Detected!").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD));
+                    messages.add(Component.translatable("sysmsg.disx.notice_potential_conflict").withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD));
                 }
                 if (o.toString().equals("carryon")) {
                     MutableComponent instructionsLink = Component.literal("here").withStyle(ChatFormatting.UNDERLINE).withStyle(ChatFormatting.DARK_AQUA).withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, instructionsURL_CARRYON)));
                     if (server.isDedicatedServer()){
                         instructionsLink = instructionsLink.append(Component.literal(" (" + instructionsURL_CARRYON + ")"));
                     }
-                    messages.add(
-                            Component.literal("(Carry On): Please blacklist all Disx blocks in Carry On's config if not already done [see instructions ")
-                            .append(instructionsLink)
-                            .append(Component.literal("] or uninstall the Carry On mod!")));
+                    messages.add(Component.translatable("sysmsg.disx.conflict_carryon", instructionsLink));
                 }
             }
         }
@@ -261,10 +270,10 @@ public class DisxSystemMessages {
 
     public static void devBuildNotice(MinecraftServer server){
         if (DisxModInfo.getIsDevBuild()){
-            MutableComponent message = Component.literal("Disx Notice: This build has been marked as an in-dev/pre-production build. Expect more bugs than usual!")
+            MutableComponent message = Component.translatable("sysmsg.disx.notice_devbuild")
                     .withStyle(ChatFormatting.GOLD)
                     .withStyle(ChatFormatting.BOLD);
-            MutableComponent message2 = Component.literal("Installed Version: " + DisxModInfo.getVERSION())
+            MutableComponent message2 = Component.translatable("sysmsg.disx.devbuild_installed_version", DisxModInfo.getVERSION())
                     .withStyle(ChatFormatting.GRAY);
             if (server.isSingleplayer()){
                 PlayerEvent.PLAYER_JOIN.register(player -> {

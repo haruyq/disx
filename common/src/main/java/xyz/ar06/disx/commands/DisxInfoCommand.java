@@ -29,8 +29,8 @@ public class DisxInfoCommand {
     public static int run(CommandContext<CommandSourceStack> context){
         CommandSourceStack source = context.getSource();
         ArrayList<MutableComponent> messages = new ArrayList<>();
-        messages.add(Component.literal("Disx Info:").withStyle(ChatFormatting.BOLD));
-        messages.add(Component.literal("Version: " + DisxModInfo.getVERSION()).withStyle(ChatFormatting.ITALIC));
+        messages.add(Component.translatable("sysmsg.disx.infocmd.header").withStyle(ChatFormatting.BOLD));
+        messages.add(Component.translatable("sysmsg.disx.infocmd.version", DisxModInfo.getVERSION()).withStyle(ChatFormatting.ITALIC));
         messages.add(Component.literal("--URLs--"));
         MutableComponent link1 = Component.literal("Modrinth")
                 .withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.UNDERLINE).withStyle(Style.EMPTY
@@ -45,7 +45,7 @@ public class DisxInfoCommand {
         MutableComponent link4 = Component.literal("Discord")
                 .withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.UNDERLINE).withStyle(Style.EMPTY
                         .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, DisxModInfo.getDiscordUrl())));
-        MutableComponent link5 = Component.literal("Road Map")
+        MutableComponent link5 = Component.translatable("sysmsg.disx.infocmd.road_map_header")
                 .withStyle(ChatFormatting.DARK_AQUA).withStyle(ChatFormatting.UNDERLINE).withStyle(Style.EMPTY
                         .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, DisxModInfo.getRoadmapUrl())));
         MutableComponent link6 = Component.literal("Patreon")

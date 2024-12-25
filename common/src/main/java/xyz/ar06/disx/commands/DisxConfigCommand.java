@@ -25,7 +25,7 @@ public class DisxConfigCommand {
     public static void registerCommand(){
         CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) -> {
             dispatcher.register(Commands.literal("disxconfig")
-                            .requires(commandSourceStack -> commandSourceStack.hasPermission(2))
+                            .requires(commandSourceStack -> commandSourceStack.hasPermission(1))
                     .then(Commands.literal("setProperty")
                             .then(Commands.argument("property", StringArgumentType.string()).suggests(DisxPropertyTypeSuggestionProvider::getSuggestions)
                                     .then(Commands.argument("propertyValue", StringArgumentType.string())
@@ -69,45 +69,45 @@ public class DisxConfigCommand {
     }
 
     private static int runSetProperty(CommandContext<CommandSourceStack> context){
-        if (!context.getSource().hasPermission(2)){
-            context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
+        if (!context.getSource().hasPermission(1)){
+            context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
         } else {
             String property = context.getArgument("property", String.class);
             String value = context.getArgument("propertyValue", String.class);
             if (DisxConfigHandler.SERVER.getProperty(property) == null){
-                context.getSource().sendFailure(Component.literal("Invalid property provided!"));
+                context.getSource().sendFailure(Component.translatable("sysmsg.disx.configcmd_invalid_property"));
             } else {
                 DisxConfigHandler.SERVER.updateProperty(property, value);
-                context.getSource().sendSystemMessage(Component.literal("Property '" + property + "' successfully set to '" + value + "'!"));
+                context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.configcmd_property_changed", property, value));
             }
         }
         return 1;
     }
 
     private static int runGetProperty(CommandContext<CommandSourceStack> context){
-        if (!context.getSource().hasPermission(2)){
-            context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
+        if (!context.getSource().hasPermission(1)){
+            context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
         } else {
             String property = context.getArgument("property", String.class);
             String value = DisxConfigHandler.SERVER.getProperty(property);
             if (value == null){
                 context.getSource().sendFailure(Component.literal("Invalid property provided!"));
             } else {
-                context.getSource().sendSystemMessage(Component.literal("Current value of the property '" + property + "' is '" + value + "'"));
+                context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.configcmd_property_value", property, value));
             }
         }
         return 1;
     }
 
     private static int runGetUseWhitelist(CommandContext<CommandSourceStack> context){
-        if (!context.getSource().hasPermission(2)){
-            context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
+        if (!context.getSource().hasPermission(1)){
+            context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
         } else {
             CompletableFuture.runAsync(() -> {
                 List<Object> list = DisxConfigHandler.SERVER.getUseWhitelist();
                 ArrayList<Component> toSend = new ArrayList<>();
-                toSend.add(Component.literal("Disx Whitelisted Players:").withStyle(ChatFormatting.BOLD));
-                toSend.add(Component.literal("Whitelist Status: " + DisxConfigHandler.SERVER.getProperty("player_use_whitelist_enabled")).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+                toSend.add(Component.translatable("sysmsg.disx.configcmd_whitelisted_players").withStyle(ChatFormatting.BOLD));
+                toSend.add(Component.translatable("sysmsg.disx.configcmd_whitelist_status", DisxConfigHandler.SERVER.getProperty("player_use_whitelist_enabled")).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
                 for (Object o : list){
                     String name = "";
                     try{
@@ -115,7 +115,7 @@ public class DisxConfigCommand {
                         name = DisxUUIDUtil.getUsernameFromUuid(UUID.fromString(o.toString()));
                     } catch (Exception e) {
                         e.printStackTrace();
-                        context.getSource().sendFailure(Component.literal("Error in trying to load whitelist. Is it corrupted?"));
+                        context.getSource().sendFailure(Component.translatable("sysmsg.disx.configcmd_whitelist_load_err"));
                         return;
                     }
                     toSend.add(Component.literal("- " + name));
@@ -132,8 +132,8 @@ public class DisxConfigCommand {
     }
 
     private static int runAddUseWhitelist(CommandContext<CommandSourceStack> context){
-        if (!context.getSource().hasPermission(2)){
-            context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
+        if (!context.getSource().hasPermission(1)){
+            context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
         } else {
             String username = context.getArgument("username", String.class);
             CompletableFuture.runAsync(() -> DisxConfigHandler.SERVER.addToUseWhitelist(username, context));
@@ -142,8 +142,8 @@ public class DisxConfigCommand {
     }
 
     private static int runRemoveUseWhitelist(CommandContext<CommandSourceStack> context){
-        if (!context.getSource().hasPermission(2)){
-            context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
+        if (!context.getSource().hasPermission(1)){
+            context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
         } else {
             String username = context.getArgument("username", String.class);
             DisxConfigHandler.SERVER.removeFromUseWhitelist(username, context);
@@ -152,20 +152,20 @@ public class DisxConfigCommand {
     }
 
     private static int runGetUseBlacklist(CommandContext<CommandSourceStack> context){
-        if (!context.getSource().hasPermission(2)){
-            context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
+        if (!context.getSource().hasPermission(1)){
+            context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
         } else {
             CompletableFuture.runAsync(() -> {
                 List<Object> list = DisxConfigHandler.SERVER.getUseBlacklist();
                 ArrayList<Component> toSend = new ArrayList<>();
-                toSend.add(Component.literal("Disx Blacklisted Players:").withStyle(ChatFormatting.BOLD));
+                toSend.add(Component.translatable("sysmsg.disx.configcmd_blacklisted_players").withStyle(ChatFormatting.BOLD));
                 for (Object o : list){
                     String name = "";
                     try{
                         name = DisxUUIDUtil.getUsernameFromUuid(UUID.fromString(o.toString()));
                     } catch (Exception e) {
                         e.printStackTrace();
-                        context.getSource().sendFailure(Component.literal("Error in trying to load blacklist. Is it corrupted?"));
+                        context.getSource().sendFailure(Component.translatable("sysmsg.disx.configcmd_blacklist_load_err"));
                         return;
                     }
                     toSend.add(Component.literal("- " + name));
@@ -182,8 +182,8 @@ public class DisxConfigCommand {
     }
 
     private static int runAddUseBlacklist(CommandContext<CommandSourceStack> context){
-        if (!context.getSource().hasPermission(2)){
-            context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
+        if (!context.getSource().hasPermission(1)){
+            context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
         } else {
             String username = context.getArgument("username", String.class);
             CompletableFuture.runAsync(() -> DisxConfigHandler.SERVER.addToUseBlacklist(username, context));
@@ -192,8 +192,8 @@ public class DisxConfigCommand {
     }
 
     private static int runRemoveUseBlacklist(CommandContext<CommandSourceStack> context){
-        if (!context.getSource().hasPermission(2)){
-            context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
+        if (!context.getSource().hasPermission(1)){
+            context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
         } else {
             String username = context.getArgument("username", String.class);
             CompletableFuture.runAsync(() -> DisxConfigHandler.SERVER.removeFromUseBlacklist(username, context));
@@ -202,12 +202,12 @@ public class DisxConfigCommand {
     }
 
     private static int runGetDimensionBlacklist(CommandContext<CommandSourceStack> context){
-        if (!context.getSource().hasPermission(2)){
-            context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
+        if (!context.getSource().hasPermission(1)){
+            context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
         } else {
             List<Object> list = DisxConfigHandler.SERVER.getDimensionBlacklist();
             ArrayList<Component> toSend = new ArrayList<>();
-            toSend.add(Component.literal("Disx Blacklisted Dimensions:").withStyle(ChatFormatting.BOLD));
+            toSend.add(Component.translatable("sysmsg.disx.configcmd_dims_blacklisted").withStyle(ChatFormatting.BOLD));
             for (Object o : list){
                 toSend.add(Component.literal("- " + o.toString()));
             }
@@ -222,34 +222,34 @@ public class DisxConfigCommand {
     }
 
     private static int runAddDimensionBlacklist(CommandContext<CommandSourceStack> context){
-        if (!context.getSource().hasPermission(2)){
-            context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
+        if (!context.getSource().hasPermission(1)){
+            context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
         } else {
             ResourceLocation dimensionLocation = context.getArgument("dimension", ResourceLocation.class);
             String result = DisxConfigHandler.SERVER.addToDimensionBlacklist(dimensionLocation);
             if (result.equals("success")){
-                context.getSource().sendSystemMessage(Component.literal("Added '" + dimensionLocation + "' to the Dimension Blacklist!"));
+                context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.configcmd_dim_blacklist_modified_add", dimensionLocation.toString()));
             } else if (result.equals("failure")){
-                context.getSource().sendFailure(Component.literal("Dimension not found. Is that a valid dimension?"));
+                context.getSource().sendFailure(Component.translatable("sysmsg.disx.configcmd.dim_blacklist_modify_add_err"));
             } else if (result.equals("duplicate")){
-                context.getSource().sendFailure(Component.literal("This dimension is already on the blacklist!"));
+                context.getSource().sendFailure(Component.translatable("sysmsg.disx.configcmd.dim_blacklist_modify_add_dupe"));
             }
         }
         return 1;
     }
 
     private static int runRemoveDimensionBlacklist(CommandContext<CommandSourceStack> context){
-        if (!context.getSource().hasPermission(2)){
-            context.getSource().sendFailure(Component.literal("You don't have permission to do that!"));
+        if (!context.getSource().hasPermission(1)){
+            context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
         } else {
             ResourceLocation dimensionLocation = context.getArgument("dimension", ResourceLocation.class);
             String result = DisxConfigHandler.SERVER.removeFromDimensionBlacklist(dimensionLocation);
             if (result.equals("success")){
-                context.getSource().sendSystemMessage(Component.literal("Removed '" + dimensionLocation + "' from the Dimension Blacklist!"));
+                context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.configcmd_dim_blacklist_modified_remove", dimensionLocation.toString()));
             } else if (result.equals("failure")){
-                context.getSource().sendFailure(Component.literal("Dimension not found. Is that a valid dimension?"));
+                context.getSource().sendFailure(Component.translatable("sysmsg.disx.configcmd.dim_blacklist_modify_add_err"));
             } else if (result.equals("notfoundonit")){
-                context.getSource().sendFailure(Component.literal("This dimension is not on the blacklist!"));
+                context.getSource().sendFailure(Component.translatable("sysmsg.disx.configcmd.dim_blacklist_modify_remove_err"));
             }
         }
         return 1;

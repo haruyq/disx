@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import xyz.ar06.disx.DisxSystemMessages;
 
 import java.util.*;
 
@@ -154,11 +155,11 @@ public class DisxAudioInstanceRegistry {
 
     public static String addToMuted(UUID uuid){
         if (muted.contains(uuid)){
-            Minecraft.getInstance().player.sendSystemMessage(Component.literal("Disx Error: Player is already muted!").withStyle(ChatFormatting.RED));
+            DisxSystemMessages.mutedAlready();
             return "duplicate";
         } else {
             muted.add(uuid);
-            Minecraft.getInstance().player.sendSystemMessage(Component.literal("Successfully muted!"));
+            DisxSystemMessages.successfulMutation();
             return "success";
         }
     }
@@ -166,10 +167,10 @@ public class DisxAudioInstanceRegistry {
     public static String removeFromMuted(UUID uuid){
         if (muted.contains(uuid)){
             muted.remove(uuid);
-            Minecraft.getInstance().player.sendSystemMessage(Component.literal("Successfully unmuted!"));
+            DisxSystemMessages.successfulUnmutation();
             return "success";
         } else {
-            Minecraft.getInstance().player.sendSystemMessage(Component.literal("Disx Error: Player was not muted!").withStyle(ChatFormatting.RED));
+            DisxSystemMessages.notMuted();
             return "notfoundonit";
         }
     }

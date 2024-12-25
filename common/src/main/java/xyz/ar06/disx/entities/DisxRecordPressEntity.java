@@ -1,8 +1,14 @@
 package xyz.ar06.disx.entities;
 
+import net.minecraft.core.Direction;
+import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.level.block.Blocks;
+import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.DisxMain;
 import xyz.ar06.disx.DisxSystemMessages;
+import xyz.ar06.disx.items.DisxBlankDisc;
 import xyz.ar06.disx.items.DisxCustomDisc;
+import xyz.ar06.disx.items.DisxRecordStamp;
 import xyz.ar06.disx.recipe_types.DisxCustomDiscRecipe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -27,7 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Optional;
 
-public class DisxRecordPressEntity extends BlockEntity implements Container {
+public class DisxRecordPressEntity extends BlockEntity implements Container, WorldlyContainer {
 
     private NonNullList<ItemStack> items;
 
@@ -45,13 +51,15 @@ public class DisxRecordPressEntity extends BlockEntity implements Container {
             itemIndex.put(0, "blank_disc");
             itemIndex.put(1, "record_stamp");
             itemIndex.put(2, "variant_factor");
+            itemIndex.put(3, "hopper_output");
+            itemIndex.put(4, "hopper_output2");
         }
-        this.items = NonNullList.withSize(3, ItemStack.EMPTY);
+        this.items = NonNullList.withSize(5, ItemStack.EMPTY);
     }
 
     @Override
     public void load(CompoundTag compoundTag) {
-        this.items = NonNullList.withSize(3, ItemStack.EMPTY);
+        this.items = NonNullList.withSize(5, ItemStack.EMPTY);
         ContainerHelper.loadAllItems(compoundTag, this.items);
         this.setPowerInput(compoundTag.getInt("powerInput"));
         super.load(compoundTag);
@@ -85,24 +93,38 @@ public class DisxRecordPressEntity extends BlockEntity implements Container {
                     compoundTag.putString("discName", videoName);
                     record.setTag(compoundTag);
                     BlockPos blockPos = getBlockPos();
-                    double x = blockPos.getX();
-                    double y = blockPos.getY();
-                    double z = blockPos.getZ();
-                    x += 0.5;
-                    y += 0.2;
-                    z += 0.5;
-                    ItemEntity record_drop = new ItemEntity(level, x, y, z, record);
-                    record_drop.setDefaultPickUpDelay();
-                    ItemEntity stamp_drop = new ItemEntity(level, x, y, z, modifiedRecordStamp);
-                    stamp_drop.setDefaultPickUpDelay();
-                    this.removeItem(0, 1);
-                    this.removeItem(1, 1);
-                    this.removeItem(2, 1);
-                    level.playSound(null, blockPos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS);
-                    level.addFreshEntity(record_drop);
-                    if (modifiedRecordStamp.getDamageValue() < 3){
-                        level.addFreshEntity(stamp_drop);
+                    if (level.getBlockState(blockPos.below()).is(Blocks.HOPPER)){
+                        DisxLogger.debug("Hopper detected below; placing output disc into appropriate inventory");
+                        this.items.set(3, record);
+                        if (modifiedRecordStamp.getDamageValue() < 3){
+                            this.items.set(4, modifiedRecordStamp);
+                        }
+                        this.removeItem(0, 1);
+                        this.removeItem(1, 1);
+                        this.removeItem(2, 1);
+                        level.playSound(null, blockPos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS);
+                    } else {
+                        DisxLogger.debug("Hopper not detected; ejecting items");
+                        double x = blockPos.getX();
+                        double y = blockPos.getY();
+                        double z = blockPos.getZ();
+                        x += 0.5;
+                        y += 0.2;
+                        z += 0.5;
+                        ItemEntity record_drop = new ItemEntity(level, x, y, z, record);
+                        record_drop.setDefaultPickUpDelay();
+                        ItemEntity stamp_drop = new ItemEntity(level, x, y, z, modifiedRecordStamp);
+                        stamp_drop.setDefaultPickUpDelay();
+                        this.removeItem(0, 1);
+                        this.removeItem(1, 1);
+                        this.removeItem(2, 1);
+                        level.playSound(null, blockPos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS);
+                        level.addFreshEntity(record_drop);
+                        if (modifiedRecordStamp.getDamageValue() < 3){
+                            level.addFreshEntity(stamp_drop);
+                        }
                     }
+
                 }
             }
         }
@@ -128,7 +150,7 @@ public class DisxRecordPressEntity extends BlockEntity implements Container {
 
     @Override
     public int getContainerSize() {
-        return 0;
+        return 3;
     }
 
     @Override
@@ -153,6 +175,7 @@ public class DisxRecordPressEntity extends BlockEntity implements Container {
     public ItemStack removeItem(int i, int j) {
         ItemStack copy = this.items.get(i).copy();
         this.items.set(i, ItemStack.EMPTY);
+        this.setChanged();
         return copy;
     }
 
@@ -199,12 +222,69 @@ public class DisxRecordPressEntity extends BlockEntity implements Container {
     }
 
     @Override
-    public int countItem(Item item) {
-        return Container.super.countItem(item);
+    public void clearContent() {
+        this.items = NonNullList.withSize(5, ItemStack.EMPTY);
     }
 
     @Override
-    public void clearContent() {
-        this.items = NonNullList.withSize(3, ItemStack.EMPTY);
+    public int[] getSlotsForFace(Direction direction) {
+        Direction[] sideDirections = new Direction[]{
+                Direction.NORTH,
+                Direction.SOUTH,
+                Direction.EAST,
+                Direction.WEST
+        };
+        for (Direction d : sideDirections){
+            if (direction.equals(d)){
+                return new int[]{0,1,2};
+            }
+        }
+        if (direction.equals(Direction.DOWN)){
+            return new int[]{3};
+        }
+        return new int[0];
+    }
+
+    @Override
+    public boolean canPlaceItemThroughFace(int i, ItemStack itemStack, @Nullable Direction direction) {
+        Direction[] sideDirections = new Direction[]{
+                Direction.NORTH,
+                Direction.SOUTH,
+                Direction.EAST,
+                Direction.WEST
+        };
+        for (Direction d : sideDirections){
+            if (direction.equals(d)){
+                if (i == 0 && itemStack.getItem().equals(DisxBlankDisc.itemRegistration.get())){
+                    if (itemStack.getCount() == 1 && this.items.get(0).isEmpty()){
+                        return true;
+                    }
+                }
+                if (i == 1 && itemStack.getItem().equals(DisxRecordStamp.getItemRegistration().get())){
+                    if (this.items.get(1).isEmpty()){
+                        return true;
+                    }
+                }
+                if (i == 2){
+                    Item stackItem = itemStack.getItem();
+                    for (Item compare : DisxCustomDisc.validDiscFactors){
+                        if (stackItem.equals(compare)){
+                            if (this.items.get(2).isEmpty()){
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean canTakeItemThroughFace(int i, ItemStack itemStack, Direction direction) {
+        if ((i == 3 || i == 4) && direction.equals(Direction.DOWN)){
+            return true;
+        }
+        return false;
     }
 }
