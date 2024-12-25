@@ -17,12 +17,12 @@ public class DisxForceStopCommand {
         }));
     }
     private static int run(CommandContext<CommandSourceStack> context){
-        if (context.getSource().hasPermission(2)){
+        if (!context.getSource().hasPermission(1)){
             context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.cmd_no_permission").withStyle(ChatFormatting.RED));
             return 1;
         }
         DisxServerAudioRegistry.forceStopAll();
-        context.getSource().sendSystemMessage(Component.literal("Force stopping all audios currently playing!"));
+        context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.forcestopcmd.response"));
         return 1;
     }
 }

@@ -15,6 +15,10 @@ public class DisxModInfo {
     private static final String VERSION = "0.2.0-dev-0830ba62";
     private static final boolean DEV_BUILD = true;
     private static final boolean FORCE_DEBUG = false;
+    private static final String[] debugKeys = new String[]{
+            "skibidi gooning",
+            "uninstall brainrot.exe"
+    };
     private static boolean DEBUG = false;
     private static final boolean TEST_TRACK_ENABLED = false;
     private static String LATEST_VERSION = "N/A - NO INTERNET";
@@ -154,5 +158,9 @@ public class DisxModInfo {
 
     public static void setDEBUG(boolean DEBUG) {
         DisxModInfo.DEBUG = DEBUG;
+    }
+
+    public static String[] getDebugKeys() {
+        return debugKeys;
     }
 }

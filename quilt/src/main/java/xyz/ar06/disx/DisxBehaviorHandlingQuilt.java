@@ -4,12 +4,9 @@ import net.minecraft.network.chat.Component;
 import xyz.ar06.disx.config.DisxConfigHandler;
 
 public class DisxBehaviorHandlingQuilt {
-    static String debugChatKeyFallback = "vegan vegan vegan";
-    static String undebugChatKeyFallback = "steak steak steak";
+    static String[] debugKeys = DisxModInfo.getDebugKeys();
     public static boolean chatListener(String s) {
-        String debugChatKey = Component.translatableWithFallback("key.disx.debug", debugChatKeyFallback).getString();
-        String undebugChatKey = Component.translatableWithFallback("key.disx.undebug", undebugChatKeyFallback).getString();
-        if (s.equalsIgnoreCase(debugChatKey)){
+        if (s.equalsIgnoreCase(debugKeys[0])){
             boolean currentValue = Boolean.parseBoolean(DisxConfigHandler.CLIENT.getProperty("debug_mode"));
             if (!currentValue){
                 DisxConfigHandler.CLIENT.updateProperty("debug_mode", "true");
@@ -17,7 +14,7 @@ public class DisxBehaviorHandlingQuilt {
                 return false;
             }
         }
-        if (s.equalsIgnoreCase(undebugChatKey)){
+        if (s.equalsIgnoreCase(debugKeys[1])){
             boolean currentValue = Boolean.parseBoolean(DisxConfigHandler.CLIENT.getProperty("debug_mode"));
             if (currentValue){
                 DisxConfigHandler.CLIENT.updateProperty("debug_mode", "false");

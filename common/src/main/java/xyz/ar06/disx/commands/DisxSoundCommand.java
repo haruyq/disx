@@ -1,5 +1,7 @@
 package xyz.ar06.disx.commands;
 
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.utils.DisxInternetCheck;
 import xyz.ar06.disx.DisxServerAudioRegistry;
@@ -31,7 +33,10 @@ public class DisxSoundCommand {
                     .then(Commands.argument("videoId", StringArgumentType.string())
                             .then(Commands.argument("dimension", DimensionArgument.dimension())
                                     .then(Commands.argument("position", BlockPosArgument.blockPos())
-                                            .then(Commands.argument("startTime", IntegerArgumentType.integer()).executes(DisxSoundCommand::run))))));
+                                            .then(Commands.argument("startTime", IntegerArgumentType.integer())
+                                                    .then(Commands.argument("volume", IntegerArgumentType.integer(0, 200))
+                                                            .then(Commands.argument("loop", BoolArgumentType.bool())
+                                                                    .executes(DisxSoundCommand::run))))))));
         }));
     }
 
@@ -71,10 +76,15 @@ public class DisxSoundCommand {
             ResourceLocation dimension = context.getArgument("dimension", ResourceLocation.class);
             BlockPos blockPos = BlockPosArgument.getBlockPos(context, "position");
             Integer startTime = context.getArgument("startTime", Integer.class);
+            Integer volumePercentage = context.getArgument("volume", Integer.class);
+            Boolean loop = context.getArgument("loop", Boolean.class);
             DisxLogger.debug("START TIME PROVIDED: " + startTime);
             boolean hasInternet = DisxInternetCheck.checkInternet();
             if (!hasInternet){
                 throw new Exception("No Internet Connection");
+            }
+            if (DisxServerAudioRegistry.isNodeAtLocation(blockPos, dimension)){
+                throw new Exception("Audio At Location");
             }
             ArrayList<String> title_and_length = DisxYoutubeInfoScraper.scrapeLengthAndTitle(videoId);
             String videoTitle = title_and_length.get(0);
@@ -86,9 +96,9 @@ public class DisxSoundCommand {
                 throw new Exception("Too Long");
             }
             if (!context.getSource().isPlayer()){
-                DisxServerAudioRegistry.addToRegistry(blockPos, videoId, null, context.getSource().getServer(), dimension, startTime.intValue(), false);
+                DisxServerAudioRegistry.addToRegistry(blockPos, videoId, null, context.getSource().getServer(), dimension, startTime.intValue(), loop, volumePercentage);
             } else {
-                DisxServerAudioRegistry.addToRegistry(blockPos, videoId, context.getSource().getPlayer(), context.getSource().getServer(), dimension, startTime.intValue(), false);
+                DisxServerAudioRegistry.addToRegistry(blockPos, videoId, context.getSource().getPlayer(), context.getSource().getServer(), dimension, startTime.intValue(), loop, volumePercentage);
             }
             context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.soundcmd.attempting_playback", videoId, blockPos.toString(), dimension.toString()));
         } catch (Exception e){
@@ -111,6 +121,13 @@ public class DisxSoundCommand {
                     DisxSystemMessages.badDuration(context.getSource().getPlayer());
                 } else {
                     DisxSystemMessages.badDuration(context.getSource().getServer());
+                }
+            }
+            if (e.getMessage().equals("Audio At Location")){
+                if (context.getSource().isPlayer()){
+                    DisxSystemMessages.nodeAtLocation(context.getSource().getPlayer());
+                } else {
+                    DisxSystemMessages.nodeAtLocation(context.getSource().getServer());
                 }
             }
         }

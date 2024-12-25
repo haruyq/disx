@@ -1,0 +1,9 @@
+{
+  "type": "disx:custom_disc_recipe",
+  "category": "misc",
+  "decorative_factor": "minecraft:air",
+  "name": "default",
+  "result": {
+    "item": "disx:custom_disc_default"
+  }
+}

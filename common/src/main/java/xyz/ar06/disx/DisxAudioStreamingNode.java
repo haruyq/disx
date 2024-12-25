@@ -57,7 +57,7 @@ public class DisxAudioStreamingNode {
                 DisxLogger.debug("Loaded requested video");
                 if (startTime != 0){
                     DisxLogger.debug("Setting position to " + startTime + " seconds");
-                    track.setPosition(startTime);
+                    track.setPosition(startTime * 1000L);
                     DisxLogger.debug("Is track seekable?: " + track.isSeekable());
                 }
                 cachedTrack = track.makeClone();

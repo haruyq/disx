@@ -34,7 +34,7 @@ public class DisxServerAudioRegistry {
     }
 
     //Variant for Sound Command - Takes server, dimension as resourcelocation, and start time
-    public static void addToRegistry(BlockPos pos, String videoId, Player player, MinecraftServer server, ResourceLocation dimension, int startTime, boolean loop){
+    public static void addToRegistry(BlockPos pos, String videoId, Player player, MinecraftServer server, ResourceLocation dimension, int startTime, boolean loop, int volume){
         ResourceLocation dimensionLocation = dimension;
         if (player != null){
             DisxSystemMessages.playingAtLocation(server, player.getName().getString(), pos, videoId, dimensionLocation);
@@ -46,11 +46,11 @@ public class DisxServerAudioRegistry {
 
         if (player == null){
             players.forEach(plr -> {
-                DisxServerPacketIndex.ServerPackets.playerRegistryEvent("add", (Player) plr, pos, dimensionLocation, UUID.randomUUID(), loop, pos, dimensionLocation, 100);
+                DisxServerPacketIndex.ServerPackets.playerRegistryEvent("add", (Player) plr, pos, dimensionLocation, UUID.randomUUID(), loop, pos, dimensionLocation, volume);
             });
         } else {
             players.forEach(plr -> {
-                DisxServerPacketIndex.ServerPackets.playerRegistryEvent("add", (Player) plr, pos, dimensionLocation, player.getUUID(), loop, pos, dimensionLocation, 100);
+                DisxServerPacketIndex.ServerPackets.playerRegistryEvent("add", (Player) plr, pos, dimensionLocation, player.getUUID(), loop, pos, dimensionLocation, volume);
             });
         }
 
@@ -116,6 +116,15 @@ public class DisxServerAudioRegistry {
     public static boolean isNodeAtLocation(BlockPos blockPos, ResourceKey<Level> dimension){
         for (DisxAudioStreamingNode node : registry){
             if (node.getBlockPos().equals(blockPos) && node.getDimension().equals(dimension.location())){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isNodeAtLocation(BlockPos blockPos, ResourceLocation dimension){
+        for (DisxAudioStreamingNode node : registry){
+            if (node.getBlockPos().equals(blockPos) && node.getDimension().equals(dimension)){
                 return true;
             }
         }

@@ -83,7 +83,7 @@
   "sysmsg.disx.helpcmd.desc.disxgen": "Generates custom disc with provided video id",
   "sysmsg.disx.helpcmd.usage.disxgen": "Usage: %s PLAYER VARIANT VIDEO_ID",
   "sysmsg.disx.helpcmd.desc.disxsound": "Starts playback of provided video id at provided block position",
-  "sysmsg.disx.helpcmd.usage.disxsound": "Usage: %s VIDEO_ID DIMENSION X Y Z START_TIME",
+  "sysmsg.disx.helpcmd.usage.disxsound": "Usage: %s VIDEO_ID DIMENSION X Y Z START_TIME(SECONDS) VOLUME(0-200) LOOP(TRUE/FALSE)",
   "sysmsg.disx.helpcmd.desc.disxforcestop": "Forces all playing audios to stop",
   "sysmsg.disx.helpcmd.desc.disxconfig": "Gets or modifies config options",
   "sysmsg.disx.helpcmd.usage.disxconfig": "Usage: %s SUB_COMMAND (OPTIONAL SUB_COMMAND) (OPTIONAL ARGUMENT)",
@@ -98,11 +98,10 @@
   "sysmsg.disx.unmutecmd.success": "Successfully unmuted!",
   "sysmsg.disx.soundcmd.one_moment": "One moment please...",
   "sysmsg.disx.soundcmd.attempting_playback": "Attempting to start playback of Video '%s' at %s in %s",
+  "sysmsg.disx.soundcmd.already_node_there": "Disx Error: There is already audio playing at that location!",
   "sysmsg.disx.stampcmd.one_moment": "Your stamp is generating, one moment please...",
   "sysmsg.disx.stampcmd.no_player_err": "Disx Error: Unable to get player(s) provided!",
   "sysmsg.disx.stampcmd.success": "Your stamp has been distributed!",
-  "key.disx.debug": "skibidi gooning",
-  "key.disx.undebug": "uninstall brainrot.exe",
   "sysmsg.disx.debug_enabled": "There's something clearly wrong here. Enabling Disx debug mode!",
   "sysmsg.disx.debug_disabled": "Crisis adverted! Disx debug mode disabled!"
 }

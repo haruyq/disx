@@ -161,6 +161,14 @@ public class DisxSystemMessages {
         Minecraft.getInstance().player.sendSystemMessage(Component.translatable("sysmsg.disx.unmutecmd.success"));
     }
 
+    public static void nodeAtLocation(MinecraftServer server){
+        server.sendSystemMessage(Component.literal("Disx Error: There is already audio playing at that location!"));
+    }
+
+    public static void nodeAtLocation(ServerPlayer player){
+        player.sendSystemMessage(Component.translatable("sysmsg.disx.soundcmd.already_node_there"));
+    }
+
     public static void debugStatus(boolean b){
         if (b){
             Minecraft.getInstance().player.sendSystemMessage(Component.translatable("sysmsg.disx.debug_enabled"));
