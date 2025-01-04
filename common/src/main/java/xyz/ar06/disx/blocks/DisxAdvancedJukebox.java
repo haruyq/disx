@@ -74,7 +74,7 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
         if (this.power != p){
             this.power = p;
             boolean loop = p > 0;
-            DisxServerAudioRegistry.modifyRegistryEntry(blockPos, level.dimension(), blockPos, level.dimension(), loop, -1);
+            DisxServerAudioRegistry.modifyEntryLoop(blockPos, level.dimension(), loop);
         }
 
     }
