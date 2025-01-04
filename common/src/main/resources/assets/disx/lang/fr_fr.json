@@ -19,7 +19,6 @@
   "block.disx.lacquer_block": "Bloc de Laque",
   "item.disx.lacquer_drop": "Goutte de Laque",
   "item.disx.record_stamp": "Timbre à Disque",
-  "item.disx.advanced_jukebox_minecart": "Minecart Jukebox Avancé",
   "sysmsg.disx.no_internet": "Erreur Disx: Pas de connexion internet disponible!",
   "sysmsg.disx.error_loading_vid": "Erreur Disx: Erreur inconnue lors du chargement de la vidéo!",
   "sysmsg.disx.error_api_response": "Erreur Disx: Réponse invalide ou incomplète de l'API YT-SRC de Disx. Vérifiez les journaux du serveur pour plus d'informations.",
@@ -36,8 +35,6 @@
   "sysmsg.disx.loop_disabled": "Boucle Désactivée!",
   "sysmsg.disx.paused_audio": "Audio en Pause!",
   "sysmsg.disx.resumed_audio": "Reprise de L'audio!",
-  "sysmsg.disx.updated_disc_name": "[%s]: Un nom de vidéo mis à jour a été trouvé pour votre disque, il lui a été appliqué!",
-  "sysmsg.disx.updated_disc_name.name": "Nom: %s",
   "sysmsg.disx.notice_outdated": "Avis de Disx: Mod est dépassé!",
   "sysmsg.disx.outdated_version_count": "Vous avez %d version(s) de retard!",
   "sysmsg.disx.outdated_version_info": "Version Installée: %s, Dernière Version: %s",
@@ -106,15 +103,5 @@
   "sysmsg.disx.stampcmd.no_player_err": "Erreur Disx: Impossible d'obtenir le(s) joueur(s) fourni(s)!",
   "sysmsg.disx.stampcmd.success": "Votre timbre a été distribué!",
   "sysmsg.disx.debug_enabled": "Il y a manifestement quelque chose qui ne va pas. Le mode de débogage Disx a été activé !",
-  "sysmsg.disx.debug_disabled": "Crise évitée! Le mode de débogage de Disx a été désactivé!",
-  "sysmsg.disx.notice_forced_disxlivesrc": "Avis Disx: L'interface YT-SRC-API de Disx a été signalée comme étant hors service. Il a été détecté que votre serveur est actuellement configuré pour l'utiliser, donc le mod prendra par défaut la source live.",
-  "sysmsg.disx.notice_forced_disxytsrcapi": "Avis de disx: La bibliothèque utilisée pour diffuser directement depuis YouTube dans ce mod a été signalée comme fonctionnant mal. Il a été détecté que votre serveur est actuellement configuré pour l'utiliser, le mod utilisera donc par défaut l'API YT-SRC de Disx.",
-  "sysmsg.disx.cmd_must_run_on_server": "Cette commande doit être exécutée à partir de la console de votre serveur!",
-  "sysmsg.disx.configcmd.config_reloaded": "La configuration a été rechargée avec succès!",
-  "sysmsg.disx.configcmd.generatedrefreshtoken": "Votre jeton de rafraîchissement a été généré et stocké automatiquement dans la configuration!",
-  "sysmsg.disx.configcmd.generaterefreshtokeninstructions": "Générateur de Jetons de Rafraîchissement: Veuillez vous rendre à l'URL suivante sur un compte Google BURNER et entrer le code fourni.",
-  "sysmsg.disx.configcmd.generaterefreshtokencode": "Code (cliquez dessus pour le copier): ",
-  "sysmsg.disx.configcmd.clearedrefreshtoken": "Le jeton a été effacé!",
-  "sysmsg.disx.error_oauth": "Erreur Oauth2: YouTube pense que vous êtes un robot. Avez-vous déjà configuré un jeton de rafraîchissement?",
-  "sysmsg.disx.error_stat403": "Erreur: Code d'état 403 de YouTube"
+  "sysmsg.disx.debug_disabled": "Crise évitée! Le mode de débogage de Disx a été désactivé!"
 }

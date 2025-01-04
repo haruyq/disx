@@ -1,6 +1,5 @@
 package xyz.ar06.disx;
 
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
 import xyz.ar06.disx.entities.DisxStampMakerEntity;
 import dev.architectury.networking.NetworkManager;
@@ -60,9 +59,7 @@ public class DisxServerPacketIndex {
                 UUID playerOwner = node.getNodeOwner().getUUID();
                 boolean loop = node.isLoop();
                 int preferredVolume = node.getPreferredVolume();
-                DisxAudioMotionType motionType = node.getMotionType();
-                UUID entityUuid = node.getEntityUuid();
-                ServerPackets.AudioRegistrySyncPackets.add(player, blockPos, dimensionLocation, playerOwner, loop, preferredVolume, motionType, entityUuid);
+                ServerPackets.AudioRegistrySyncPackets.add(player, blockPos, dimensionLocation, playerOwner, loop, preferredVolume);
                 DisxLogger.debug("sent registry add event");
             }
         }
@@ -88,28 +85,17 @@ public class DisxServerPacketIndex {
         public static void onSingleplayerTrackEnd(FriendlyByteBuf buf, NetworkManager.PacketContext context){
             BlockPos blockPos = buf.readBlockPos();
             ResourceLocation dimension = buf.readResourceLocation();
-            //DisxServerAudioRegistry.removeFromRegistry(blockPos, dimension);
+            DisxServerAudioRegistry.removeFromRegistry(blockPos, dimension);
         }
 
         public static void onScrolledHitCheck(FriendlyByteBuf buf, NetworkManager.PacketContext context){
             BlockPos blockPos = buf.readBlockPos();
             double amount = buf.readDouble();
-            UUID entityUuid = buf.readUUID();
             Player player = context.getPlayer();
-            if (entityUuid.equals(new UUID(0L, 0L))){
-                Vec3 vec3 = new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
-                if (player.position().distanceTo(vec3) <= 25){
-                    DisxServerAudioRegistry.incrementVolume(blockPos, player.level().dimension(), amount);
-                }
-            } else {
-                ServerLevel serverLevel = (ServerLevel) context.getPlayer().level();
-                blockPos = serverLevel.getEntity(entityUuid).getOnPos();
-                Vec3 vec3 = new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
-                if (player.position().distanceTo(vec3) <= 25){
-                    DisxServerAudioRegistry.incrementVolume(entityUuid, amount);
-                }
+            Vec3 vec3 = new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
+            if (player.position().distanceTo(vec3) <= 25){
+                DisxServerAudioRegistry.incrementVolume(blockPos, player.level().dimension(), amount);
             }
-
         }
     }
 
@@ -117,33 +103,37 @@ public class DisxServerPacketIndex {
 
         public class AudioRegistrySyncPackets {
             private static void packetBuildSend(String type, Player player, BlockPos pos, ResourceLocation dimension, UUID playerOwner, Boolean loop,
-                                                   int preferredVolume, String motionType, UUID entityUuid){
+                                                   BlockPos newBlockPos, ResourceLocation newDimension, int preferredVolume){
                 FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
                 buf.writeUtf(type);
                 buf.writeBlockPos(pos);
                 buf.writeResourceLocation(dimension);
                 buf.writeUUID(playerOwner);
                 buf.writeUtf(String.valueOf(loop));
+                buf.writeBlockPos(newBlockPos);
+                buf.writeResourceLocation(newDimension);
                 buf.writeInt(preferredVolume);
-                buf.writeUtf(motionType);
-                buf.writeUUID(entityUuid);
                 NetworkManager.sendToPlayer((ServerPlayer) player, new ResourceLocation("disx","serveraudioregistryevent"), buf);
             }
             public static void add(Player player, BlockPos pos, ResourceLocation dimension, UUID playerOwner, boolean loop,
-                                   int preferredVolume, DisxAudioMotionType motionType, UUID entityUuid){
-                packetBuildSend("add", player, pos, dimension, playerOwner, loop, preferredVolume, motionType.name(), entityUuid);
+                                   int preferredVolume){
+                packetBuildSend("add", player, pos, dimension, playerOwner, loop, pos, dimension, preferredVolume);
             }
 
-            public static void modifyPrefVolume(Player player, BlockPos pos, ResourceLocation dimension, int preferredVolume, DisxAudioMotionType motionType, UUID entityUuid){
-                packetBuildSend("modify", player, pos, dimension, new UUID(0L, 0L), null, preferredVolume, motionType.name(), entityUuid);
+            public static void modifyLocation(Player player, BlockPos pos, ResourceLocation dimension, BlockPos newBlockPos, ResourceLocation newDimension){
+                packetBuildSend("modify", player, pos, dimension, UUID.randomUUID(), null, newBlockPos, newDimension, -1);
             }
 
-            public static void modifyLoop(Player player, BlockPos pos, ResourceLocation dimension, boolean loop, DisxAudioMotionType motionType, UUID entityUuid){
-                packetBuildSend("modify", player, pos, dimension, new UUID(0L, 0L), loop, -1, motionType.name(), entityUuid);
+            public static void modifyPrefVolume(Player player, BlockPos pos, ResourceLocation dimension, int preferredVolume){
+                packetBuildSend("modify", player, pos, dimension, UUID.randomUUID(), null, pos, dimension, preferredVolume);
             }
 
-            public static void remove(Player player, BlockPos pos, ResourceLocation dimension, UUID entityUuid, DisxAudioMotionType motionType){
-                packetBuildSend("remove", player, pos, dimension, new UUID(0L, 0L), false, -1, motionType.name(), entityUuid);
+            public static void modifyLoop(Player player, BlockPos pos, ResourceLocation dimension, boolean loop){
+                packetBuildSend("modify", player, pos, dimension, UUID.randomUUID(), loop, pos, dimension, -1);
+            }
+
+            public static void remove(Player player, BlockPos pos, ResourceLocation dimension){
+                packetBuildSend("remove", player, pos, dimension, UUID.randomUUID(), false, pos, dimension, -1);
             }
         }
 

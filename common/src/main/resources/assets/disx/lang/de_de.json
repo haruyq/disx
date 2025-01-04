@@ -19,7 +19,6 @@
   "block.disx.lacquer_block": "Lackblock",
   "item.disx.lacquer_drop": "Tropfen des Lacks",
   "item.disx.record_stamp": "Aufnahmestempel",
-  "item.disx.advanced_jukebox_minecart": "Erweiterte Jukebox Minecart",
   "sysmsg.disx.no_internet": "Disx-Fehler: Keine Internetverbindung verfügbar!",
   "sysmsg.disx.error_loading_vid": "Disx Fehler: Unbekannter Fehler beim Laden des Videos!",
   "sysmsg.disx.error_api_response": "Disx-Fehler: Ungültige oder unvollständige Antwort von Disx YT-SRC API. Prüfen Sie die Serverprotokolle für weitere Informationen.",
@@ -36,8 +35,6 @@
   "sysmsg.disx.loop_disabled": "Schleife Deaktiviert!",
   "sysmsg.disx.paused_audio": "Audio Pausiert!",
   "sysmsg.disx.resumed_audio": "Audio Unpausiert!",
-  "sysmsg.disx.updated_disc_name": "[%s]: Es wurde ein aktualisierter Videoname für Ihre Disc gefunden, er wurde auf sie angewendet!",
-  "sysmsg.disx.updated_disc_name.name": "Videoname: %s",
   "sysmsg.disx.notice_outdated": "Disx Hinweis: Mod ist veraltet!",
   "sysmsg.disx.outdated_version_count": "Sie sind %d Version(en) im Rückstand!",
   "sysmsg.disx.outdated_version_info": "Installierte Version: %s, Neueste Version: %s",
@@ -106,16 +103,5 @@
   "sysmsg.disx.stampcmd.no_player_err": "Disx-Fehler: Der/die angegebene(n) Spieler kann/können nicht abgerufen werden!",
   "sysmsg.disx.stampcmd.success": "Ihre Briefmarke wurde an Sie verteilt!",
   "sysmsg.disx.debug_enabled": "Hier ist eindeutig etwas falsch. Disx-Debug-Modus jetzt aktiv!",
-  "sysmsg.disx.debug_disabled": "Disx-Debug-Modus deaktiviert!",
-  "sysmsg.disx.notice_forced_disxlivesrc": "Disx Hinweis: Die Disx YT-SRC-API wurde als abgeschaltet gemeldet. Es wurde festgestellt, dass Ihr Server derzeit so konfiguriert ist, dass er sie verwendet, daher wird der Mod standardmäßig die Live-Quelle verwenden.",
-  "sysmsg.disx.notice_forced_disxytsrcapi": "Disx Hinweis: Die Bibliothek, die in dieser Mod zum Streamen direkt von YouTube verwendet wird, wurde als fehlerhaft gemeldet. Es wurde festgestellt, dass Ihr Server derzeit so konfiguriert ist, dass er diese Bibliothek verwendet, daher wird die Mod standardmäßig die Disx YT-SRC API verwenden.",
-  "sysmsg.disx.cmd_must_run_on_server": "Dieser Befehl muss von Ihrer Serverkonsole aus ausgeführt werden!",
-  "sysmsg.disx.configcmd.config_reloaded": "Config erfolgreich neu geladen!",
-  "sysmsg.disx.configcmd.generatedrefreshtoken": "Ihr Refresh Token wurde automatisch generiert und in der Konfiguration gespeichert!",
-  "sysmsg.disx.configcmd.generaterefreshtokeninstructions": "Token-Generator Refresh Bitte gehen Sie mit einem BURNER Google-Konto auf die folgende URL und geben Sie den angegebenen Code ein.",
-  "sysmsg.disx.configcmd.generaterefreshtokencode": "Code (zum Kopieren anklicken): ",
-  "sysmsg.disx.configcmd.clearedrefreshtoken": "Refresh-Token gelöscht!",
-  "sysmsg.disx.error_oauth": "Oauth2-Fehler: YouTube denkt, du bist ein Bot. Haben Sie schon ein Refresh-Token eingerichtet?",
-  "sysmsg.disx.error_stat403": "Fehler: Empfangener Statuscode 403 von YouTube"
-
+  "sysmsg.disx.debug_disabled": "Disx-Debug-Modus deaktiviert!"
 }
