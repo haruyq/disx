@@ -55,7 +55,7 @@ public class DisxClientPacketIndex  {
             BlockPos blockPos = buf.readBlockPos();
             ResourceLocation dimensionLocation = buf.readResourceLocation();
             UUID instanceOwner = buf.readUUID();
-            Boolean loop = buf.readBoolean();
+            Boolean loop = Boolean.valueOf(buf.readUtf());
             BlockPos newBlockPos = buf.readBlockPos();
             ResourceLocation newDimLocation = buf.readResourceLocation();
             int preferredVolume = buf.readInt();

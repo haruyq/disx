@@ -1,9 +1,6 @@
 package xyz.ar06.disx;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.world.phys.Vec3;
-import xyz.ar06.disx.client_only.DisxBehaviorHandling;
 import xyz.ar06.disx.entities.DisxStampMakerEntity;
 import dev.architectury.networking.NetworkManager;
 import io.netty.buffer.Unpooled;
@@ -62,7 +59,7 @@ public class DisxServerPacketIndex {
                 UUID playerOwner = node.getNodeOwner().getUUID();
                 boolean loop = node.isLoop();
                 int preferredVolume = node.getPreferredVolume();
-                ServerPackets.playerRegistryEvent("add", player, blockPos, dimensionLocation, playerOwner, loop, blockPos, dimensionLocation, preferredVolume);
+                ServerPackets.AudioRegistrySyncPackets.add(player, blockPos, dimensionLocation, playerOwner, loop, preferredVolume);
                 DisxLogger.debug("sent registry add event");
             }
         }
@@ -104,18 +101,40 @@ public class DisxServerPacketIndex {
 
     public class ServerPackets {
 
-        public static void playerRegistryEvent(String type, Player player, BlockPos pos, ResourceLocation dimension, UUID playerOwner, boolean loop,
-                                               BlockPos newBlockPos, ResourceLocation newDimension, int preferredVolume){
-            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-            buf.writeUtf(type);
-            buf.writeBlockPos(pos);
-            buf.writeResourceLocation(dimension);
-            buf.writeUUID(playerOwner);
-            buf.writeBoolean(loop);
-            buf.writeBlockPos(newBlockPos);
-            buf.writeResourceLocation(newDimension);
-            buf.writeInt(preferredVolume);
-            NetworkManager.sendToPlayer((ServerPlayer) player, new ResourceLocation("disx","serveraudioregistryevent"), buf);
+        public class AudioRegistrySyncPackets {
+            private static void packetBuildSend(String type, Player player, BlockPos pos, ResourceLocation dimension, UUID playerOwner, Boolean loop,
+                                                   BlockPos newBlockPos, ResourceLocation newDimension, int preferredVolume){
+                FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+                buf.writeUtf(type);
+                buf.writeBlockPos(pos);
+                buf.writeResourceLocation(dimension);
+                buf.writeUUID(playerOwner);
+                buf.writeUtf(String.valueOf(loop));
+                buf.writeBlockPos(newBlockPos);
+                buf.writeResourceLocation(newDimension);
+                buf.writeInt(preferredVolume);
+                NetworkManager.sendToPlayer((ServerPlayer) player, new ResourceLocation("disx","serveraudioregistryevent"), buf);
+            }
+            public static void add(Player player, BlockPos pos, ResourceLocation dimension, UUID playerOwner, boolean loop,
+                                   int preferredVolume){
+                packetBuildSend("add", player, pos, dimension, playerOwner, loop, pos, dimension, preferredVolume);
+            }
+
+            public static void modifyLocation(Player player, BlockPos pos, ResourceLocation dimension, BlockPos newBlockPos, ResourceLocation newDimension){
+                packetBuildSend("modify", player, pos, dimension, UUID.randomUUID(), null, newBlockPos, newDimension, -1);
+            }
+
+            public static void modifyPrefVolume(Player player, BlockPos pos, ResourceLocation dimension, int preferredVolume){
+                packetBuildSend("modify", player, pos, dimension, UUID.randomUUID(), null, pos, dimension, preferredVolume);
+            }
+
+            public static void modifyLoop(Player player, BlockPos pos, ResourceLocation dimension, boolean loop){
+                packetBuildSend("modify", player, pos, dimension, UUID.randomUUID(), loop, pos, dimension, -1);
+            }
+
+            public static void remove(Player player, BlockPos pos, ResourceLocation dimension){
+                packetBuildSend("remove", player, pos, dimension, UUID.randomUUID(), false, pos, dimension, -1);
+            }
         }
 
         public static void playingVideoIdMessage(String videoId, Player player){

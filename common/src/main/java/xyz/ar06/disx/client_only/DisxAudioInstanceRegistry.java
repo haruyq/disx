@@ -69,13 +69,15 @@ public class DisxAudioInstanceRegistry {
 
     }
 
-    public static void modifyAudioInstance(BlockPos blockPos, ResourceLocation dimension, BlockPos newBlockPos, ResourceLocation newDimension, boolean loop, int preferredVolume){
+    public static void modifyAudioInstance(BlockPos blockPos, ResourceLocation dimension, BlockPos newBlockPos, ResourceLocation newDimension, Boolean loop, int preferredVolume){
         try {
             for (DisxAudioInstance instance : registry){
                 if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension)){
                     instance.setBlockPos(newBlockPos);
                     instance.setDimension(newDimension);
-                    instance.setLoop(loop);
+                    if (loop != null){
+                        instance.setLoop(loop);
+                    }
                     if (preferredVolume != -1){
                         instance.setPreferredVolume(preferredVolume);
                     }
