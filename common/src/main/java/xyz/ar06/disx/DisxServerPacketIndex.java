@@ -59,8 +59,7 @@ public class DisxServerPacketIndex {
                 UUID playerOwner = node.getNodeOwner().getUUID();
                 boolean loop = node.isLoop();
                 int preferredVolume = node.getPreferredVolume();
-                DisxAudioMotionType motionType = node.getMotionType();
-                ServerPackets.AudioRegistrySyncPackets.add(player, blockPos, dimensionLocation, playerOwner, loop, preferredVolume, motionType);
+                ServerPackets.AudioRegistrySyncPackets.add(player, blockPos, dimensionLocation, playerOwner, loop, preferredVolume);
                 DisxLogger.debug("sent registry add event");
             }
         }
@@ -104,7 +103,7 @@ public class DisxServerPacketIndex {
 
         public class AudioRegistrySyncPackets {
             private static void packetBuildSend(String type, Player player, BlockPos pos, ResourceLocation dimension, UUID playerOwner, Boolean loop,
-                                                   BlockPos newBlockPos, ResourceLocation newDimension, int preferredVolume, String motionType){
+                                                   BlockPos newBlockPos, ResourceLocation newDimension, int preferredVolume){
                 FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
                 buf.writeUtf(type);
                 buf.writeBlockPos(pos);
@@ -114,28 +113,27 @@ public class DisxServerPacketIndex {
                 buf.writeBlockPos(newBlockPos);
                 buf.writeResourceLocation(newDimension);
                 buf.writeInt(preferredVolume);
-                buf.writeUtf(motionType);
                 NetworkManager.sendToPlayer((ServerPlayer) player, new ResourceLocation("disx","serveraudioregistryevent"), buf);
             }
             public static void add(Player player, BlockPos pos, ResourceLocation dimension, UUID playerOwner, boolean loop,
-                                   int preferredVolume, DisxAudioMotionType motionType){
-                packetBuildSend("add", player, pos, dimension, playerOwner, loop, pos, dimension, preferredVolume, motionType.name());
+                                   int preferredVolume){
+                packetBuildSend("add", player, pos, dimension, playerOwner, loop, pos, dimension, preferredVolume);
             }
 
             public static void modifyLocation(Player player, BlockPos pos, ResourceLocation dimension, BlockPos newBlockPos, ResourceLocation newDimension){
-                packetBuildSend("modify", player, pos, dimension, UUID.randomUUID(), null, newBlockPos, newDimension, -1, "");
+                packetBuildSend("modify", player, pos, dimension, UUID.randomUUID(), null, newBlockPos, newDimension, -1);
             }
 
             public static void modifyPrefVolume(Player player, BlockPos pos, ResourceLocation dimension, int preferredVolume){
-                packetBuildSend("modify", player, pos, dimension, UUID.randomUUID(), null, pos, dimension, preferredVolume, "");
+                packetBuildSend("modify", player, pos, dimension, UUID.randomUUID(), null, pos, dimension, preferredVolume);
             }
 
             public static void modifyLoop(Player player, BlockPos pos, ResourceLocation dimension, boolean loop){
-                packetBuildSend("modify", player, pos, dimension, UUID.randomUUID(), loop, pos, dimension, -1, "");
+                packetBuildSend("modify", player, pos, dimension, UUID.randomUUID(), loop, pos, dimension, -1);
             }
 
             public static void remove(Player player, BlockPos pos, ResourceLocation dimension){
-                packetBuildSend("remove", player, pos, dimension, UUID.randomUUID(), false, pos, dimension, -1, "");
+                packetBuildSend("remove", player, pos, dimension, UUID.randomUUID(), false, pos, dimension, -1);
             }
         }
 

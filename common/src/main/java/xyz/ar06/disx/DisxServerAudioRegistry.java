@@ -15,19 +15,19 @@ public class DisxServerAudioRegistry {
     public static LinkedList<DisxAudioStreamingNode> registry = new LinkedList<>();
 
     //Default variant
-    public static void addToRegistry(BlockPos pos, String videoId, Player player, ResourceKey<Level> dimension, boolean loop, DisxAudioMotionType motionType){
+    public static void addToRegistry(BlockPos pos, String videoId, Player player, ResourceKey<Level> dimension, boolean loop){
         ResourceLocation dimensionLocation = dimension.location();
         if (player != null){
             DisxSystemMessages.playingAtLocation(player.getServer(), player.getName().getString(), pos, videoId, dimensionLocation);
         }
-        registry.add(new DisxAudioStreamingNode(videoId, pos, dimensionLocation, player, loop, 0, motionType));
+        registry.add(new DisxAudioStreamingNode(videoId, pos, dimensionLocation, player, loop, 0));
         if (player == null){
             players.forEach(plr -> {
-                DisxServerPacketIndex.ServerPackets.AudioRegistrySyncPackets.add(plr, pos, dimensionLocation, UUID.randomUUID(), loop, 100, motionType);
+                DisxServerPacketIndex.ServerPackets.AudioRegistrySyncPackets.add(plr, pos, dimensionLocation, UUID.randomUUID(), loop, 100);
             });
         } else {
             players.forEach(plr -> {
-                DisxServerPacketIndex.ServerPackets.AudioRegistrySyncPackets.add(plr, pos, dimensionLocation, player.getUUID(), loop, 100, motionType);
+                DisxServerPacketIndex.ServerPackets.AudioRegistrySyncPackets.add(plr, pos, dimensionLocation, player.getUUID(), loop, 100);
             });
         }
 
@@ -38,19 +38,19 @@ public class DisxServerAudioRegistry {
         ResourceLocation dimensionLocation = dimension;
         if (player != null){
             DisxSystemMessages.playingAtLocation(server, player.getName().getString(), pos, videoId, dimensionLocation);
-            registry.add(new DisxAudioStreamingNode(videoId, pos, dimensionLocation, player, loop, startTime, DisxAudioMotionType.STATIC));
+            registry.add(new DisxAudioStreamingNode(videoId, pos, dimensionLocation, player, loop, startTime));
         } else {
             DisxSystemMessages.playingAtLocation(server, "Server", pos, videoId, dimensionLocation);
-            registry.add(new DisxAudioStreamingNode(videoId, pos, dimensionLocation, null, loop, startTime, DisxAudioMotionType.STATIC));
+            registry.add(new DisxAudioStreamingNode(videoId, pos, dimensionLocation, null, loop, startTime));
         }
 
         if (player == null){
             players.forEach(plr -> {
-                DisxServerPacketIndex.ServerPackets.AudioRegistrySyncPackets.add(plr, pos, dimensionLocation, UUID.randomUUID(), loop, 100, DisxAudioMotionType.STATIC);
+                DisxServerPacketIndex.ServerPackets.AudioRegistrySyncPackets.add(plr, pos, dimensionLocation, UUID.randomUUID(), loop, 100);
             });
         } else {
             players.forEach(plr -> {
-                DisxServerPacketIndex.ServerPackets.AudioRegistrySyncPackets.add(plr, pos, dimensionLocation, player.getUUID(), loop, 100, DisxAudioMotionType.STATIC);
+                DisxServerPacketIndex.ServerPackets.AudioRegistrySyncPackets.add(plr, pos, dimensionLocation, player.getUUID(), loop, 100);
             });
         }
 
@@ -59,9 +59,6 @@ public class DisxServerAudioRegistry {
     public static void removeFromRegistry(DisxAudioStreamingNode node){
         BlockPos pos = node.getBlockPos();
         ResourceLocation dimensionLocation = node.getDimension();
-        if (pos == null || dimensionLocation == null){
-            return;
-        }
         players.forEach(plr -> {
             DisxServerPacketIndex.ServerPackets.AudioRegistrySyncPackets.remove(plr, pos, dimensionLocation);
         });
