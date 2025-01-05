@@ -2,7 +2,6 @@ package xyz.ar06.disx.client_only;
 
 import io.netty.buffer.ByteBuf;
 import xyz.ar06.disx.DisxAudioMotionType;
-import xyz.ar06.disx.DisxAudioStreamingNode;
 import xyz.ar06.disx.DisxLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,8 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 import xyz.ar06.disx.DisxSystemMessages;
 
 import java.util.*;
-
-import static xyz.ar06.disx.DisxAudioStreamingNode.FORMAT;
 
 @Environment(EnvType.CLIENT)
 public class DisxAudioInstanceRegistry {
@@ -130,12 +127,7 @@ public class DisxAudioInstanceRegistry {
         try {
             for (DisxAudioInstance instance : registry){
                 if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension)){
-                    int bitDepth = 16;
-                    int frameSize = (bitDepth / 8) * FORMAT.channelCount;
-                    int sampleRate = FORMAT.sampleRate;
-                    double streamInterval = DisxAudioStreamingNode.getStreamInterval();
-                    int chunkSize = (int) (sampleRate * frameSize * streamInterval); //(calculates to 441000)
-                    byte[] audioData = new byte[chunkSize];
+                    byte[] audioData = new byte[882000];
                     buf.readBytes(audioData);
                     instance.addToPacketDataQueue(audioData);
                     break;
