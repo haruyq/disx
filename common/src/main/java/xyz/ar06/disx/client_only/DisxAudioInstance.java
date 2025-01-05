@@ -4,19 +4,15 @@ import dev.architectury.event.events.client.ClientTickEvent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import xyz.ar06.disx.DisxAudioMotionType;
 import xyz.ar06.disx.DisxAudioStreamingNode;
 import xyz.ar06.disx.DisxLogger;
-import xyz.ar06.disx.entities.vehicle.DisxAdvancedJukeboxMinecart;
 
 import javax.sound.sampled.*;
 import java.util.ConcurrentModificationException;
@@ -47,8 +43,7 @@ public class DisxAudioInstance {
     private String cachedAudioDeviceName = null;
     private int preferredVolume;
     private DisxAudioMotionType motionType;
-    private UUID entityUuid;
-    public DisxAudioInstance(BlockPos blockPos, ResourceLocation dimension, UUID instanceOwner, boolean loop, int preferredVolume, DisxAudioMotionType motionType, UUID entityUuid){
+    public DisxAudioInstance(BlockPos blockPos, ResourceLocation dimension, UUID instanceOwner, boolean loop, int preferredVolume, DisxAudioMotionType motionType){
         DisxLogger.debug("New DisxAudioInstance called for; setting details:");
         this.blockPos = blockPos;
         this.dimension = dimension;
@@ -56,30 +51,25 @@ public class DisxAudioInstance {
         this.loop = loop;
         this.preferredVolume = preferredVolume;
         this.motionType = motionType;
-        this.entityUuid = entityUuid;
         DisxLogger.debug("Details set successfully");
         DisxLogger.debug("Building audio line and controls");
         this.buildAudioLine();
         DisxLogger.debug("Audio line and controls built");
         try {
-            ClientTickEvent.CLIENT_LEVEL_POST.register(this::loops);
+            ClientTickEvent.CLIENT_POST.register(this::writingLoop);
+            ClientTickEvent.CLIENT_POST.register(this::volumeLoop);
         } catch (ConcurrentModificationException e){
             DisxLogger.error("Error registering writing and volume loops:");
             e.printStackTrace();
         }
+
         DisxLogger.debug("DisxAudioInstance initialized successfully!");
     }
 
-    private void loops(ClientLevel clientLevel){
-        this.writingLoop(clientLevel);
-        this.volumeLoop(clientLevel);
-    }
-
     public void deconstruct(){
-        DisxLogger.debug("call for deconstruct");
         try {
-            //ClientTickEvent.CLIENT_POST.unregister(this::loops);
-            ClientTickEvent.CLIENT_LEVEL_POST.unregister(this::loops);
+            ClientTickEvent.CLIENT_POST.unregister(this::writingLoop);
+            ClientTickEvent.CLIENT_POST.unregister(this::volumeLoop);
         } catch (ConcurrentModificationException e){
             DisxLogger.error("Error deregistering writing and volume loops:");
             e.printStackTrace();
@@ -153,7 +143,7 @@ public class DisxAudioInstance {
     public void addToPacketDataQueue(byte[] data){
         this.audioDataPacketQueue.add(data);
     }
-    private void writingLoop(ClientLevel clientLevel){
+    private void writingLoop(Minecraft minecraft){
         CompletableFuture.runAsync(() -> {
             if (!writingToLine && !audioDataPacketQueue.isEmpty() && this.audioLine != null){
                 writingToLine = true;
@@ -200,7 +190,7 @@ public class DisxAudioInstance {
 
     }
 
-    private void volumeLoop(ClientLevel clientLevel) {
+    private void volumeLoop(Minecraft minecraft) {
         if (this.volumeControl != null && this.balanceControl != null && this.audioLine != null) {
             LocalPlayer plr = Minecraft.getInstance().player;
             ResourceLocation dimension = this.dimension;
@@ -212,57 +202,44 @@ public class DisxAudioInstance {
                             volumeControl.setValue(-80f);
                             playerCanHear = false;
                         } else {
-                            BlockPos blockPos = null;
-                            if (this.motionType.equals(DisxAudioMotionType.LIVE)){
-                                for (Entity entity : clientLevel.entitiesForRendering()){
-                                    if (entity.getUUID().equals(this.entityUuid)){
-                                        blockPos = new BlockPos(entity.getBlockX(), entity.getBlockY(), entity.getBlockZ());
-                                    }
-                                }
-                            } else {
-                                blockPos = this.blockPos;
+                            Vec3 currentpos = Minecraft.getInstance().getCameraEntity().getPosition(0.01f);
+                            BlockPos blockPos = this.blockPos;
+                            Vec3 blockPosVec = new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
+                            double distance = currentpos.distanceTo(blockPosVec);
+                            double maxDistance = 25.00;
+                            double plrVolumeConfig_RECORDS = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.RECORDS).get();
+                            double plrVolumeConfig_MASTER = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.MASTER).get();
+                            double volumeCalc = Math.max(0.0f, 1.0f - (distance / maxDistance));
+                            volumeCalc *= (plrVolumeConfig_MASTER * plrVolumeConfig_RECORDS);
+                            volumeCalc *= ((double) this.preferredVolume / 100);
+                            float volumeCalc_line = 20.0f * (float) Math.log10(Math.max(0.01f, volumeCalc));
+                            if (distance >= maxDistance || preferredVolume == 0){
+                                volumeCalc_line = -80f;
                             }
-                            if (blockPos != null){
-                                Vec3 currentpos = Minecraft.getInstance().getCameraEntity().getPosition(0.01f);
-                                Vec3 blockPosVec = new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
-                                double distance = currentpos.distanceTo(blockPosVec);
-                                double maxDistance = 25.00;
-                                double plrVolumeConfig_RECORDS = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.RECORDS).get();
-                                double plrVolumeConfig_MASTER = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.MASTER).get();
-                                double volumeCalc = Math.max(0.0f, 1.0f - (distance / maxDistance));
-                                volumeCalc *= (plrVolumeConfig_MASTER * plrVolumeConfig_RECORDS);
-                                volumeCalc *= ((double) this.preferredVolume / 100);
-                                float volumeCalc_line = 20.0f * (float) Math.log10(Math.max(0.01f, volumeCalc));
-                                if (distance >= maxDistance || preferredVolume == 0){
-                                    volumeCalc_line = -80f;
-                                }
-                                if (volumeCalc_line < -80f) {
-                                    volumeCalc_line = -80f;
-                                }
-                                if (volumeCalc_line > 6.0206) {
-                                    volumeCalc_line = 6.0206f;
-                                }
-                                volumeControl.setValue(volumeCalc_line);
+                            if (volumeCalc_line < -80f) {
+                                volumeCalc_line = -80f;
+                            }
+                            if (volumeCalc_line > 6.0206) {
+                                volumeCalc_line = 6.0206f;
+                            }
+                            volumeControl.setValue(volumeCalc_line);
 
-                                if (volumeCalc_line <= -80f) {
-                                    playerCanHear = false;
-                                } else {
-                                    playerCanHear = true;
-                                }
-
-                                if (plrVolumeConfig_RECORDS != 0.0 && volumeCalc_line > -80f && plrVolumeConfig_MASTER != 0.0 && playerCanHear) {
-                                    try {
-                                        MusicManager musicManager = Minecraft.getInstance().getMusicManager();
-                                        Minecraft.getInstance().getMusicManager().tick();
-                                        musicManager.stopPlaying();
-                                    } catch (NullPointerException e) {
-                                        DisxLogger.error("Audio Instance at " + blockPos + " was unsuccessful in pausing client music. Error: " + e);
-                                    }
-                                }
-                            } else {
-                                volumeControl.setValue(-80f);
+                            if (volumeCalc_line <= -80f) {
                                 playerCanHear = false;
+                            } else {
+                                playerCanHear = true;
                             }
+
+                            if (plrVolumeConfig_RECORDS != 0.0 && volumeCalc_line > -80f && plrVolumeConfig_MASTER != 0.0 && playerCanHear) {
+                                try {
+                                    MusicManager musicManager = Minecraft.getInstance().getMusicManager();
+                                    Minecraft.getInstance().getMusicManager().tick();
+                                    musicManager.stopPlaying();
+                                } catch (NullPointerException e) {
+                                    DisxLogger.error("Audio Instance at " + blockPos + " was unsuccessful in pausing client music. Error: " + e);
+                                }
+                            }
+
                         }
                     } else {
                         volumeControl.setValue(-80f);
@@ -302,13 +279,5 @@ public class DisxAudioInstance {
 
     public int getPreferredVolume() {
         return preferredVolume;
-    }
-
-    public DisxAudioMotionType getMotionType() {
-        return motionType;
-    }
-
-    public UUID getEntityUuid() {
-        return entityUuid;
     }
 }

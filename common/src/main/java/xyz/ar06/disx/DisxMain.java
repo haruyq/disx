@@ -1,11 +1,14 @@
 package xyz.ar06.disx;
 
 import dev.architectury.event.events.common.*;
-import dev.architectury.registry.fuel.FuelRegistry;
 import dev.architectury.utils.Env;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import xyz.ar06.disx.blocks.*;
+import xyz.ar06.disx.blocks.DisxAdvancedJukebox;
+import xyz.ar06.disx.blocks.DisxLacquerBlock;
+import xyz.ar06.disx.blocks.DisxRecordPress;
+import xyz.ar06.disx.blocks.DisxStampMaker;
 import xyz.ar06.disx.client_only.DisxClientMain;
 import xyz.ar06.disx.commands.*;
 import xyz.ar06.disx.config.DisxConfigHandler;
@@ -71,8 +74,6 @@ public class DisxMain {
         DisxRecordPress.registerBlockEntity(blockEntityRegistrar);
         DisxLacquerBlock.registerBlock(blocksRegistrar);
         DisxLacquerBlock.registerBlockItem(itemsRegistrar, creativeModeTab);
-        DisxEnderAdvancedJukebox.registerBlock(blocksRegistrar);
-        DisxEnderAdvancedJukebox.registerBlockItem(itemsRegistrar, creativeModeTab);
         //Command Registration Calls
         DisxConfigCommand.registerCommand();
         DisxForceStopCommand.registerCommand();
@@ -93,13 +94,9 @@ public class DisxMain {
         DisxSoundEvents.registerAdvancedJukeboxStatic(soundEventRegistrar);
         //Entity Registration Calls
         DisxAdvancedJukeboxMinecart.registerEntityType(entityTypeRegistrar);
-        //Fuel Registration Calls
-        FuelRegistry.register(100, DisxLacquerDrop.itemRegistration.get());
-        FuelRegistry.register(900, DisxLacquerBlock.itemRegistration.get());
 
         //Pull Mod Info
         DisxModInfo.pullLatestVersion();
-        DisxModInfo.pullForceSettings();
 
         //Event Registrations
         PlayerEvent.PLAYER_JOIN.register(player -> {
@@ -127,10 +124,6 @@ public class DisxMain {
         LifecycleEvent.SERVER_STARTED.register(DisxSystemMessages::devBuildNotice);
 
         LifecycleEvent.SERVER_STARTED.register(DisxAudioStreamingNode::initPlayerManager);
-
-        LifecycleEvent.SERVER_STARTED.register(DisxSystemMessages::forcingDisxYtSrcApi);
-
-        LifecycleEvent.SERVER_STARTED.register(DisxSystemMessages::forcingLiveYtSrc);
 
 
         LifecycleEvent.SERVER_STARTED.register((server) -> {

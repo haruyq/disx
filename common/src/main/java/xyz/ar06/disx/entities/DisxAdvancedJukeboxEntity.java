@@ -24,11 +24,9 @@ import net.minecraft.world.ticks.ContainerSingleItem;
 import xyz.ar06.disx.items.DisxCustomDisc;
 import xyz.ar06.disx.utils.DisxYoutubeInfoScraper;
 
-import java.util.UUID;
-
 public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerSingleItem, WorldlyContainer {
 
-    NonNullList<ItemStack> itemInventory = NonNullList.withSize(1, ItemStack.EMPTY);
+    private NonNullList<ItemStack> itemInventory = NonNullList.withSize(1, ItemStack.EMPTY);
 
     public DisxAdvancedJukeboxEntity(BlockPos blockPos, BlockState blockState) {
         super(
@@ -74,10 +72,7 @@ public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerS
     public ItemStack removeItem(int i, int j) {
         ItemStack returnStack = itemInventory.get(i).copy();
         itemInventory.set(i, ItemStack.EMPTY);
-        if (returnStack.getItem() instanceof DisxCustomDisc){
-            DisxServerAudioRegistry.removeFromRegistry(this.getBlockPos(), this.getLevel().dimension(), new UUID(0L, 0L), DisxAudioMotionType.STATIC);
-
-        }
+        DisxServerAudioRegistry.removeFromRegistry(this.getBlockPos(), this.getLevel().dimension());
         return returnStack;
     }
 
@@ -88,7 +83,7 @@ public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerS
             String videoId = itemStack.getTag().getString("videoId");
             int jukeboxPower = this.getLevel().getBestNeighborSignal(this.getBlockPos());
             boolean loop = jukeboxPower > 0;
-            DisxServerAudioRegistry.addToRegistry(this.getBlockPos(), videoId, null, level.dimension(), loop, DisxAudioMotionType.STATIC, new UUID(0L, 0L));
+            DisxServerAudioRegistry.addToRegistry(this.getBlockPos(), videoId, null, level.dimension(), loop, DisxAudioMotionType.STATIC);
         } else {
             itemInventory.set(i, itemStack);
         }
@@ -101,7 +96,7 @@ public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerS
             String videoId = itemStack.getTag().getString("videoId");
             int jukeboxPower = this.getLevel().getBestNeighborSignal(this.getBlockPos());
             boolean loop = jukeboxPower > 0;
-            DisxServerAudioRegistry.addToRegistry(this.getBlockPos(), videoId, player, level.dimension(), loop, DisxAudioMotionType.STATIC, new UUID(0L, 0L));
+            DisxServerAudioRegistry.addToRegistry(this.getBlockPos(), videoId, player, level.dimension(), loop, DisxAudioMotionType.STATIC);
         } else {
             itemInventory.set(i, itemStack);
         }
@@ -129,8 +124,12 @@ public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerS
                     if (discStack.equals(this.itemInventory.get(0))){
                         DisxLogger.debug("Disc stack still the same in Advanced Jukebox, setting updated nbt tag");
                         discStack.setTag(compoundTag);
-                        player.sendSystemMessage(Component.translatable("sysmsg.disx.updated_disc_name", "Advanced Jukebox"));
-                        player.sendSystemMessage(Component.translatable("sysmsg.disx.updated_disc_name.name", videoName).withStyle(ChatFormatting.GRAY));
+                        player.sendSystemMessage(Component.literal(
+                                "[Advanced Jukebox]: Found updated video name for your disc, it has been applied to it!"
+                        ));
+                        player.sendSystemMessage(Component.literal(
+                                "Name: " + videoName
+                        ).withStyle(ChatFormatting.GRAY));
                     }
                 } else {
                     DisxLogger.debug("Video name not found once more");

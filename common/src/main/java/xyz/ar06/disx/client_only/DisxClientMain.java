@@ -65,7 +65,7 @@ public class DisxClientMain {
                 provider1);
                 EntityRendererRegistry.register(
                         () -> ((EntityType<DisxAdvancedJukeboxMinecart>) DisxAdvancedJukeboxMinecart.entityTypeRegistration.get()),
-                        (arg) -> new DisxAdvancedJukeboxMinecartRenderer(arg, ModelLayers.COMMAND_BLOCK_MINECART)
+                        (arg) -> new MinecartRenderer(arg, ModelLayers.COMMAND_BLOCK_MINECART)
                 );
             });
             ClientLifecycleEvent.CLIENT_STARTED.register(DisxConfigHandler.CLIENT::initializeConfig);

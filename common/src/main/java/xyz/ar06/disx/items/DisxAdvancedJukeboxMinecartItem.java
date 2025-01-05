@@ -55,7 +55,7 @@ public class DisxAdvancedJukeboxMinecartItem extends Item {
     public static void registerItem(Registrar<Item> registrar, RegistrySupplier<CreativeModeTab> tab){
         itemRegistration = registrar.register(
                 new ResourceLocation("disx", "advanced_jukebox_minecart"),
-                () -> new DisxAdvancedJukeboxMinecartItem(new Item.Properties().stacksTo(1).arch$tab(tab))
+                () -> new DisxAdvancedJukeboxMinecartItem(new Item.Properties().stacksTo(1).arch$tab(tab.get()))
         );
     }
 }
