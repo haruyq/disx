@@ -3,6 +3,8 @@ package xyz.ar06.disx;
 import dev.architectury.event.events.common.*;
 import dev.architectury.utils.Env;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import xyz.ar06.disx.blocks.DisxAdvancedJukebox;
 import xyz.ar06.disx.blocks.DisxLacquerBlock;
 import xyz.ar06.disx.blocks.DisxRecordPress;
@@ -11,6 +13,7 @@ import xyz.ar06.disx.client_only.DisxClientMain;
 import xyz.ar06.disx.commands.*;
 import xyz.ar06.disx.config.DisxConfigHandler;
 import xyz.ar06.disx.entities.DisxAdvancedJukeboxEntity;
+import xyz.ar06.disx.entities.vehicle.DisxAdvancedJukeboxMinecart;
 import xyz.ar06.disx.items.*;
 import xyz.ar06.disx.recipe_types.DisxCustomDiscRecipe;
 import xyz.ar06.disx.recipe_types.DisxStampRecipe;
@@ -49,6 +52,7 @@ public class DisxMain {
         Registrar<RecipeSerializer<?>> serializerRegistrar = REGISTRAR_MANAGER.get().get(Registries.RECIPE_SERIALIZER);
         Registrar<RecipeType<?>> recipeTypeRegistrar = REGISTRAR_MANAGER.get().get(Registries.RECIPE_TYPE);
         Registrar<SoundEvent> soundEventRegistrar = REGISTRAR_MANAGER.get().get(Registries.SOUND_EVENT);
+        Registrar<EntityType<?>> entityTypeRegistrar = REGISTRAR_MANAGER.get().get(Registries.ENTITY_TYPE);
         //Creative Mode Tab Registration
         RegistrySupplier<CreativeModeTab> creativeModeTab = tabRegistrar.register(new ResourceLocation("disx", "creativemodetab.disx"), () -> CreativeTabRegistry.create(Component.translatable("category.disx.tab"), () -> new ItemStack(itemsRegistrar.get(new ResourceLocation("disx", "blank_disc")))));
         //Item Registration Calls
@@ -57,6 +61,7 @@ public class DisxMain {
         DisxCustomDisc.registerCustomDiscs(itemsRegistrar);
         DisxLacquerDrop.registerItem(itemsRegistrar, creativeModeTab);
         DisxRecordStamp.registerItem(itemsRegistrar);
+        DisxAdvancedJukeboxMinecartItem.registerItem(itemsRegistrar, creativeModeTab);
         //Block Registration Calls
         DisxAdvancedJukebox.registerBlock(blocksRegistrar);
         DisxAdvancedJukebox.registerBlockItem(itemsRegistrar, creativeModeTab);
@@ -87,6 +92,8 @@ public class DisxMain {
         DisxStampRecipe.DisxStampRecipeSerializer.registerSerializer(serializerRegistrar);
         //Sound Event Registration Calls
         DisxSoundEvents.registerAdvancedJukeboxStatic(soundEventRegistrar);
+        //Entity Registration Calls
+        DisxAdvancedJukeboxMinecart.registerEntityType(entityTypeRegistrar);
 
         //Pull Mod Info
         DisxModInfo.pullLatestVersion();

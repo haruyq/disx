@@ -1,7 +1,6 @@
 package xyz.ar06.disx.client_only;
 
 import io.netty.buffer.ByteBuf;
-import xyz.ar06.disx.DisxAudioStreamingNode;
 import xyz.ar06.disx.DisxLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -27,8 +26,8 @@ public class DisxAudioInstanceRegistry {
         DisxClientPacketIndex.ClientPackets.getServerAudioRegistry();
     }
 
-    public static void newAudioPlayer(BlockPos blockPos, ResourceLocation dimension, UUID instanceOwner, boolean loop, int preferredVolume){
-        registry.add(new DisxAudioInstance(blockPos, dimension, instanceOwner, loop, preferredVolume));
+    public static void newAudioPlayer(BlockPos blockPos, ResourceLocation dimension, UUID instanceOwner, boolean loop, int preferredVolume, DisxAudioMotionType motionType){
+        registry.add(new DisxAudioInstance(blockPos, dimension, instanceOwner, loop, preferredVolume, motionType));
         DisxLogger.debug("New DisxAudioInstance registered");
     }
 

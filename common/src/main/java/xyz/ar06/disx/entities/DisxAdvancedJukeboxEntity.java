@@ -5,9 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.WorldlyContainer;
 import org.jetbrains.annotations.Nullable;
-import xyz.ar06.disx.DisxLogger;
-import xyz.ar06.disx.DisxMain;
-import xyz.ar06.disx.DisxServerAudioRegistry;
+import xyz.ar06.disx.*;
 import xyz.ar06.disx.blocks.DisxAdvancedJukebox;
 import dev.architectury.registry.registries.Registrar;
 import dev.architectury.registry.registries.RegistrySupplier;
@@ -85,7 +83,7 @@ public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerS
             String videoId = itemStack.getTag().getString("videoId");
             int jukeboxPower = this.getLevel().getBestNeighborSignal(this.getBlockPos());
             boolean loop = jukeboxPower > 0;
-            DisxServerAudioRegistry.addToRegistry(this.getBlockPos(), videoId, null, level.dimension(), loop);
+            DisxServerAudioRegistry.addToRegistry(this.getBlockPos(), videoId, null, level.dimension(), loop, DisxAudioMotionType.STATIC);
         } else {
             itemInventory.set(i, itemStack);
         }
@@ -98,7 +96,7 @@ public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerS
             String videoId = itemStack.getTag().getString("videoId");
             int jukeboxPower = this.getLevel().getBestNeighborSignal(this.getBlockPos());
             boolean loop = jukeboxPower > 0;
-            DisxServerAudioRegistry.addToRegistry(this.getBlockPos(), videoId, player, level.dimension(), loop);
+            DisxServerAudioRegistry.addToRegistry(this.getBlockPos(), videoId, player, level.dimension(), loop, DisxAudioMotionType.STATIC);
         } else {
             itemInventory.set(i, itemStack);
         }
