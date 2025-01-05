@@ -10,6 +10,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
+import xyz.ar06.disx.DisxAudioMotionType;
+import xyz.ar06.disx.DisxAudioStreamingNode;
 import xyz.ar06.disx.DisxLogger;
 
 import javax.sound.sampled.*;
@@ -40,13 +42,15 @@ public class DisxAudioInstance {
     private boolean playerCanHear;
     private String cachedAudioDeviceName = null;
     private int preferredVolume;
-    public DisxAudioInstance(BlockPos blockPos, ResourceLocation dimension, UUID instanceOwner, boolean loop, int preferredVolume){
+    private DisxAudioMotionType motionType;
+    public DisxAudioInstance(BlockPos blockPos, ResourceLocation dimension, UUID instanceOwner, boolean loop, int preferredVolume, DisxAudioMotionType motionType){
         DisxLogger.debug("New DisxAudioInstance called for; setting details:");
         this.blockPos = blockPos;
         this.dimension = dimension;
         this.instanceOwner = instanceOwner;
         this.loop = loop;
         this.preferredVolume = preferredVolume;
+        this.motionType = motionType;
         DisxLogger.debug("Details set successfully");
         DisxLogger.debug("Building audio line and controls");
         this.buildAudioLine();
