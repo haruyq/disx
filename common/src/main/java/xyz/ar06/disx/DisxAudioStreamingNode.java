@@ -61,7 +61,7 @@ public class DisxAudioStreamingNode {
                     DisxLogger.debug("Is track seekable?: " + track.isSeekable());
                 }
                 cachedTrack = track.makeClone();
-
+                DisxLogger.debug("Track length: " + track.getDuration());
                 audioPlayer.playTrack(track);
                 DisxLogger.debug("Playback starting");
             }
@@ -232,8 +232,18 @@ public class DisxAudioStreamingNode {
                 AudioTrack toLoop = cachedTrack.makeClone();
                 player.playTrack(toLoop);
             } else {
-                DisxLogger.debug("Track finished, loop != true; unregistering send audio data loop and deregistering node");
-                DisxServerAudioRegistry.removeFromRegistry(DisxAudioStreamingNode.this);
+                DisxLogger.debug("Track finished, loop != true; unregistering send audio data loop and deregistering node in 5 seconds");
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        Thread.sleep(5000);
+                        DisxLogger.debug("5 second intermitent window is closed; deregistering audio node");
+                        DisxServerAudioRegistry.removeFromRegistry(DisxAudioStreamingNode.this);
+                    } catch (InterruptedException e) {
+                        DisxLogger.error("Failed to remove DisxAudioStreamingNode from server registry:");
+                        e.printStackTrace();
+                    }
+
+                });
             }
             super.onTrackEnd(player, track, endReason);
         }
