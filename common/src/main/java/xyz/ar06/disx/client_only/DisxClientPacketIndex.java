@@ -1,6 +1,7 @@
 package xyz.ar06.disx.client_only;
 
 import io.netty.buffer.ByteBuf;
+import xyz.ar06.disx.DisxAudioMotionType;
 import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.DisxSystemMessages;
 import xyz.ar06.disx.client_only.gui.screens.DisxStampMakerGUI;
@@ -59,10 +60,12 @@ public class DisxClientPacketIndex  {
             BlockPos newBlockPos = buf.readBlockPos();
             ResourceLocation newDimLocation = buf.readResourceLocation();
             int preferredVolume = buf.readInt();
+            String motionTypeUtf = buf.readUtf();
+            DisxAudioMotionType motionType = DisxAudioMotionType.valueOf(motionTypeUtf);
             if (type.equals("add")){
                 DisxLogger.debug("calling for add");
                 CompletableFuture.runAsync(() -> {
-                    DisxAudioInstanceRegistry.newAudioPlayer(blockPos, dimensionLocation, instanceOwner, loop, preferredVolume);
+                    DisxAudioInstanceRegistry.newAudioPlayer(blockPos, dimensionLocation, instanceOwner, loop, preferredVolume, motionType);
                 });
             }
             if (type.equals("remove")){

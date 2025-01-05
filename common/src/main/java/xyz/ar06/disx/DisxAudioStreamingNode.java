@@ -45,8 +45,9 @@ public class DisxAudioStreamingNode {
     private int lastPosition;
     private boolean paused = false;
 
+    private DisxAudioMotionType motionType;
 
-    public DisxAudioStreamingNode(String videoId, BlockPos blockPos, ResourceLocation dimension, Player nodeOwner, boolean loop, int startTime){
+    public DisxAudioStreamingNode(String videoId, BlockPos blockPos, ResourceLocation dimension, Player nodeOwner, boolean loop, int startTime, DisxAudioMotionType motionType){
         DisxLogger.debug("New Audio Streaming Node called for; setting details");
         this.videoId = videoId;
         this.blockPos = blockPos;
@@ -55,6 +56,7 @@ public class DisxAudioStreamingNode {
         this.loop = loop;
         this.audioPlayer.addListener(new TrackHandler());
         this.preferredVolume = 100;
+        this.motionType = motionType;
         DisxLogger.debug("Track handler intialized");
         String url = "http://disxytsourceapi.ar06.xyz/stream_audio?id=" + videoId;
         DisxLogger.debug("Attempting to load requested video");
@@ -313,6 +315,10 @@ public class DisxAudioStreamingNode {
 
     public static double getStreamInterval() {
         return streamInterval;
+    }
+
+    public DisxAudioMotionType getMotionType() {
+        return motionType;
     }
 
     public class TrackHandler extends AudioEventAdapter {
