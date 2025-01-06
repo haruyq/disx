@@ -129,7 +129,7 @@ public class DisxAudioInstanceRegistry {
                     int bitDepth = 16;
                     int frameSize = (bitDepth / 8) * FORMAT.channelCount;
                     int sampleRate = FORMAT.sampleRate;
-                    int chunkSize = sampleRate * frameSize * 5; //(calculates to 882000)
+                    int chunkSize = (int) (sampleRate * frameSize * 2.5); //(calculates to 882000)
                     byte[] audioData = new byte[chunkSize];
                     buf.readBytes(audioData);
                     instance.addToPacketDataQueue(audioData);
