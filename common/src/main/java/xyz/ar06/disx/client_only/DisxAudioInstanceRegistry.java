@@ -13,6 +13,8 @@ import xyz.ar06.disx.DisxSystemMessages;
 
 import java.util.*;
 
+import static xyz.ar06.disx.DisxAudioStreamingNode.FORMAT;
+
 @Environment(EnvType.CLIENT)
 public class DisxAudioInstanceRegistry {
 
@@ -124,7 +126,11 @@ public class DisxAudioInstanceRegistry {
         try {
             for (DisxAudioInstance instance : registry){
                 if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension)){
-                    byte[] audioData = new byte[882000];
+                    int bitDepth = 16;
+                    int frameSize = (bitDepth / 8) * FORMAT.channelCount;
+                    int sampleRate = FORMAT.sampleRate;
+                    int chunkSize = sampleRate * frameSize * 5; //(calculates to 882000)
+                    byte[] audioData = new byte[chunkSize];
                     buf.readBytes(audioData);
                     instance.addToPacketDataQueue(audioData);
                     break;

@@ -456,6 +456,7 @@ public class DisxConfigHandler {
 
         public static void updateProperty(String key, String value){
             properties.setProperty(key, value);
+            DisxModInfo.setDEBUG(Boolean.parseBoolean(getProperty("debug_mode")));
             updateConfigFile();
         }
 

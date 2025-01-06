@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 public class DisxAudioStreamingNode {
-    private static AudioDataFormat FORMAT = StandardAudioDataFormats.COMMON_PCM_S16_BE;
+    public static AudioDataFormat FORMAT = StandardAudioDataFormats.COMMON_PCM_S16_BE;
     private static DefaultAudioPlayerManager playerManager;
     private AudioPlayer audioPlayer = new DefaultAudioPlayer(playerManager);
     private AudioInputStream inputStream = AudioPlayerInputStream.createStream(audioPlayer, FORMAT, 99999999L, true);
@@ -92,7 +92,11 @@ public class DisxAudioStreamingNode {
     private void sendAudioData() {
         CompletableFuture.runAsync(() -> {
             try {
-                byte[] buffer = new byte[882000];
+                int bitDepth = 16;
+                int frameSize = (bitDepth / 8) * FORMAT.channelCount;
+                int sampleRate = FORMAT.sampleRate;
+                int chunkSize = (int) (sampleRate * frameSize * 2.5); //(calculates to 441000)
+                byte[] buffer = new byte[chunkSize];
                 int bytesRead;
                 if (inputStream != null){
                     while ((bytesRead = inputStream.read(buffer)) >= 0 && inputStream != null && !this.audioPlayer.isPaused()) {
@@ -105,7 +109,7 @@ public class DisxAudioStreamingNode {
                                 DisxServerPacketIndex.ServerPackets.audioData(p, buf);
                             }
                         }
-                        Thread.sleep(5000);
+                        Thread.sleep(2500);
                     }
                 }
             } catch (Exception e) {
@@ -231,12 +235,12 @@ public class DisxAudioStreamingNode {
                 DisxLogger.debug("Track finished, loop = true; replaying track");
                 AudioTrack toLoop = cachedTrack.makeClone();
                 player.playTrack(toLoop);
-            } else {
+            } else if (endReason.equals(AudioTrackEndReason.FINISHED)) {
                 DisxLogger.debug("Track finished, loop != true; unregistering send audio data loop and deregistering node in 5 seconds");
                 CompletableFuture.runAsync(() -> {
                     try {
-                        Thread.sleep(5000);
-                        DisxLogger.debug("5 second intermitent window is closed; deregistering audio node");
+                        Thread.sleep(3500);
+                        DisxLogger.debug("3.5 second intermitent window is closed; deregistering audio node");
                         DisxServerAudioRegistry.removeFromRegistry(DisxAudioStreamingNode.this);
                     } catch (InterruptedException e) {
                         DisxLogger.error("Failed to remove DisxAudioStreamingNode from server registry:");
