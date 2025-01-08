@@ -1,6 +1,8 @@
 package xyz.ar06.disx.client_only;
 
 import io.netty.buffer.ByteBuf;
+import xyz.ar06.disx.DisxAudioMotionType;
+import xyz.ar06.disx.DisxAudioStreamingNode;
 import xyz.ar06.disx.DisxLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
