@@ -12,7 +12,7 @@ import java.net.http.HttpResponse;
 import java.util.HashMap;
 
 public class DisxModInfo {
-    private static final String VERSION = "0.2.1-dev-0ab6426d";
+    private static final String VERSION = "0.2.1-dev-e41ffe81";
     private static final boolean DEV_BUILD = true;
     private static final boolean FORCE_DEBUG = true;
     private static final String[] debugKeys = new String[]{

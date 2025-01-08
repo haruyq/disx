@@ -144,9 +144,9 @@ public class DisxAudioStreamingNode {
                                 audioDataCache.reset();
                                 this.streamAudioData();
                             } else {
-                                //DisxLogger.debug("Audio streaming finished; loop != true; waiting to deregister audio node if not already done so");
-                                //Thread.sleep(((long) streamInterval * 1000L) + 1000L);
-                                DisxLogger.debug("Audio streaming finished; loop != true; deregistering audio node if not already done so");
+                                DisxLogger.debug("Audio streaming finished; loop != true; waiting to deregister audio node if not already done so");
+                                Thread.sleep(((long) streamInterval * 1000L) + 1000L);
+                                DisxLogger.debug("deregistering audio node if not already done so");
                                 DisxServerAudioRegistry.removeFromRegistry(DisxAudioStreamingNode.this);
                             }
 
