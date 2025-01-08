@@ -59,6 +59,9 @@ public class DisxServerAudioRegistry {
     public static void removeFromRegistry(DisxAudioStreamingNode node){
         BlockPos pos = node.getBlockPos();
         ResourceLocation dimensionLocation = node.getDimension();
+        if (pos == null || dimensionLocation == null){
+            return;
+        }
         players.forEach(plr -> {
             DisxServerPacketIndex.ServerPackets.playerRegistryEvent("remove", (Player) plr, pos, dimensionLocation, UUID.randomUUID(), false, pos, dimensionLocation, 100);
         });

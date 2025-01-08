@@ -1,6 +1,7 @@
 package xyz.ar06.disx.client_only;
 
 import io.netty.buffer.ByteBuf;
+import xyz.ar06.disx.DisxAudioStreamingNode;
 import xyz.ar06.disx.DisxLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -129,7 +130,8 @@ public class DisxAudioInstanceRegistry {
                     int bitDepth = 16;
                     int frameSize = (bitDepth / 8) * FORMAT.channelCount;
                     int sampleRate = FORMAT.sampleRate;
-                    int chunkSize = (int) (sampleRate * frameSize * 2.5); //(calculates to 882000)
+                    double streamInterval = DisxAudioStreamingNode.getStreamInterval();
+                    int chunkSize = (int) (sampleRate * frameSize * streamInterval); //(calculates to 441000)
                     byte[] audioData = new byte[chunkSize];
                     buf.readBytes(audioData);
                     instance.addToPacketDataQueue(audioData);
