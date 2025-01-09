@@ -61,7 +61,12 @@ public class DisxClientPacketIndex  {
             ResourceLocation newDimLocation = buf.readResourceLocation();
             int preferredVolume = buf.readInt();
             String motionTypeUtf = buf.readUtf();
-            DisxAudioMotionType motionType = DisxAudioMotionType.valueOf(motionTypeUtf);
+            DisxAudioMotionType motionType;
+            if (!motionTypeUtf.isEmpty()){
+                motionType = DisxAudioMotionType.valueOf(motionTypeUtf);
+            } else {
+                motionType = null;
+            }
             if (type.equals("add")){
                 DisxLogger.debug("calling for add");
                 CompletableFuture.runAsync(() -> {
