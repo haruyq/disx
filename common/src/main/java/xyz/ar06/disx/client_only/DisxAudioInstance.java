@@ -4,6 +4,7 @@ import dev.architectury.event.events.client.ClientTickEvent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.core.BlockPos;
@@ -56,8 +57,7 @@ public class DisxAudioInstance {
         this.buildAudioLine();
         DisxLogger.debug("Audio line and controls built");
         try {
-            ClientTickEvent.CLIENT_POST.register(this::writingLoop);
-            ClientTickEvent.CLIENT_POST.register(this::volumeLoop);
+            ClientTickEvent.CLIENT_LEVEL_POST.register(this::loops);
         } catch (ConcurrentModificationException e){
             DisxLogger.error("Error registering writing and volume loops:");
             e.printStackTrace();
@@ -66,10 +66,16 @@ public class DisxAudioInstance {
         DisxLogger.debug("DisxAudioInstance initialized successfully!");
     }
 
+    private void loops(ClientLevel clientLevel){
+        this.writingLoop(clientLevel);
+        this.volumeLoop(clientLevel);
+    }
+
     public void deconstruct(){
+        DisxLogger.debug("call for deconstruct");
         try {
-            ClientTickEvent.CLIENT_POST.unregister(this::writingLoop);
-            ClientTickEvent.CLIENT_POST.unregister(this::volumeLoop);
+            //ClientTickEvent.CLIENT_POST.unregister(this::loops);
+            ClientTickEvent.CLIENT_LEVEL_POST.unregister(this::loops);
         } catch (ConcurrentModificationException e){
             DisxLogger.error("Error deregistering writing and volume loops:");
             e.printStackTrace();
@@ -143,7 +149,7 @@ public class DisxAudioInstance {
     public void addToPacketDataQueue(byte[] data){
         this.audioDataPacketQueue.add(data);
     }
-    private void writingLoop(Minecraft minecraft){
+    private void writingLoop(ClientLevel clientLevel){
         CompletableFuture.runAsync(() -> {
             if (!writingToLine && !audioDataPacketQueue.isEmpty() && this.audioLine != null){
                 writingToLine = true;
@@ -190,7 +196,7 @@ public class DisxAudioInstance {
 
     }
 
-    private void volumeLoop(Minecraft minecraft) {
+    private void volumeLoop(ClientLevel clientLevel) {
         if (this.volumeControl != null && this.balanceControl != null && this.audioLine != null) {
             LocalPlayer plr = Minecraft.getInstance().player;
             ResourceLocation dimension = this.dimension;
