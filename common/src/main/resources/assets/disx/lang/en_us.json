@@ -36,6 +36,8 @@
   "sysmsg.disx.loop_disabled": "Loop Disabled!",
   "sysmsg.disx.paused_audio": "Paused Audio!",
   "sysmsg.disx.resumed_audio": "Resumed Audio!",
+  "sysmsg.disx.updated_disc_name": "[%s]: Found updated video name for your disc, it has been applied to it!",
+  "sysmsg.disx.updated_disc_name.name": "Name: %s",
   "sysmsg.disx.notice_outdated": "Disx Notice: Mod is Outdated!",
   "sysmsg.disx.outdated_version_count": "You are %d version(s) behind!",
   "sysmsg.disx.outdated_version_info": "Installed Version: %s, Latest Version: %s",
