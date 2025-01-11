@@ -22,14 +22,19 @@ import net.minecraft.world.entity.player.Player;
 import org.apache.http.client.config.RequestConfig;
 
 import javax.sound.sampled.AudioInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class DisxAudioStreamingNode {
-    private static AudioDataFormat FORMAT = StandardAudioDataFormats.COMMON_PCM_S16_BE;
+    public static AudioDataFormat FORMAT = StandardAudioDataFormats.COMMON_PCM_S16_BE;
     private static DefaultAudioPlayerManager playerManager;
+    private static double streamInterval = 5;
     private AudioPlayer audioPlayer = new DefaultAudioPlayer(playerManager);
     private AudioInputStream inputStream = AudioPlayerInputStream.createStream(audioPlayer, FORMAT, 99999999L, true);
+    private ByteArrayInputStream audioDataCache;
     private BlockPos blockPos;
     private ResourceLocation dimension;
     private Player nodeOwner;
@@ -38,10 +43,14 @@ public class DisxAudioStreamingNode {
     private AudioTrack cachedTrack;
 
     private int preferredVolume;
-    private DisxAudioMotionType motionType;
+    private int lastPosition;
+    private boolean paused = false;
 
-    public DisxAudioStreamingNode(String videoId, BlockPos blockPos, ResourceLocation dimension, Player nodeOwner, boolean loop, int startTime, DisxAudioMotionType motionType){
-        DisxLogger.debug("New Audio Streaming Node called for; setting details");
+    private DisxAudioMotionType motionType;
+    private UUID entityUuid;
+
+    public DisxAudioStreamingNode(String videoId, BlockPos blockPos, ResourceLocation dimension, Player nodeOwner, boolean loop, int startTime, DisxAudioMotionType motionType, UUID entityUuid){
+        DisxLogger.debug("New Audio Streaming Node called for; setting details (MOTION TYPE: " + motionType.name() + ")");
         this.videoId = videoId;
         this.blockPos = blockPos;
         this.dimension = dimension;
@@ -50,6 +59,7 @@ public class DisxAudioStreamingNode {
         this.audioPlayer.addListener(new TrackHandler());
         this.preferredVolume = 100;
         this.motionType = motionType;
+        this.entityUuid = entityUuid;
         DisxLogger.debug("Track handler intialized");
         String url = "http://disxytsourceapi.ar06.xyz/stream_audio?id=" + videoId;
         DisxLogger.debug("Attempting to load requested video");
@@ -63,9 +73,10 @@ public class DisxAudioStreamingNode {
                     DisxLogger.debug("Is track seekable?: " + track.isSeekable());
                 }
                 cachedTrack = track.makeClone();
-
+                DisxLogger.debug("Track length: " + track.getDuration());
                 audioPlayer.playTrack(track);
-                DisxLogger.debug("Playback starting");
+                DisxLogger.debug("Ordering audio data cache to be built");
+                DisxAudioStreamingNode.this.readAudioInputStream();
             }
 
             @Override
@@ -84,35 +95,118 @@ public class DisxAudioStreamingNode {
             @Override
             public void loadFailed(FriendlyException exception) {
                 DisxLogger.error("Unable to load specified video:");
+                DisxLogger.error("MESSAGE: " + exception.getMessage());
                 exception.printStackTrace();
                 DisxSystemMessages.errorLoading(nodeOwner);
             }
         });
     }
 
-    private boolean audioDataLoopRunning = false;
-    private void sendAudioData() {
+    private void streamAudioData() {
         CompletableFuture.runAsync(() -> {
             try {
-                byte[] buffer = new byte[882000];
-                int bytesRead;
-                if (inputStream != null){
-                    while ((bytesRead = inputStream.read(buffer)) >= 0 && inputStream != null && !this.audioPlayer.isPaused()) {
-                        if (this.blockPos != null && this.dimension != null){
+                int bitDepth = 16;
+                int frameSize = (bitDepth / 8) * FORMAT.channelCount;
+                int sampleRate = FORMAT.sampleRate;
+                int chunkSize = (int) (sampleRate * frameSize * streamInterval); //(calculates to 882000)
+                byte[] buffer = new byte[chunkSize];
+                if (audioDataCache != null){
+                    int bytesRead;
+                    int currentPosition = 0;
+
+                    /*if (lastPosition != 0){
+                        DisxLogger.debug("Audio was previously paused, skipping to last known position");
+                        audioDataGate.skip(lastPosition);
+                        currentPosition = lastPosition;
+                        lastPosition = 0;
+                    }*/
+                    while (audioDataCache != null && !this.isPaused()){
+                        bytesRead = audioDataCache.read(buffer);
+                        if (bytesRead != 0 && bytesRead != -1){
+                            //currentPosition += chunkSize;
                             for (Player p : DisxServerAudioRegistry.getMcPlayers()) {
                                 FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
                                 buf.writeBlockPos(this.blockPos);
                                 buf.writeResourceLocation(this.dimension);
+                                buf.writeUtf(this.motionType.name());
+                                buf.writeUUID(this.entityUuid);
                                 buf.writeBytes(buffer, 0, bytesRead);
                                 DisxServerPacketIndex.ServerPackets.audioData(p, buf);
                             }
+                            Thread.sleep((long) (streamInterval * 1000L));
+                        } else {
+                            break;
                         }
-                        Thread.sleep(5000);
                     }
+                    if (this.isPaused()){
+                        DisxLogger.debug("Audio was paused; streaming should stop");
+                        //lastPosition = currentPosition;
+                    } else if (this.blockPos == null || this.dimension == null){
+                        DisxLogger.debug("Audio streaming stopped; audio node deregistered?");
+                        //DisxServerAudioRegistry.removeFromRegistry(DisxAudioStreamingNode.this);
+                    } else {
+                        try {
+                            if (loop){
+                                DisxLogger.debug("Audio streaming finished; loop == true; calling for restream");
+                                audioDataCache.reset();
+                                this.streamAudioData();
+                            } else {
+                                DisxLogger.debug("Audio streaming finished; loop != true; waiting to deregister audio node if not already done so");
+                                Thread.sleep(((long) streamInterval * 1000L) + 1000L);
+                                DisxLogger.debug("deregistering audio node if not already done so");
+                                DisxServerAudioRegistry.removeFromRegistry(DisxAudioStreamingNode.this);
+                            }
+
+                        } catch (Exception e) {
+                            DisxLogger.error("Failed to remove DisxAudioStreamingNode from server registry:");
+                            e.printStackTrace();
+                        }
+                    }
+
+                } else {
+                    DisxLogger.error("Audio data cache is null");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        });
+    }
+    private void readAudioInputStream(){
+        CompletableFuture.runAsync(() -> {
+           try {
+               int bitDepth = 16;
+               int frameSize = (bitDepth / 8) * FORMAT.channelCount;
+               int sampleRate = FORMAT.sampleRate;
+               int bytesPerSecond = sampleRate * frameSize;
+               int bufferSize = frameSize * 480;
+               byte[] buffer = new byte[bufferSize];
+               int bytesRead;
+               ByteArrayOutputStream audioDataBridge = new ByteArrayOutputStream();
+               if (inputStream != null){
+                   DisxLogger.debug("Reading audio input stream");
+                   while (inputStream != null) {
+                       if (this.blockPos != null && this.dimension != null){
+                           bytesRead = inputStream.read(buffer);
+                           audioDataBridge.write(buffer, 0, bytesRead);
+                           //long sleepTimeMs = (bytesRead * 1000L) / bytesPerSecond;
+                           //Thread.sleep(sleepTimeMs);
+                       }
+                   }
+                   DisxLogger.debug("Audio input stream read; creating cache");
+                   this.audioDataCache = new ByteArrayInputStream(audioDataBridge.toByteArray());
+                   audioDataBridge.close();
+                   DisxLogger.debug("Audio data cached successfully; sending now playing message, registering data stream loop; dismantling DefaultAudioPlayer object");
+                   DisxServerPacketIndex.ServerPackets.playingVideoIdMessage(DisxAudioStreamingNode.this.videoId, DisxAudioStreamingNode.this.nodeOwner);
+                   DisxAudioStreamingNode.this.streamAudioData();
+                   this.audioPlayer.stopTrack();
+                   this.audioPlayer.destroy();
+                   this.audioPlayer = null;
+               } else {
+                   DisxLogger.error("Audio input stream is null!");
+               }
+           } catch (Exception e){
+               e.printStackTrace();
+           }
         });
     }
 
@@ -132,15 +226,22 @@ public class DisxAudioStreamingNode {
         if (this.audioPlayer != null){
             this.audioPlayer.stopTrack();
             this.audioPlayer.destroy();
+            this.audioPlayer = null;
         }
         this.blockPos = null;
         this.dimension = null;
         this.loop = false;
         this.nodeOwner = null;
         this.videoId = null;
+        this.paused = false;
         try {
             if (this.inputStream != null){
                 this.inputStream.close();
+                this.inputStream = null;
+            }
+            if (this.audioDataCache != null){
+                this.audioDataCache.close();
+                this.audioDataCache = null;
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -148,12 +249,12 @@ public class DisxAudioStreamingNode {
     }
 
     public void pausePlayer(){
-        this.audioPlayer.setPaused(true);
+        this.paused = true;
     }
 
     public void resumePlayer(){
-        this.audioPlayer.setPaused(false);
-        this.sendAudioData();
+        this.paused = false;
+        this.streamAudioData();
     }
 
     public BlockPos getBlockPos() {
@@ -177,7 +278,7 @@ public class DisxAudioStreamingNode {
     }
 
     public boolean isPaused(){
-        return this.audioPlayer.isPaused();
+        return this.paused;
     }
 
     public static void shutdownPlayerManager(){
@@ -217,30 +318,60 @@ public class DisxAudioStreamingNode {
         return preferredVolume;
     }
 
+    public static double getStreamInterval() {
+        return streamInterval;
+    }
+
     public DisxAudioMotionType getMotionType() {
         return motionType;
+    }
+
+    public UUID getEntityUuid() {
+        return entityUuid;
     }
 
     public class TrackHandler extends AudioEventAdapter {
         @Override
         public void onTrackStart(AudioPlayer player, AudioTrack track) {
+            /*
             DisxLogger.debug("Calling for now playing message packet to be sent");
             DisxServerPacketIndex.ServerPackets.playingVideoIdMessage(DisxAudioStreamingNode.this.videoId, DisxAudioStreamingNode.this.nodeOwner);
-            DisxLogger.debug("Audio starting; registered audio data send loop");
-            DisxAudioStreamingNode.this.sendAudioData();
+            DisxLogger.debug("Audio starting; registered audio data read and send loops");
+*/
             super.onTrackStart(player, track);
         }
 
         @Override
         public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
+            if (endReason.equals(AudioTrackEndReason.FINISHED)){
+                try {
+                    DisxLogger.debug("Input stream read reached end of audio; closing audio input stream");
+                    inputStream.close();
+                    DisxAudioStreamingNode.this.inputStream = null;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            /*
             if (loop && endReason.equals(AudioTrackEndReason.FINISHED)){
                 DisxLogger.debug("Track finished, loop = true; replaying track");
                 AudioTrack toLoop = cachedTrack.makeClone();
                 player.playTrack(toLoop);
-            } else {
-                DisxLogger.debug("Track finished, loop != true; unregistering send audio data loop and deregistering node");
-                DisxServerAudioRegistry.removeFromRegistry(DisxAudioStreamingNode.this);
+            } else if (endReason.equals(AudioTrackEndReason.FINISHED)){
+                    DisxLogger.debug("Track finished, loop != true; unregistering send audio data loop and deregistering node in 6 second delay");
+                    CompletableFuture.runAsync(() -> {
+                        try {
+                            Thread.sleep(6000);
+                            DisxLogger.debug("6 second finish window is closed; deregistering audio node");
+                            DisxServerAudioRegistry.removeFromRegistry(DisxAudioStreamingNode.this);
+                        } catch (Exception e) {
+                            DisxLogger.error("Failed to remove DisxAudioStreamingNode from server registry:");
+                            e.printStackTrace();
+                        }
+
+                    });
             }
+             */
             super.onTrackEnd(player, track, endReason);
         }
     }
