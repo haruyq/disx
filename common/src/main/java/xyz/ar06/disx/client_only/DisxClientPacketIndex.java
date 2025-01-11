@@ -57,8 +57,6 @@ public class DisxClientPacketIndex  {
             ResourceLocation dimensionLocation = buf.readResourceLocation();
             UUID instanceOwner = buf.readUUID();
             Boolean loop = Boolean.valueOf(buf.readUtf());
-            BlockPos newBlockPos = buf.readBlockPos();
-            ResourceLocation newDimLocation = buf.readResourceLocation();
             int preferredVolume = buf.readInt();
             String motionTypeUtf = buf.readUtf();
             DisxAudioMotionType motionType;
@@ -67,20 +65,30 @@ public class DisxClientPacketIndex  {
             } else {
                 motionType = null;
             }
+            UUID entityUuid = buf.readUUID();
             if (type.equals("add")){
                 DisxLogger.debug("calling for add");
                 CompletableFuture.runAsync(() -> {
-                    DisxAudioInstanceRegistry.newAudioPlayer(blockPos, dimensionLocation, instanceOwner, loop, preferredVolume, motionType);
+                    DisxAudioInstanceRegistry.newAudioPlayer(blockPos, dimensionLocation, instanceOwner, loop, preferredVolume, motionType, entityUuid);
                 });
             }
             if (type.equals("remove")){
                 CompletableFuture.runAsync(() -> {
-                    DisxAudioInstanceRegistry.removeAudioInstance(blockPos, dimensionLocation);
+                    if (motionType.equals(DisxAudioMotionType.LIVE)){
+                        DisxAudioInstanceRegistry.removeAudioInstance(entityUuid);
+                    } else {
+                        DisxAudioInstanceRegistry.removeAudioInstance(blockPos, dimensionLocation);
+                    }
+
                 });
             }
             if (type.equals("modify")){
                 CompletableFuture.runAsync(() -> {
-                    DisxAudioInstanceRegistry.modifyAudioInstance(blockPos, dimensionLocation, newBlockPos, newDimLocation, loop, preferredVolume);
+                    if (motionType.equals(DisxAudioMotionType.LIVE)){
+                        DisxAudioInstanceRegistry.modifyAudioInstance(entityUuid, loop, preferredVolume);
+                    } else {
+                        DisxAudioInstanceRegistry.modifyAudioInstance(blockPos, dimensionLocation, loop, preferredVolume);
+                    }
                 });
             }
         }
@@ -121,8 +129,16 @@ public class DisxClientPacketIndex  {
             }
             BlockPos blockPos = buf.readBlockPos();
             ResourceLocation dimension = buf.readResourceLocation();
+            String motionTypeUtf = buf.readUtf();
+            DisxAudioMotionType motionType;
+            if (!motionTypeUtf.isEmpty()){
+                motionType = DisxAudioMotionType.valueOf(motionTypeUtf);
+            } else {
+                motionType = DisxAudioMotionType.STATIC;
+            }
+            UUID entityUuid = buf.readUUID();
             ByteBuf bufCopy = buf.copy();
-            CompletableFuture.runAsync(() -> DisxAudioInstanceRegistry.routeAudioData(bufCopy, blockPos, dimension));
+            CompletableFuture.runAsync(() -> DisxAudioInstanceRegistry.routeAudioData(bufCopy, blockPos, dimension, entityUuid, motionType));
         }
 
         public static void receiveLoopMsg(FriendlyByteBuf buf, NetworkManager.PacketContext context){
@@ -173,15 +189,17 @@ public class DisxClientPacketIndex  {
             );
         }
 
-        public static void scrolledCheckHit(BlockPos blockPos, double amount){
+        public static void scrolledCheckHit(BlockPos blockPos, double amount, UUID entityUuid){
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
             buf.writeBlockPos(blockPos);
             buf.writeDouble(amount);
+            buf.writeUUID(entityUuid);
             NetworkManager.sendToServer(
                     new ResourceLocation("disx","scrolledcheckhit"),
                     buf
             );
         }
+
     }
 
 }

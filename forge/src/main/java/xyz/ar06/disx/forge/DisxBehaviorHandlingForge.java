@@ -3,8 +3,10 @@ package xyz.ar06.disx.forge;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.client.event.ClientChatEvent;
 import net.minecraftforge.client.event.InputEvent;
@@ -13,6 +15,7 @@ import xyz.ar06.disx.DisxModInfo;
 import xyz.ar06.disx.DisxSystemMessages;
 import xyz.ar06.disx.blocks.DisxAdvancedJukebox;
 import xyz.ar06.disx.config.DisxConfigHandler;
+import xyz.ar06.disx.entities.vehicle.DisxAdvancedJukeboxMinecart;
 
 public class DisxBehaviorHandlingForge {
     @SubscribeEvent
@@ -24,6 +27,16 @@ public class DisxBehaviorHandlingForge {
                 if (level != null){
                     BlockPos blockPos = ((BlockHitResult) hitResult).getBlockPos();
                     if (level.getBlockState(blockPos).getBlock().equals(DisxAdvancedJukebox.blockRegistration.get())){
+                        event.setCanceled(true);
+                    }
+                }
+            }
+            if (hitResult.getType().equals(HitResult.Type.ENTITY)){
+                Level level = Minecraft.getInstance().level;
+                if (level != null){
+                    EntityHitResult entityHitResult = (EntityHitResult) hitResult;
+                    Entity entity = entityHitResult.getEntity();
+                    if (entity.getType().equals(DisxAdvancedJukeboxMinecart.entityTypeRegistration.get())){
                         event.setCanceled(true);
                     }
                 }

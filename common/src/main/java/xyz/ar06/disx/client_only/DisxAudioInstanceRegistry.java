@@ -28,36 +28,16 @@ public class DisxAudioInstanceRegistry {
         DisxClientPacketIndex.ClientPackets.getServerAudioRegistry();
     }
 
-    public static void newAudioPlayer(BlockPos blockPos, ResourceLocation dimension, UUID instanceOwner, boolean loop, int preferredVolume, DisxAudioMotionType motionType){
-        registry.add(new DisxAudioInstance(blockPos, dimension, instanceOwner, loop, preferredVolume, motionType));
+    public static void newAudioPlayer(BlockPos blockPos, ResourceLocation dimension, UUID instanceOwner, boolean loop, int preferredVolume, DisxAudioMotionType motionType, UUID entityUuid){
+        registry.add(new DisxAudioInstance(blockPos, dimension, instanceOwner, loop, preferredVolume, motionType, entityUuid));
         DisxLogger.debug("New DisxAudioInstance registered");
     }
-
-    public static void registerAudioPlayer(DisxAudioPlayerDetails playerDetails){
-        //registry.add(playerDetails);
-    }
-
-    public static void deregisterAudioPlayer(BlockPos blockPos, ResourceLocation dimension){
-        /*
-        ArrayList<DisxAudioPlayerDetails> toRemove = new ArrayList<>();
-        for (DisxAudioPlayerDetails details : registry){
-            if (details.getBlockPos().equals(blockPos) && details.getDimension().equals(dimension)){
-                toRemove.add(details);
-            }
-        }
-
-        for (DisxAudioPlayerDetails details : toRemove){
-            details.getDisxAudioPlayer().dumpsterAudioPlayer();
-            details.clearDetails();
-            registry.remove(details);
-        }*/
-    };
 
     public static void removeAudioInstance(BlockPos blockPos, ResourceLocation dimension){
         DisxAudioInstance toRemove = null;
         try {
             for (DisxAudioInstance instance : registry){
-                if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension)){
+                if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension) && instance.getMotionType().equals(DisxAudioMotionType.STATIC)){
                     toRemove = instance;
                     instance.deconstruct();
                     break;
@@ -73,12 +53,49 @@ public class DisxAudioInstanceRegistry {
 
     }
 
-    public static void modifyAudioInstance(BlockPos blockPos, ResourceLocation dimension, BlockPos newBlockPos, ResourceLocation newDimension, Boolean loop, int preferredVolume){
+    public static void removeAudioInstance(UUID entityUuid){
+        DisxAudioInstance toRemove = null;
         try {
             for (DisxAudioInstance instance : registry){
-                if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension)){
-                    instance.setBlockPos(newBlockPos);
-                    instance.setDimension(newDimension);
+                if (instance.getEntityUuid().equals(entityUuid) && instance.getMotionType().equals(DisxAudioMotionType.LIVE)){
+                    toRemove = instance;
+                    instance.deconstruct();
+                    break;
+                }
+            }
+            if (toRemove != null){
+                registry.remove(toRemove);
+            }
+        } catch (ConcurrentModificationException e){
+            DisxLogger.error("Encountered error in request to remove audio instance:");
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void modifyAudioInstance(BlockPos blockPos, ResourceLocation dimension, Boolean loop, int preferredVolume){
+        try {
+            for (DisxAudioInstance instance : registry){
+                if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension) && instance.getMotionType().equals(DisxAudioMotionType.STATIC)){
+                    if (loop != null){
+                        instance.setLoop(loop);
+                    }
+                    if (preferredVolume != -1){
+                        instance.setPreferredVolume(preferredVolume);
+                    }
+                    break;
+                }
+            }
+        } catch (ConcurrentModificationException e){
+            DisxLogger.error("Encountered error in request to remove audio instance:");
+            e.printStackTrace();
+        }
+    }
+
+    public static void modifyAudioInstance(UUID entityUuid, Boolean loop, int preferredVolume){
+        try {
+            for (DisxAudioInstance instance : registry){
+                if (instance.getEntityUuid().equals(entityUuid) && instance.getMotionType().equals(DisxAudioMotionType.LIVE)){
                     if (loop != null){
                         instance.setLoop(loop);
                     }
@@ -122,23 +139,39 @@ public class DisxAudioInstanceRegistry {
         */
     }
 
-    public static void routeAudioData(ByteBuf buf, BlockPos blockPos, ResourceLocation dimension){
+    public static void routeAudioData(ByteBuf buf, BlockPos blockPos, ResourceLocation dimension, UUID entityUuid, DisxAudioMotionType motionType){
         if (!buf.isReadable()){
             DisxLogger.error("No readable data found in received audio data packet!");
             return;
         }
         try {
-            for (DisxAudioInstance instance : registry){
-                if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension)){
-                    int bitDepth = 16;
-                    int frameSize = (bitDepth / 8) * FORMAT.channelCount;
-                    int sampleRate = FORMAT.sampleRate;
-                    double streamInterval = DisxAudioStreamingNode.getStreamInterval();
-                    int chunkSize = (int) (sampleRate * frameSize * streamInterval); //(calculates to 441000)
-                    byte[] audioData = new byte[chunkSize];
-                    buf.readBytes(audioData);
-                    instance.addToPacketDataQueue(audioData);
-                    break;
+            if (motionType.equals(DisxAudioMotionType.STATIC)){
+                for (DisxAudioInstance instance : registry){
+                    if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension) && instance.getMotionType().equals(DisxAudioMotionType.STATIC)){
+                        int bitDepth = 16;
+                        int frameSize = (bitDepth / 8) * FORMAT.channelCount;
+                        int sampleRate = FORMAT.sampleRate;
+                        double streamInterval = DisxAudioStreamingNode.getStreamInterval();
+                        int chunkSize = (int) (sampleRate * frameSize * streamInterval); //(calculates to 441000)
+                        byte[] audioData = new byte[chunkSize];
+                        buf.readBytes(audioData);
+                        instance.addToPacketDataQueue(audioData);
+                        break;
+                    }
+                }
+            } else {
+                for (DisxAudioInstance instance : registry){
+                    if (instance.getEntityUuid().equals(entityUuid) && instance.getMotionType().equals(DisxAudioMotionType.LIVE)){
+                        int bitDepth = 16;
+                        int frameSize = (bitDepth / 8) * FORMAT.channelCount;
+                        int sampleRate = FORMAT.sampleRate;
+                        double streamInterval = DisxAudioStreamingNode.getStreamInterval();
+                        int chunkSize = (int) (sampleRate * frameSize * streamInterval); //(calculates to 441000)
+                        byte[] audioData = new byte[chunkSize];
+                        buf.readBytes(audioData);
+                        instance.addToPacketDataQueue(audioData);
+                        break;
+                    }
                 }
             }
         } catch (ConcurrentModificationException e){
@@ -153,7 +186,6 @@ public class DisxAudioInstanceRegistry {
 
     public static void onClientStopping(Minecraft client) {
         clearAllRegisteredInstances();
-        DisxAudioPlayer.shutdownPlayerManager();
     }
 
     public static void onClientPause(){
@@ -196,7 +228,16 @@ public class DisxAudioInstanceRegistry {
 
     public static int getPreferredVolume(BlockPos blockPos, ResourceLocation dimension){
         for (DisxAudioInstance instance : registry){
-            if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension)){
+            if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension) && instance.getMotionType().equals(DisxAudioMotionType.STATIC)){
+                return instance.getPreferredVolume();
+            }
+        }
+        return -1;
+    }
+
+    public static int getPreferredVolume(UUID entityUuid){
+        for (DisxAudioInstance instance : registry){
+            if (instance.getEntityUuid().equals(entityUuid) && instance.getMotionType().equals(DisxAudioMotionType.LIVE)){
                 return instance.getPreferredVolume();
             }
         }

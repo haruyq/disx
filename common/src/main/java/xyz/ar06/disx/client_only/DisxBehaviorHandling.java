@@ -6,14 +6,19 @@ import dev.architectury.event.EventResult;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import xyz.ar06.disx.DisxLogger;
 import xyz.ar06.disx.DisxSystemMessages;
 import xyz.ar06.disx.blocks.DisxAdvancedJukebox;
 import xyz.ar06.disx.blocks.DisxStampMaker;
+import xyz.ar06.disx.entities.vehicle.DisxAdvancedJukeboxMinecart;
+
+import java.util.UUID;
 
 public class DisxBehaviorHandling {
     //for advanced jukebox scrolling
@@ -42,12 +47,37 @@ public class DisxBehaviorHandling {
                         DisxSystemMessages.volumeSetMessage(modifiedVolume);
                         if (currentVolume != modifiedVolume){
                             DisxLogger.debug("sending scrolled packet");
-                            DisxClientPacketIndex.ClientPackets.scrolledCheckHit(blockPos, amount);
+                            DisxClientPacketIndex.ClientPackets.scrolledCheckHit(blockPos, amount, new UUID(0L, 0L));
                         }
                         return EventResult.interrupt(true);
                     }
                 }
-
+            }
+            if (hitResult.getType().equals(HitResult.Type.ENTITY)){
+                EntityHitResult entityHitResult = (EntityHitResult) hitResult;
+                Entity entity = entityHitResult.getEntity();
+                if (entity.getType().equals(DisxAdvancedJukeboxMinecart.entityTypeRegistration.get())){
+                    DisxLogger.debug("Player scrolled on advanced jukebox minecart");
+                    int currentVolume = DisxAudioInstanceRegistry.getPreferredVolume(entity.getUUID());
+                    DisxLogger.debug("Got current volume: " + currentVolume);
+                    if (currentVolume == -1){
+                        return EventResult.pass();
+                    }
+                    int modifiedVolume = currentVolume + ((int) (amount * 10));
+                    if (modifiedVolume < 0){
+                        modifiedVolume = 0;
+                    }
+                    if (modifiedVolume > 200){
+                        modifiedVolume = 200;
+                    }
+                    DisxLogger.debug("sending volume set message");
+                    DisxSystemMessages.volumeSetMessage(modifiedVolume);
+                    if (currentVolume != modifiedVolume){
+                        DisxLogger.debug("sending scrolled packet");
+                        DisxClientPacketIndex.ClientPackets.scrolledCheckHit(BlockPos.ZERO, amount, entity.getUUID());
+                    }
+                    return EventResult.interrupt(true);
+                }
             }
         }
         return EventResult.pass();

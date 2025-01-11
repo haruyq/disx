@@ -25,6 +25,7 @@ import javax.sound.sampled.AudioInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class DisxAudioStreamingNode {
@@ -46,9 +47,10 @@ public class DisxAudioStreamingNode {
     private boolean paused = false;
 
     private DisxAudioMotionType motionType;
+    private UUID entityUuid;
 
-    public DisxAudioStreamingNode(String videoId, BlockPos blockPos, ResourceLocation dimension, Player nodeOwner, boolean loop, int startTime, DisxAudioMotionType motionType){
-        DisxLogger.debug("New Audio Streaming Node called for; setting details");
+    public DisxAudioStreamingNode(String videoId, BlockPos blockPos, ResourceLocation dimension, Player nodeOwner, boolean loop, int startTime, DisxAudioMotionType motionType, UUID entityUuid){
+        DisxLogger.debug("New Audio Streaming Node called for; setting details (MOTION TYPE: " + motionType.name() + ")");
         this.videoId = videoId;
         this.blockPos = blockPos;
         this.dimension = dimension;
@@ -57,6 +59,7 @@ public class DisxAudioStreamingNode {
         this.audioPlayer.addListener(new TrackHandler());
         this.preferredVolume = 100;
         this.motionType = motionType;
+        this.entityUuid = entityUuid;
         DisxLogger.debug("Track handler intialized");
         String url = "http://disxytsourceapi.ar06.xyz/stream_audio?id=" + videoId;
         DisxLogger.debug("Attempting to load requested video");
@@ -125,6 +128,8 @@ public class DisxAudioStreamingNode {
                                 FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
                                 buf.writeBlockPos(this.blockPos);
                                 buf.writeResourceLocation(this.dimension);
+                                buf.writeUtf(this.motionType.name());
+                                buf.writeUUID(this.entityUuid);
                                 buf.writeBytes(buffer, 0, bytesRead);
                                 DisxServerPacketIndex.ServerPackets.audioData(p, buf);
                             }
@@ -179,7 +184,7 @@ public class DisxAudioStreamingNode {
                ByteArrayOutputStream audioDataBridge = new ByteArrayOutputStream();
                if (inputStream != null){
                    DisxLogger.debug("Reading audio input stream");
-                   while (inputStream != null && !this.isPaused()) {
+                   while (inputStream != null) {
                        if (this.blockPos != null && this.dimension != null){
                            bytesRead = inputStream.read(buffer);
                            audioDataBridge.write(buffer, 0, bytesRead);
@@ -319,6 +324,10 @@ public class DisxAudioStreamingNode {
 
     public DisxAudioMotionType getMotionType() {
         return motionType;
+    }
+
+    public UUID getEntityUuid() {
+        return entityUuid;
     }
 
     public class TrackHandler extends AudioEventAdapter {
