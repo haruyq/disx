@@ -106,5 +106,13 @@
   "sysmsg.disx.stampcmd.no_player_err": "Error Disx: ¡No se puede obtener el jugador(es) proporcionado!",
   "sysmsg.disx.stampcmd.success": "¡Su molde ha sido distribuido!",
   "sysmsg.disx.debug_enabled": "Hay algo claramente mal aquí. ¡Activando el modo de depuración Disx!",
-  "sysmsg.disx.debug_disabled": "Modo de depuración Disx desactivado."
+  "sysmsg.disx.debug_disabled": "Modo de depuración Disx desactivado.",
+  "sysmsg.disx.notice_forced_disxlivesrc": "Aviso Disx: El Disx YT-SRC-API ha sido reportado como caído. Se ha detectado que su servidor está actualmente configurado para utilizarla, por lo que el mod utilizará por defecto la fuente activa.",
+  "sysmsg.disx.notice_forced_disxytsrcapi": "Aviso Disx: La librería utilizada para transmitir directamente desde YouTube en este mod ha sido reportada como funcionando mal. Se ha detectado que su servidor está actualmente configurado para utilizarla, por lo que el mod utilizará por defecto la API Disx YT-SRC.",
+  "sysmsg.disx.cmd_must_run_on_server": "Este comando debe ejecutarse desde la consola del servidor.",
+  "sysmsg.disx.configcmd.config_reloaded": "La configuración se ha cargado correctamente.",
+  "sysmsg.disx.configcmd.generatedrefreshtoken": "¡Su Refresh Token ha sido generado y almacenado en la configuración automáticamente!",
+  "sysmsg.disx.configcmd.generaterefreshtokeninstructions": "Generador de Refresh Tokens: Vaya a la siguiente URL en una cuenta de Google BURNER e introduzca el código proporcionado.",
+  "sysmsg.disx.configcmd.generaterefreshtokencode": "Código (haga clic en él para copiarlo): ",
+  "sysmsg.disx.configcmd.clearedrefreshtoken": "¡Token despejado!"
 }

@@ -9,10 +9,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.Nullable;
-import xyz.ar06.disx.DisxLogger;
-import xyz.ar06.disx.DisxMain;
-import xyz.ar06.disx.DisxModInfo;
-import xyz.ar06.disx.DisxSystemMessages;
+import xyz.ar06.disx.*;
 import xyz.ar06.disx.utils.DisxUUIDUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -74,6 +71,8 @@ public class DisxConfigHandler {
             }
             updateConfig();
             DisxModInfo.setDEBUG(Boolean.parseBoolean(properties.getProperty("debug_mode")));
+            DisxModInfo.setUseYtsrc(Boolean.parseBoolean(properties.getProperty("use_live_ytsrc")));
+            DisxModInfo.setRefreshToken(properties.getProperty("refresh_token"));
             //JSON Check/Create/Initialization
             //Player Use Whitelist JSON
             File dir2 = new File(useWhitelistJsonPath);
@@ -167,6 +166,11 @@ public class DisxConfigHandler {
                 updateProperty("debug_mode", "false");
                 updateProperty("config_version", "1");
             }
+            if (config_version < 2){
+                updateProperty("use_live_ytsrc", "false");
+                updateProperty("config_version", "2");
+                updateProperty("refresh_token","");
+            }
         }
 
         public static String getProperty(String key){
@@ -176,6 +180,8 @@ public class DisxConfigHandler {
         public static void updateProperty(String key, String value){
             properties.setProperty(key, value);
             DisxModInfo.setDEBUG(Boolean.parseBoolean(properties.getProperty("debug_mode")));
+            DisxModInfo.setUseYtsrc(Boolean.parseBoolean(properties.getProperty("use_live_ytsrc")));
+            DisxModInfo.setRefreshToken(properties.getProperty("refresh_token"));
             updateConfigFile();
         }
 

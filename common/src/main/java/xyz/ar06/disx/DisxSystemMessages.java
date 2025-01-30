@@ -4,6 +4,7 @@ import dev.architectury.event.events.common.PlayerEvent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
@@ -11,6 +12,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Player;
+import xyz.ar06.disx.config.DisxConfigHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -217,6 +219,10 @@ public class DisxSystemMessages {
         sendOverlayMessage(message, false);
     }
 
+    public static void refreshTokenGenerated(CommandSourceStack commandSourceStack){
+        commandSourceStack.sendSystemMessage(Component.translatable("sysmsg.disx.configcmd.generatedrefreshtoken"));
+    }
+
     public static void outdatedModVersion(MinecraftServer server){
         if (!DisxModInfo.getIsUpToDate()){
             ArrayList<MutableComponent> messages = new ArrayList<MutableComponent>();
@@ -230,6 +236,7 @@ public class DisxSystemMessages {
                     for (MutableComponent component : messages){
                         player.sendSystemMessage(component);
                     }
+                    player.sendSystemMessage(Component.empty());
                 });
             } else {
                 for (MutableComponent component : messages){
@@ -240,6 +247,7 @@ public class DisxSystemMessages {
                         for (MutableComponent component : messages){
                             player.sendSystemMessage(component);
                         }
+                        player.sendSystemMessage(Component.empty());
                     }
                 });
             }
@@ -272,6 +280,10 @@ public class DisxSystemMessages {
                 for (MutableComponent component : messages){
                     player.sendSystemMessage(component);
                 }
+                if (!messages.isEmpty()){
+                    player.sendSystemMessage(Component.empty());
+                }
+
             });
         } else {
             for (MutableComponent component : messages){
@@ -281,6 +293,9 @@ public class DisxSystemMessages {
                 if (player.hasPermissions(1)){
                     for (MutableComponent component : messages){
                         player.sendSystemMessage(component);
+                    }
+                    if (!messages.isEmpty()){
+                        player.sendSystemMessage(Component.empty());
                     }
                 }
             });
@@ -298,6 +313,7 @@ public class DisxSystemMessages {
                 PlayerEvent.PLAYER_JOIN.register(player -> {
                     player.sendSystemMessage(message);
                     player.sendSystemMessage(message2);
+                    player.sendSystemMessage(Component.empty());
                 });
             } else {
                 server.sendSystemMessage(message);
@@ -306,11 +322,59 @@ public class DisxSystemMessages {
                     if (player.hasPermissions(1)){
                         player.sendSystemMessage(message);
                         player.sendSystemMessage(message2);
+                        player.sendSystemMessage(Component.empty());
                     }
                 });
             }
         }
 
+    }
+
+    public static void forcingLiveYtSrc(MinecraftServer server){
+        boolean configuredForLiveSrc = Boolean.parseBoolean(DisxConfigHandler.SERVER.getProperty("use_live_ytsrc"));
+        if (DisxModInfo.isForceLiveytsrc() && !configuredForLiveSrc){
+            MutableComponent message = Component.translatable("sysmsg.disx.notice_forced_disxlivesrc")
+                    .withStyle(ChatFormatting.RED)
+                    .withStyle(ChatFormatting.BOLD);
+            if (server.isSingleplayer()){
+                PlayerEvent.PLAYER_JOIN.register(player -> {
+                    player.sendSystemMessage(message);
+                    player.sendSystemMessage(Component.empty());
+                });
+            } else {
+                server.sendSystemMessage(message);
+                PlayerEvent.PLAYER_JOIN.register(player -> {
+                    if (player.hasPermissions(1)){
+                        player.sendSystemMessage(message);
+                        player.sendSystemMessage(Component.empty());
+                    }
+                });
+            }
+        }
+
+    }
+
+    public static void forcingDisxYtSrcApi(MinecraftServer server){
+        boolean configuredForLiveSrc = Boolean.parseBoolean(DisxConfigHandler.SERVER.getProperty("use_live_ytsrc"));
+        if (DisxModInfo.isForceDisxytsrcapi() && configuredForLiveSrc){
+            MutableComponent message = Component.translatable("sysmsg.disx.notice_forced_disxytsrcapi")
+                    .withStyle(ChatFormatting.RED)
+                    .withStyle(ChatFormatting.BOLD);
+            if (server.isSingleplayer()){
+                PlayerEvent.PLAYER_JOIN.register(player -> {
+                    player.sendSystemMessage(message);
+                    player.sendSystemMessage(Component.empty());
+                });
+            } else {
+                server.sendSystemMessage(message);
+                PlayerEvent.PLAYER_JOIN.register(player -> {
+                    if (player.hasPermissions(1)){
+                        player.sendSystemMessage(message);
+                        player.sendSystemMessage(Component.empty());
+                    }
+                });
+            }
+        }
     }
 
 }
