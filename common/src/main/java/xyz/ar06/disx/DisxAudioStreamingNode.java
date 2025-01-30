@@ -17,13 +17,17 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import dev.lavalink.youtube.YoutubeSource;
+import dev.lavalink.youtube.clients.AndroidMusic;
 import dev.lavalink.youtube.clients.Tv;
+import dev.lavalink.youtube.clients.TvHtml5Embedded;
 import dev.lavalink.youtube.clients.skeleton.Client;
 import io.netty.buffer.Unpooled;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.apache.http.client.config.RequestConfig;
 
@@ -37,7 +41,7 @@ import java.util.concurrent.CompletableFuture;
 public class DisxAudioStreamingNode {
     public static AudioDataFormat FORMAT = StandardAudioDataFormats.COMMON_PCM_S16_BE;
     private static DefaultAudioPlayerManager playerManager;
-    private static YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager();
+    private static YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager(false, new Client[] {new Tv(), new TvHtml5Embedded()});
     private static double streamInterval = 5;
     private AudioPlayer audioPlayer = new DefaultAudioPlayer(playerManager);
     private AudioInputStream inputStream = AudioPlayerInputStream.createStream(audioPlayer, FORMAT, 99999999L, true);
@@ -305,7 +309,7 @@ public class DisxAudioStreamingNode {
         this.entityUuid = null;
         this.motionType = null;
         this.loop = false;
-        this.nodeOwner = null;
+        //this.nodeOwner = null;
         this.videoId = null;
         this.paused = false;
         try {
@@ -420,12 +424,34 @@ public class DisxAudioStreamingNode {
         }
 
         @Override
+        public void onTrackException(AudioPlayer player, AudioTrack track, FriendlyException exception) {
+            if (exception.getMessage().equals("Please sign in")){
+                DisxLogger.debug("Oauth2 error detected; sending node owner message");
+                DisxSystemMessages.signInError((ServerPlayer) nodeOwner);
+            } else
+            if (exception.getCause().toString().equals("java.lang.RuntimeException: Not success status code: 403")){
+                DisxLogger.debug("Oauth2 error detected; sending node owner message");
+                DisxSystemMessages.status403Error((ServerPlayer) nodeOwner);
+            }
+            super.onTrackException(player, track, exception);
+        }
+
+        @Override
         public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
             if (endReason.equals(AudioTrackEndReason.FINISHED)){
                 try {
-                    DisxLogger.debug("Audio input stream read reached end of audio; closing audio input stream");
-                    inputStream.close();
-                    DisxAudioStreamingNode.this.inputStream = null;
+                    if (!DisxAudioStreamingNode.this.useLiveYtSrc){
+                        DisxLogger.debug("Audio input stream read reached end of audio; closing audio input stream");
+                        inputStream.close();
+                        DisxAudioStreamingNode.this.inputStream = null;
+                    } else {
+                        if (!loop){
+                            DisxLogger.debug("Audio input stream read reached end of audio; loop != true; closing audio input stream (live yt source)");
+                            inputStream.close();
+                            DisxAudioStreamingNode.this.inputStream = null;
+                        }
+                    }
+
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
