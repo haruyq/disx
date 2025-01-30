@@ -13,6 +13,8 @@ public class DisxPropertyTypeSuggestionProvider {
         suggestionsBuilder.suggest("video_existence_check");
         suggestionsBuilder.suggest("max_audio_players");
         suggestionsBuilder.suggest("debug_mode");
+        suggestionsBuilder.suggest("use_live_ytsrc");
+        //suggestionsBuilder.suggest("refresh_token");
         //suggestionsBuilder.suggest("age_restricted_playback");
         return suggestionsBuilder.buildFuture();
     }

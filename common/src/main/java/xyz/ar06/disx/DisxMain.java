@@ -97,6 +97,7 @@ public class DisxMain {
 
         //Pull Mod Info
         DisxModInfo.pullLatestVersion();
+        DisxModInfo.pullForceSettings();
 
         //Event Registrations
         PlayerEvent.PLAYER_JOIN.register(player -> {
@@ -124,6 +125,10 @@ public class DisxMain {
         LifecycleEvent.SERVER_STARTED.register(DisxSystemMessages::devBuildNotice);
 
         LifecycleEvent.SERVER_STARTED.register(DisxAudioStreamingNode::initPlayerManager);
+
+        LifecycleEvent.SERVER_STARTED.register(DisxSystemMessages::forcingDisxYtSrcApi);
+
+        LifecycleEvent.SERVER_STARTED.register(DisxSystemMessages::forcingLiveYtSrc);
 
 
         LifecycleEvent.SERVER_STARTED.register((server) -> {
