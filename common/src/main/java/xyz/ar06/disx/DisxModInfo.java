@@ -12,7 +12,7 @@ import java.net.http.HttpResponse;
 import java.util.HashMap;
 
 public class DisxModInfo {
-    private static final String VERSION = "0.3.0-indev";
+    private static final String VERSION = "0.3.0-dev-c44c1b5f";
     private static final boolean DEV_BUILD = true;
     private static final boolean FORCE_DEBUG = true;
     private static final String[] debugKeys = new String[]{
@@ -216,7 +216,11 @@ public class DisxModInfo {
 
     public static void setRefreshToken(String refreshToken) {
         REFRESH_TOKEN = refreshToken;
-        DisxAudioStreamingNode.getYoutubeAudioSourceManager().useOauth2(refreshToken, true);
+        try {
+            DisxAudioStreamingNode.getYoutubeAudioSourceManager().useOauth2(refreshToken, true);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public static String getRefreshToken() {
