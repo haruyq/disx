@@ -305,7 +305,7 @@ public class DisxConfigCommand {
             context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
         } else {
             DisxConfigHandler.SERVER.updateProperty("refresh_token","");
-            context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.configcmd.clearedrefreshtoken"));
+            context.getSource().sendSystemMessage(Component.literal("sysmsg.disx.configcmd.clearedrefreshtoken"));
         }
         return 1;
     }

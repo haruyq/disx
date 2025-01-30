@@ -106,5 +106,13 @@
   "sysmsg.disx.stampcmd.no_player_err": "Erreur Disx: Impossible d'obtenir le(s) joueur(s) fourni(s)!",
   "sysmsg.disx.stampcmd.success": "Votre timbre a été distribué!",
   "sysmsg.disx.debug_enabled": "Il y a manifestement quelque chose qui ne va pas. Le mode de débogage Disx a été activé !",
-  "sysmsg.disx.debug_disabled": "Crise évitée! Le mode de débogage de Disx a été désactivé!"
+  "sysmsg.disx.debug_disabled": "Crise évitée! Le mode de débogage de Disx a été désactivé!",
+  "sysmsg.disx.notice_forced_disxlivesrc": "Avis Disx: L'interface YT-SRC-API de Disx a été signalée comme étant hors service. Il a été détecté que votre serveur est actuellement configuré pour l'utiliser, donc le mod prendra par défaut la source live.",
+  "sysmsg.disx.notice_forced_disxytsrcapi": "Avis de disx: La bibliothèque utilisée pour diffuser directement depuis YouTube dans ce mod a été signalée comme fonctionnant mal. Il a été détecté que votre serveur est actuellement configuré pour l'utiliser, le mod utilisera donc par défaut l'API YT-SRC de Disx.",
+  "sysmsg.disx.cmd_must_run_on_server": "Cette commande doit être exécutée à partir de la console de votre serveur!",
+  "sysmsg.disx.configcmd.config_reloaded": "La configuration a été rechargée avec succès!",
+  "sysmsg.disx.configcmd.generatedrefreshtoken": "Votre jeton de rafraîchissement a été généré et stocké automatiquement dans la configuration!",
+  "sysmsg.disx.configcmd.generaterefreshtokeninstructions": "Générateur de Jetons de Rafraîchissement: Veuillez vous rendre à l'URL suivante sur un compte Google BURNER et entrer le code fourni.",
+  "sysmsg.disx.configcmd.generaterefreshtokencode": "Code (cliquez dessus pour le copier): ",
+  "sysmsg.disx.configcmd.clearedrefreshtoken": "Le jeton a été effacé!"
 }
