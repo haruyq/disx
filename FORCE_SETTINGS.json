@@ -1,6 +1,6 @@
 {
   "global": {
-    "force_DISX-YTSRC-API": false,
+    "force_DISX-YTSRC-API": true,
     "force_live-yt-src": false
   }
 }
