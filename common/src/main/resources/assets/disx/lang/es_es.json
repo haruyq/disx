@@ -114,5 +114,7 @@
   "sysmsg.disx.configcmd.generatedrefreshtoken": "¡Su Refresh Token ha sido generado y almacenado en la configuración automáticamente!",
   "sysmsg.disx.configcmd.generaterefreshtokeninstructions": "Generador de Refresh Tokens: Vaya a la siguiente URL en una cuenta de Google BURNER e introduzca el código proporcionado.",
   "sysmsg.disx.configcmd.generaterefreshtokencode": "Código (haga clic en él para copiarlo): ",
-  "sysmsg.disx.configcmd.clearedrefreshtoken": "¡Token despejado!"
+  "sysmsg.disx.configcmd.clearedrefreshtoken": "¡Token despejado!",
+  "sysmsg.disx.error_oauth": "Error Oauth2: YouTube cree que eres un bot. ¿Has configurado ya un token de actualización?",
+  "sysmsg.disx.error_stat403": "Error: Recibido código de estado 403 de YouTube"
 }

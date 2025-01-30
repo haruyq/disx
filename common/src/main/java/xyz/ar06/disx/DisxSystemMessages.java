@@ -223,6 +223,16 @@ public class DisxSystemMessages {
         commandSourceStack.sendSystemMessage(Component.translatable("sysmsg.disx.configcmd.generatedrefreshtoken"));
     }
 
+    public static void signInError(ServerPlayer serverPlayer){
+        serverPlayer.sendSystemMessage(Component.translatable("sysmsg.disx.error_oauth")
+                .withStyle(ChatFormatting.DARK_RED));
+    }
+
+    public static void status403Error(ServerPlayer serverPlayer){
+        serverPlayer.sendSystemMessage(Component.translatable("sysmsg.disx.error_stat403")
+                .withStyle(ChatFormatting.DARK_RED));
+    }
+
     public static void outdatedModVersion(MinecraftServer server){
         if (!DisxModInfo.getIsUpToDate()){
             ArrayList<MutableComponent> messages = new ArrayList<MutableComponent>();
