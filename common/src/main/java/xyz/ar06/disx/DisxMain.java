@@ -5,14 +5,12 @@ import dev.architectury.utils.Env;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import xyz.ar06.disx.blocks.DisxAdvancedJukebox;
-import xyz.ar06.disx.blocks.DisxLacquerBlock;
-import xyz.ar06.disx.blocks.DisxRecordPress;
-import xyz.ar06.disx.blocks.DisxStampMaker;
+import xyz.ar06.disx.blocks.*;
 import xyz.ar06.disx.client_only.DisxClientMain;
 import xyz.ar06.disx.commands.*;
 import xyz.ar06.disx.config.DisxConfigHandler;
 import xyz.ar06.disx.entities.DisxAdvancedJukeboxEntity;
+import xyz.ar06.disx.entities.DisxEnderAdvancedJukeboxEntity;
 import xyz.ar06.disx.entities.vehicle.DisxAdvancedJukeboxMinecart;
 import xyz.ar06.disx.items.*;
 import xyz.ar06.disx.recipe_types.DisxCustomDiscRecipe;
@@ -74,6 +72,9 @@ public class DisxMain {
         DisxRecordPress.registerBlockEntity(blockEntityRegistrar);
         DisxLacquerBlock.registerBlock(blocksRegistrar);
         DisxLacquerBlock.registerBlockItem(itemsRegistrar, creativeModeTab);
+        DisxEnderAdvancedJukebox.registerBlock(blocksRegistrar);
+        DisxEnderAdvancedJukebox.registerBlockItem(itemsRegistrar, creativeModeTab);
+        DisxEnderAdvancedJukeboxEntity.registerEntity(blockEntityRegistrar);
         //Command Registration Calls
         DisxConfigCommand.registerCommand();
         DisxForceStopCommand.registerCommand();

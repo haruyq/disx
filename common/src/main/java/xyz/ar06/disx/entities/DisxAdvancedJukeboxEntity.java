@@ -28,7 +28,7 @@ import java.util.UUID;
 
 public class DisxAdvancedJukeboxEntity extends BlockEntity implements ContainerSingleItem, WorldlyContainer {
 
-    private NonNullList<ItemStack> itemInventory = NonNullList.withSize(1, ItemStack.EMPTY);
+    NonNullList<ItemStack> itemInventory = NonNullList.withSize(1, ItemStack.EMPTY);
 
     public DisxAdvancedJukeboxEntity(BlockPos blockPos, BlockState blockState) {
         super(

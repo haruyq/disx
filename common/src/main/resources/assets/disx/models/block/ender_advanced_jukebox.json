@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_top",
+  "textures": {
+    "side": "disx:block/ender_advanced_jukebox_side",
+    "top": "disx:block/ender_advanced_jukebox_top"
+  }
+}
