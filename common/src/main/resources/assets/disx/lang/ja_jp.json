@@ -103,5 +103,19 @@
   "sysmsg.disx.stampcmd.no_player_err": "Disx エラー: 指定されたプレイヤーは見つかりません。",
   "sysmsg.disx.stampcmd.success": "スタンプは作成され、プレイヤーに配布されました。",
   "sysmsg.disx.debug_enabled": "Disx デバッグモードが有効になりました。",
-  "sysmsg.disx.debug_disabled": "Disx デバッグモードが無効になりました。"
+  "sysmsg.disx.debug_disabled": "Disx デバッグモードが無効になりました。",
+  "item.disx.advanced_jukebox_minecart": "アドバンスド・ジュークボックス・マインカート",
+  "block.disx.ender_advanced_jukebox": "エンダー・アドバンスド・ジュークボックス",
+  "sysmsg.disx.error_oauth": "Oauth2エラー： YouTubeはあなたをボットだと思っています。リフレッシュトークンの設定はお済みですか？",
+  "sysmsg.disx.error_stat403": "エラー YouTubeからステータスコード403を受け取りました。",
+  "sysmsg.disx.updated_disc_name": "[%s]: ディスクのビデオ名が更新されました！",
+  "sysmsg.disx.updated_disc_name.name": "名前： %s",
+  "sysmsg.disx.notice_forced_disxlivesrc": "Disxのお知らせ： Disx YT-SRC-APIがダウンしていることが報告されました。あなたのサーバーが現在それを使用するように設定されていることが検出されました。",
+  "sysmsg.disx.notice_forced_disxytsrcapi": "Disxからのお知らせ： このMODでYouTubeから直接ストリーミングするために使用されているライブラリの不具合が報告されています。このMODはデフォルトでDisx YT-SRC APIを使用します。",
+  "sysmsg.disx.cmd_must_run_on_server": "このコマンドはサーバーコンソールから実行する必要があります！",
+  "sysmsg.disx.configcmd.config_reloaded": "コンフィグが正常にリロードされた！",
+  "sysmsg.disx.configcmd.generatedrefreshtoken": "あなたのリフレッシュ・トークンは自動的に生成され、設定に保存されました！",
+  "sysmsg.disx.configcmd.generaterefreshtokeninstructions": "Refresh Tokenジェネレーター： BURNERのGoogleアカウントで以下のURLにアクセスし、コードを入力してください。",
+  "sysmsg.disx.configcmd.generaterefreshtokencode": "コード（クリックするとコピーされます）：",
+  "sysmsg.disx.configcmd.clearedrefreshtoken": "リフレッシュトークンがクリアされた！"
 }

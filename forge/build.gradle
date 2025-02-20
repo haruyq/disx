@@ -98,6 +98,7 @@ dependencies {
     forgeRuntimeLibrary 'org.apache.httpcomponents:httpclient:+'
     forgeRuntimeLibrary 'commons-logging:commons-logging:+'
     forgeRuntimeLibrary 'org.apache.httpcomponents:httpcore:+'
+    forgeRuntimeLibrary group: 'com.grack', name: 'nanojson', version: '+'
 
     include 'com.alibaba:fastjson:+'
     include 'com.fasterxml.jackson.core:jackson-annotations:+'

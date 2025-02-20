@@ -116,5 +116,6 @@
   "sysmsg.disx.configcmd.generaterefreshtokencode": "Código (haga clic en él para copiarlo): ",
   "sysmsg.disx.configcmd.clearedrefreshtoken": "¡Token despejado!",
   "sysmsg.disx.error_oauth": "Error Oauth2: YouTube cree que eres un bot. ¿Has configurado ya un token de actualización?",
-  "sysmsg.disx.error_stat403": "Error: Recibido código de estado 403 de YouTube"
+  "sysmsg.disx.error_stat403": "Error: Recibido código de estado 403 de YouTube",
+  "block.disx.ender_advanced_jukebox": "Jukebox Avanzado de Ender"
 }

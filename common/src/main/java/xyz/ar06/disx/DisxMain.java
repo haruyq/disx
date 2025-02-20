@@ -5,6 +5,9 @@ import dev.architectury.registry.fuel.FuelRegistry;
 import dev.architectury.utils.Env;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import xyz.ar06.disx.blocks.*;
 import xyz.ar06.disx.client_only.DisxClientMain;
 import xyz.ar06.disx.commands.*;
@@ -93,13 +96,12 @@ public class DisxMain {
         DisxSoundEvents.registerAdvancedJukeboxStatic(soundEventRegistrar);
         //Entity Registration Calls
         DisxAdvancedJukeboxMinecart.registerEntityType(entityTypeRegistrar);
-        //Fuel Registration Calls
-        FuelRegistry.register(100, DisxLacquerDrop.itemRegistration.get());
-        FuelRegistry.register(900, DisxLacquerBlock.itemRegistration.get());
 
         //Pull Mod Info
         DisxModInfo.pullLatestVersion();
         DisxModInfo.pullForceSettings();
+
+        //Fuel Registrations done in individual client loaders
 
         //Event Registrations
         PlayerEvent.PLAYER_JOIN.register(player -> {

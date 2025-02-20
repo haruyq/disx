@@ -1,5 +1,6 @@
 package xyz.ar06.disx.items;
 
+import dev.architectury.registry.fuel.FuelRegistry;
 import dev.architectury.registry.registries.Registrar;
 import dev.architectury.registry.registries.RegistrySupplier;
 import net.minecraft.resources.ResourceLocation;
@@ -20,5 +21,6 @@ public class DisxLacquerDrop extends Item {
                         new Item.Properties().arch$tab(tab)
                 )
         );
+        //FuelRegistry.register(100, itemRegistration.get());
     }
 }

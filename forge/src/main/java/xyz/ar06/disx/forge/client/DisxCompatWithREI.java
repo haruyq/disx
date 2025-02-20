@@ -1,4 +1,4 @@
-package xyz.ar06.disx.forge;
+package xyz.ar06.disx.forge.client;
 
 import me.shedaniel.rei.forge.REIPluginClient;
 

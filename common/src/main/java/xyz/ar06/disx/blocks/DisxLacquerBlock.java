@@ -1,5 +1,6 @@
 package xyz.ar06.disx.blocks;
 
+import dev.architectury.registry.fuel.FuelRegistry;
 import xyz.ar06.disx.entities.DisxRecordPressEntity;
 import dev.architectury.registry.registries.Registrar;
 import dev.architectury.registry.registries.RegistrySupplier;
@@ -28,6 +29,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
+import xyz.ar06.disx.items.DisxLacquerDrop;
 
 public class DisxLacquerBlock extends HalfTransparentBlock{
 
@@ -109,5 +111,6 @@ public class DisxLacquerBlock extends HalfTransparentBlock{
                         .arch$tab(tab)
                 )
         );
+        //FuelRegistry.register(900, itemRegistration.get());
     }
 }
