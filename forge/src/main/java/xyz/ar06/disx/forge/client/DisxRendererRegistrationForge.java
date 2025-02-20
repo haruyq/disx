@@ -1,7 +1,6 @@
-package xyz.ar06.disx.forge;
+package xyz.ar06.disx.forge.client;
 
 import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.renderer.entity.MinecartRenderer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;

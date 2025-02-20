@@ -116,6 +116,7 @@
   "sysmsg.disx.configcmd.generaterefreshtokencode": "Code (zum Kopieren anklicken): ",
   "sysmsg.disx.configcmd.clearedrefreshtoken": "Refresh-Token gelöscht!",
   "sysmsg.disx.error_oauth": "Oauth2-Fehler: YouTube denkt, du bist ein Bot. Haben Sie schon ein Refresh-Token eingerichtet?",
-  "sysmsg.disx.error_stat403": "Fehler: Empfangener Statuscode 403 von YouTube"
+  "sysmsg.disx.error_stat403": "Fehler: Empfangener Statuscode 403 von YouTube",
+  "block.disx.ender_advanced_jukebox": "End Erweiterte Jukebox"
 
 }

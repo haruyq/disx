@@ -1,8 +1,7 @@
-package xyz.ar06.disx.forge;
+package xyz.ar06.disx.forge.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;

@@ -1,14 +1,14 @@
 package xyz.ar06.disx;
 
 import dev.architectury.event.events.common.*;
+import dev.architectury.registry.fuel.FuelRegistry;
 import dev.architectury.utils.Env;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import xyz.ar06.disx.blocks.DisxAdvancedJukebox;
-import xyz.ar06.disx.blocks.DisxLacquerBlock;
-import xyz.ar06.disx.blocks.DisxRecordPress;
-import xyz.ar06.disx.blocks.DisxStampMaker;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import xyz.ar06.disx.blocks.*;
 import xyz.ar06.disx.client_only.DisxClientMain;
 import xyz.ar06.disx.commands.*;
 import xyz.ar06.disx.config.DisxConfigHandler;
@@ -74,6 +74,8 @@ public class DisxMain {
         DisxRecordPress.registerBlockEntity(blockEntityRegistrar);
         DisxLacquerBlock.registerBlock(blocksRegistrar);
         DisxLacquerBlock.registerBlockItem(itemsRegistrar, creativeModeTab);
+        DisxEnderAdvancedJukebox.registerBlock(blocksRegistrar);
+        DisxEnderAdvancedJukebox.registerBlockItem(itemsRegistrar, creativeModeTab);
         //Command Registration Calls
         DisxConfigCommand.registerCommand();
         DisxForceStopCommand.registerCommand();
@@ -98,6 +100,8 @@ public class DisxMain {
         //Pull Mod Info
         DisxModInfo.pullLatestVersion();
         DisxModInfo.pullForceSettings();
+
+        //Fuel Registrations done in individual client loaders
 
         //Event Registrations
         PlayerEvent.PLAYER_JOIN.register(player -> {
