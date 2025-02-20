@@ -11,8 +11,10 @@ public class DisxLacquerDrop extends Item {
         super(properties);
     }
 
+    public static RegistrySupplier<Item> itemRegistration;
+
     public static void registerItem(Registrar<Item> registrar, RegistrySupplier<CreativeModeTab> tab){
-        registrar.register(
+        itemRegistration = registrar.register(
                 new ResourceLocation("disx","lacquer_drop"),
                 () -> new DisxLacquerDrop(
                         new Item.Properties().arch$tab(tab)

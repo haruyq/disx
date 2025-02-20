@@ -18,6 +18,9 @@
         "xyz.ar06.disx.DisxMainQuilt"
       ]
     },
+    "mixin": [
+      "disx.mixins.json"
+    ],
     "depends": [
       {
         "id": "quilt_loader",

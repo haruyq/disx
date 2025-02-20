@@ -1,46 +1,41 @@
 package xyz.ar06.disx.blocks;
 
-import dev.architectury.event.EventResult;
 import dev.architectury.registry.registries.Registrar;
 import dev.architectury.registry.registries.RegistrySupplier;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundSource;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.inventory.PlayerEnderChestContainer;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import org.jetbrains.annotations.Nullable;
 import xyz.ar06.disx.*;
 import xyz.ar06.disx.config.DisxConfigHandler;
-import xyz.ar06.disx.entities.DisxAdvancedJukeboxEntity;
-import xyz.ar06.disx.entities.DisxEnderAdvancedJukeboxEntity;
 import xyz.ar06.disx.items.DisxCustomDisc;
+import xyz.ar06.disx.utils.DisxEnderAdvancedJukeboxInventoryHelper;
 import xyz.ar06.disx.utils.DisxInternetCheck;
 import xyz.ar06.disx.utils.DisxJukeboxUsageCooldownManager;
+import xyz.ar06.disx.utils.DisxYoutubeInfoScraper;
 
 import java.util.concurrent.CompletableFuture;
 
-public class DisxEnderAdvancedJukebox extends BaseEntityBlock {
+public class DisxEnderAdvancedJukebox extends Block{
     protected DisxEnderAdvancedJukebox(Properties properties) {
         super(properties);
     }
@@ -49,84 +44,119 @@ public class DisxEnderAdvancedJukebox extends BaseEntityBlock {
     public static RegistrySupplier<Item> blockItemRegistration;
 
     private boolean debounce = false;
-    private int power;
-
-    @Nullable
-    @Override
-    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new DisxEnderAdvancedJukeboxEntity(blockPos, blockState);
-    }
 
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-        /*
         if (!level.isClientSide() && interactionHand == InteractionHand.MAIN_HAND && !debounce && !DisxJukeboxUsageCooldownManager.isOnCooldown(blockPos, level.dimension())){
-            ItemStack stack = player.getMainHandItem();
-            Item item = null;
-            if (stack != null){
-                item = stack.getItem();
-            }
-            DisxEnderAdvancedJukeboxEntity entity = (DisxEnderAdvancedJukeboxEntity) level.getBlockEntity(blockPos);
-            if (entity.isHas_record()){
-                debounce = true;
-                DisxLogger.debug("does have record, taking it out");
-                DisxJukeboxUsageCooldownManager.updateCooldown(blockPos, level.dimension());
-                ItemStack newItemStack = entity.removeItem(0, 1);
-                player.getInventory().add(newItemStack);
-                entity.setChanged();
-                DisxLogger.debug("current has record value: " + entity.isHas_record());
-                debounce = false;
-                return InteractionResult.SUCCESS;
-            } else if (!entity.isHas_record()){
-                if (item instanceof DisxCustomDisc){
-                    if (stack.getTag() != null && stack.getTag().get("videoId") != null && !stack.getTag().getString("videoId").isEmpty()){
-                        if (!isPassingAudioPrerequisiteChecks(player, level)){
-                            return InteractionResult.FAIL;
-                        }
-                        DisxLogger.debug("[advanced jukebox] doesn't have record, putting it in");
-                        debounce = true;
-                        String discName = stack.getTag().getString("discName");
-                        String videoId = stack.getTag().getString("videoId");
-                        //alpha discs compatibility
-                        if (discName.isBlank() || discName.isEmpty()){
-                            CompoundTag updatedTag = stack.getTag();
-                            updatedTag.putString("discName", stack.getHoverName().getString());
-                            stack.setTag(updatedTag);
-                        }
-                        //player.getCooldowns().addCooldown(item, 999999999);
-                        entity.setItem(0, stack.copy(), player);
-                        stack.setCount(stack.getCount() - 1);
-                        DisxJukeboxUsageCooldownManager.updateCooldown(blockPos, level.dimension());
-                        DisxServerPacketIndex.ServerPackets.loadingVideoIdMessage(videoId, player);
-                        DisxLogger.debug("current has record value: " + entity.isHas_record());
-                        debounce = false;
-                        //player.getCooldowns().removeCooldown(item);
-                        entity.setChanged();
-                        //attempt to get the latest video title if disc was made with no proper title
-                        CompletableFuture.runAsync(() -> entity.tryGetUpdatedDiscName(player));
-                        return InteractionResult.SUCCESS;
+            ItemStack handStack = player.getMainHandItem();
+            if (handStack.getItem() instanceof DisxCustomDisc){
+                DisxLogger.debug("Player interacted with block with custom disc in hand");
+                if (player instanceof DisxEnderAdvancedJukeboxInventoryHelper helper){
+                    DisxLogger.debug("Mixin was registered successfully at runtime;");
+                    debounce = true;
+                    CompoundTag invTag = helper.disx$getEnderAdvancedJukeboxInventory();
+                    NonNullList<ItemStack> invList = NonNullList.withSize(1, ItemStack.EMPTY);
+                    if (!invTag.isEmpty()){
+                        ContainerHelper.loadAllItems(invTag, invList);
                     }
+                    if (invList.get(0).isEmpty()){
+                        CompoundTag handStackTag = handStack.getOrCreateTag();
+                        if (handStackTag != null && handStackTag.get("videoId") != null && !handStackTag.getString("videoId").isEmpty()){
+                            DisxLogger.debug("doesn't have record, putting it in");
+                            if (!isPassingAudioPrerequisiteChecks(player, level)){
+                                DisxLogger.debug("player did not pass audio prerequisite check");
+                                return InteractionResult.FAIL;
+                            }
+                            String discName = handStackTag.getString("discName");
+                            String videoId = handStackTag.getString("videoId");
+                            //alpha discs compatibility
+                            if (discName.isBlank() || discName.isEmpty()){
+                                handStackTag.putString("discName", handStack.getHoverName().getString());
+                                handStack.setTag(handStackTag);
+                            }
+                            invList.set(0, handStack.copyWithCount(1));
+                            DisxJukeboxUsageCooldownManager.updateCooldown(blockPos, level.dimension());
+                            DisxLogger.debug("Sending loading video message");
+                            DisxServerPacketIndex.ServerPackets.loadingVideoIdMessage(videoId, player);
+                            DisxLogger.debug("Calling add to registry (LIVE)");
+                            DisxServerAudioRegistry.addToRegistry(blockPos, videoId, player, level.dimension(), false, DisxAudioMotionType.LIVE, player.getUUID());
+                            helper.disx$setEnderAdvancedJukeboxInventory(ContainerHelper.saveAllItems(new CompoundTag(), invList));
+                            handStack.shrink(1);
+                            CompletableFuture.runAsync(() -> tryGetUpdatedDiscName(player));
+                        }
+                    } else {
+                        DisxJukeboxUsageCooldownManager.updateCooldown(blockPos, level.dimension());
+                        DisxLogger.debug("Detected record, returning it and killing audio");
+                        ItemStack returnStack = invList.get(0).copyWithCount(1);
+                        invList.set(0, ItemStack.EMPTY);
+                        DisxServerAudioRegistry.removeFromRegistry(blockPos, level.dimension(), player.getUUID(), DisxAudioMotionType.LIVE);
+                        player.addItem(returnStack);
+                        helper.disx$setEnderAdvancedJukeboxInventory(ContainerHelper.saveAllItems(new CompoundTag(), invList));
+
+                    }
+                    debounce = false;
+                    return InteractionResult.SUCCESS;
+                }
+            } else if (handStack.isEmpty()){
+                DisxLogger.debug("Player interacted with block with empty hand");
+                if (player instanceof DisxEnderAdvancedJukeboxInventoryHelper helper){
+                    DisxLogger.debug("Mixin was registered successfully at runtime;");
+                    debounce = true;
+                    CompoundTag invTag = helper.disx$getEnderAdvancedJukeboxInventory();
+                    NonNullList<ItemStack> invList = NonNullList.withSize(1, ItemStack.EMPTY);
+                    if (!invTag.isEmpty()){
+                        ContainerHelper.loadAllItems(invTag, invList);
+                    }
+                    if (!invList.get(0).isEmpty()){
+                        DisxJukeboxUsageCooldownManager.updateCooldown(blockPos, level.dimension());
+                        DisxLogger.debug("Detected record, returning it and killing audio");
+                        ItemStack returnStack = invList.get(0).copyWithCount(1);
+                        invList.set(0, ItemStack.EMPTY);
+                        DisxServerAudioRegistry.removeFromRegistry(blockPos, level.dimension(), player.getUUID(), DisxAudioMotionType.LIVE);
+                        player.addItem(returnStack);
+                        helper.disx$setEnderAdvancedJukeboxInventory(ContainerHelper.saveAllItems(new CompoundTag(), invList));
+                    }
+                    debounce = false;
+                    return InteractionResult.SUCCESS;
                 }
             }
-        } */
+            return InteractionResult.SUCCESS;
+
+        }
         return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
     }
 
-    @Override
-    public ItemStack getCloneItemStack(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
-        BlockEntity blockEntity = blockGetter.getBlockEntity(blockPos);
-        if (blockGetter.getBlockEntity(blockPos) instanceof DisxEnderAdvancedJukeboxEntity){
-            DisxEnderAdvancedJukeboxEntity entity = (DisxEnderAdvancedJukeboxEntity) blockEntity;
-            ItemStack stack = new ItemStack(blockItemRegistration.get());
-            stack.setCount(1);
-            CompoundTag compoundTag = entity.saveWithoutMetadata();
-            if (!compoundTag.isEmpty()){
-                stack.getOrCreateTag().put("BlockEntityTag", compoundTag);
+    public void tryGetUpdatedDiscName(Player player){
+        NonNullList<ItemStack> itemInventory = NonNullList.withSize(1, ItemStack.EMPTY);
+        if (player instanceof DisxEnderAdvancedJukeboxInventoryHelper helper){
+            ContainerHelper.loadAllItems(helper.disx$getEnderAdvancedJukeboxInventory(), itemInventory);
+            ItemStack discStack = itemInventory.get(0);
+            if (!discStack.isEmpty()){
+                CompoundTag compoundTag = discStack.getTag();
+                DisxLogger.debug("Found disc in jukebox, checking name");
+                String discName = compoundTag.getString("discName");
+                String videoId = compoundTag.getString("videoId");
+                if (discName.equals("Video Not Found")){
+                    DisxLogger.debug("Disc has no name. Attempting to find one...");
+                    String videoName = DisxYoutubeInfoScraper.scrapeTitle(videoId);
+                    if (!videoName.equals("Video Not Found")){
+                        DisxLogger.debug("Found updated name: " + videoName);
+                        compoundTag.putString("discName", videoName);
+                        itemInventory = NonNullList.withSize(1, ItemStack.EMPTY);
+                        ContainerHelper.loadAllItems(helper.disx$getEnderAdvancedJukeboxInventory(), itemInventory);
+                        if (discStack.equals(itemInventory.get(0))){
+                            DisxLogger.debug("Disc stack still the same in Ender Advanced Jukebox, setting updated nbt tag");
+                            discStack.setTag(compoundTag);
+                            player.sendSystemMessage(Component.translatable("sysmsg.disx.updated_disc_name", "Advanced Jukebox"));
+                            player.sendSystemMessage(Component.translatable("sysmsg.disx.updated_disc_name.name", videoName).withStyle(ChatFormatting.GRAY));
+                        }
+                    } else {
+                        DisxLogger.debug("Video name not found once more");
+                    }
+                }
             }
-            return stack;
         }
 
-        return super.getCloneItemStack(blockGetter, blockPos, blockState);
     }
 
     private static boolean isPassingAudioPrerequisiteChecks(Player player, Level level){
@@ -159,7 +189,7 @@ public class DisxEnderAdvancedJukebox extends BaseEntityBlock {
     }
 
     public static void registerBlock(Registrar<Block> registry){
-        blockRegistration = registry.register(new ResourceLocation("disx", "ender_advanced_jukebox"), () -> new DisxEnderAdvancedJukebox(BlockBehaviour.Properties.copy(Blocks.JUKEBOX)));
+        blockRegistration = registry.register(new ResourceLocation("disx", "ender_advanced_jukebox"), () -> new DisxEnderAdvancedJukebox(BlockBehaviour.Properties.copy(Blocks.ENDER_CHEST).strength(22.5F, 600.0F)));
     }
 
     public static void registerBlockItem(Registrar<Item> registry, RegistrySupplier<CreativeModeTab> tab){
@@ -173,82 +203,7 @@ public class DisxEnderAdvancedJukebox extends BaseEntityBlock {
 
     @Override
     public boolean hasAnalogOutputSignal(BlockState blockState) {
-        return true;
-    }
-
-    @Override
-    public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
-        if (((DisxEnderAdvancedJukeboxEntity) level.getBlockEntity(blockPos)).isRecordPlaying()){
-            DisxLogger.debug("Comparator Reading: yes there is a record playing");
-            return 16;
-        }
-        DisxLogger.debug("Comparator Reading: no there is not a record playing");
-        return 0;
-    }
-
-    public static EventResult leverListener(Player player, InteractionHand interactionHand, BlockPos blockPos, Direction direction) {
-        Level level = player.level();
-        if (!player.level().isClientSide() && interactionHand.equals(InteractionHand.MAIN_HAND)){
-            BlockState blockState = level.getBlockState(blockPos);
-            Block block = blockState.getBlock();
-            if (block instanceof LeverBlock){
-                Direction facingDirection = blockState.getValue(LeverBlock.FACING).getOpposite();
-                BlockState adjacentBlockState = level.getBlockState(blockPos.relative(facingDirection));
-                if (adjacentBlockState.is(DisxAdvancedJukebox.blockRegistration.get())){
-                    DisxServerPacketIndex.ServerPackets.loopMsg(player, !blockState.getValue(LeverBlock.POWERED));
-                }
-            }
-        }
-
-        return EventResult.pass();
-    }
-
-    private boolean pauseResumeDebounce = false;
-    @Override
-    public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
-
-        if (!level.isClientSide() && !pauseResumeDebounce) {
-            boolean audioExists = DisxServerAudioRegistry.isNodeAtLocation(blockHitResult.getBlockPos(), level.dimension());
-            if (!audioExists){
-                return;
-            }
-            pauseResumeDebounce = true;
-            boolean paused = DisxServerAudioRegistry.pauseOrPlayNode(blockHitResult.getBlockPos(), level.dimension());
-            if (projectile.getOwner() != null) {
-                if (projectile.getOwner().getType().equals(EntityType.PLAYER) && audioExists){
-                    ServerPlayer player = level.getServer().getPlayerList().getPlayer(projectile.getOwner().getUUID());
-                    DisxServerPacketIndex.ServerPackets.pauseMsg(player, paused);
-                }
-            }
-            if (paused){
-                DisxLogger.debug("Playing static sound?");
-                level.playSound(null, blockHitResult.getBlockPos(), DisxSoundEvents.SoundInstances.ADVANCED_JUKEBOX_STATIC.get(), SoundSource.RECORDS, 1.0f, 1.0f);
-            }
-            CompletableFuture.runAsync(() -> {
-                try {
-                    Thread.sleep(6500);
-                    pauseResumeDebounce = false;
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        }
-
-        super.onProjectileHit(level, blockState, blockHitResult, projectile);
-    }
-
-    @Override
-    public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
-        super.setPlacedBy(level, blockPos, blockState, livingEntity, itemStack);
-        if (!level.isClientSide()){
-            BlockEntity blockEntity = level.getBlockEntity(blockPos);
-            if (blockEntity instanceof DisxEnderAdvancedJukeboxEntity jukeboxEntity){
-                CompoundTag compoundTag = itemStack.getTag();
-                if (compoundTag != null && !compoundTag.isEmpty() && compoundTag.contains("BlockEntityTag")){
-                    jukeboxEntity.load(compoundTag.getCompound("BlockEntityTag"));
-                }
-            }
-        }
+        return false;
     }
 
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
@@ -264,5 +219,20 @@ public class DisxEnderAdvancedJukebox extends BaseEntityBlock {
             level.addParticle(ParticleTypes.PORTAL, d, e, f, g, h, l);
         }
 
+    }
+
+    @Override
+    public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
+        double x = blockPos.getX();
+        double y = blockPos.getY();
+        double z = blockPos.getZ();
+        x += 0.5;
+        y += 0.5;
+        z += 0.5;
+        ItemStack item2 = new ItemStack(blockItemRegistration.get());
+        item2.setCount(1);
+        ItemEntity itemEntity2 = new ItemEntity(serverLevel, x, y, z, item2);
+        serverLevel.addFreshEntity(itemEntity2);
+        super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack, bl);
     }
 }

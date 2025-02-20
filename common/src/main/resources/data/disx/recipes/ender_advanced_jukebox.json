@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "OOE",
+    "OAE",
+    "OEE"
+  ],
+  "key": {
+    "O": {
+      "item": "minecraft:obsidian"
+    },
+    "E": {
+      "item": "minecraft:ender_eye"
+    },
+    "A": {
+      "item": "disx:advanced_jukebox"
+    }
+  },
+  "result": {
+    "item": "disx:ender_advanced_jukebox"
+  }
+}

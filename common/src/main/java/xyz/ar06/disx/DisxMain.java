@@ -1,16 +1,15 @@
 package xyz.ar06.disx;
 
 import dev.architectury.event.events.common.*;
+import dev.architectury.registry.fuel.FuelRegistry;
 import dev.architectury.utils.Env;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import xyz.ar06.disx.blocks.*;
 import xyz.ar06.disx.client_only.DisxClientMain;
 import xyz.ar06.disx.commands.*;
 import xyz.ar06.disx.config.DisxConfigHandler;
 import xyz.ar06.disx.entities.DisxAdvancedJukeboxEntity;
-import xyz.ar06.disx.entities.DisxEnderAdvancedJukeboxEntity;
 import xyz.ar06.disx.entities.vehicle.DisxAdvancedJukeboxMinecart;
 import xyz.ar06.disx.items.*;
 import xyz.ar06.disx.recipe_types.DisxCustomDiscRecipe;
@@ -74,7 +73,6 @@ public class DisxMain {
         DisxLacquerBlock.registerBlockItem(itemsRegistrar, creativeModeTab);
         DisxEnderAdvancedJukebox.registerBlock(blocksRegistrar);
         DisxEnderAdvancedJukebox.registerBlockItem(itemsRegistrar, creativeModeTab);
-        DisxEnderAdvancedJukeboxEntity.registerEntity(blockEntityRegistrar);
         //Command Registration Calls
         DisxConfigCommand.registerCommand();
         DisxForceStopCommand.registerCommand();
@@ -95,6 +93,9 @@ public class DisxMain {
         DisxSoundEvents.registerAdvancedJukeboxStatic(soundEventRegistrar);
         //Entity Registration Calls
         DisxAdvancedJukeboxMinecart.registerEntityType(entityTypeRegistrar);
+        //Fuel Registration Calls
+        FuelRegistry.register(100, DisxLacquerDrop.itemRegistration.get());
+        FuelRegistry.register(900, DisxLacquerBlock.itemRegistration.get());
 
         //Pull Mod Info
         DisxModInfo.pullLatestVersion();
