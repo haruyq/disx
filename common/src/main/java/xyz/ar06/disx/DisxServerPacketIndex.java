@@ -57,12 +57,13 @@ public class DisxServerPacketIndex {
                 DisxLogger.debug("got registry grab request");
                 BlockPos blockPos = node.getBlockPos();
                 ResourceLocation dimensionLocation = node.getDimension();
-                UUID playerOwner = node.getNodeOwner().getUUID();
+                Player nodeOwner = node.getNodeOwner();
+                UUID nodeOwnerUuid = (nodeOwner == null) ? new UUID(0L, 0L) : nodeOwner.getUUID();
                 boolean loop = node.isLoop();
                 int preferredVolume = node.getPreferredVolume();
                 DisxAudioMotionType motionType = node.getMotionType();
                 UUID entityUuid = node.getEntityUuid();
-                ServerPackets.AudioRegistrySyncPackets.add(player, blockPos, dimensionLocation, playerOwner, loop, preferredVolume, motionType, entityUuid);
+                ServerPackets.AudioRegistrySyncPackets.add(player, blockPos, dimensionLocation, nodeOwnerUuid, loop, preferredVolume, motionType, entityUuid);
                 DisxLogger.debug("sent registry add event");
             }
         }
