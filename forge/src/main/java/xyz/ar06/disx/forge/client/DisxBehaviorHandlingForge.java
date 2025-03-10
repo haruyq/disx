@@ -13,6 +13,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import xyz.ar06.disx.DisxModInfo;
 import xyz.ar06.disx.DisxSystemMessages;
 import xyz.ar06.disx.blocks.DisxAdvancedJukebox;
+import xyz.ar06.disx.blocks.DisxEnderAdvancedJukebox;
 import xyz.ar06.disx.config.DisxConfigHandler;
 import xyz.ar06.disx.entities.vehicle.DisxAdvancedJukeboxMinecart;
 
@@ -26,6 +27,9 @@ public class DisxBehaviorHandlingForge {
                 if (level != null){
                     BlockPos blockPos = ((BlockHitResult) hitResult).getBlockPos();
                     if (level.getBlockState(blockPos).getBlock().equals(DisxAdvancedJukebox.blockRegistration.get())){
+                        event.setCanceled(true);
+                    }
+                    if (level.getBlockState(blockPos).getBlock().equals(DisxEnderAdvancedJukebox.blockRegistration.get())){
                         event.setCanceled(true);
                     }
                 }
