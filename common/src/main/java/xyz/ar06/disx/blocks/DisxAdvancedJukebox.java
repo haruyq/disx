@@ -3,14 +3,18 @@ package xyz.ar06.disx.blocks;
 
 import dev.architectury.event.EventResult;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.block.*;
 import xyz.ar06.disx.DisxSoundEvents;
 import xyz.ar06.disx.*;
+import xyz.ar06.disx.client_only.DisxAudioInstanceRegistry;
+import xyz.ar06.disx.client_only.DisxConfigRecordS2C;
 import xyz.ar06.disx.config.DisxConfigHandler;
 import xyz.ar06.disx.entities.DisxAdvancedJukeboxEntity;
 import xyz.ar06.disx.items.DisxCustomDisc;
@@ -96,6 +100,7 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                 player.getInventory().add(newItemStack);
                 entity.setChanged();
                 DisxLogger.debug("[advanced jukebox] current has record value: " + entity.isHas_record());
+                level.playSound(null, blockPos, SoundEvents.CHAIN_STEP, SoundSource.BLOCKS, 1.0F, 1.0F);
                 debounce = false;
                 return InteractionResult.SUCCESS;
             } else if (!entity.isHas_record()){
@@ -120,6 +125,7 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                         DisxJukeboxUsageCooldownManager.updateCooldown(blockPos, level.dimension());
                         DisxServerPacketIndex.ServerPackets.loadingVideoIdMessage(videoId, player);
                         DisxLogger.debug("[advanced jukebox] current has record value: " + entity.isHas_record());
+                        level.playSound(null, blockPos, SoundEvents.CHICKEN_EGG, SoundSource.BLOCKS, 1.0F, 1.0F);
                         debounce = false;
                         //player.getCooldowns().removeCooldown(item);
                         entity.setChanged();
@@ -290,6 +296,23 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
         super.onProjectileHit(level, blockState, blockHitResult, projectile);
     }
 
-
-
+    private int particleTickCount = 0;
+    @Override
+    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
+        if (level.isClientSide()){
+            particleTickCount++;
+            if (particleTickCount == 9){
+                if (DisxAudioInstanceRegistry.isNodeAtLocation(blockPos, level.dimension().location()) && DisxConfigRecordS2C.getSoundParticles()){
+                    float noteColor = level.random.nextInt(25) / 24.0f;
+                    level.addParticle(ParticleTypes.NOTE,
+                            blockPos.getX() + 0.5,
+                            blockPos.getY() + 1.1,
+                            blockPos.getZ() + 0.5,
+                            noteColor, 0, 0);
+                }
+                particleTickCount = 0;
+            }
+        }
+        super.animateTick(blockState, level, blockPos, randomSource);
+    }
 }

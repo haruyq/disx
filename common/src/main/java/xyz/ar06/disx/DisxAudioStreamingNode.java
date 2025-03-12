@@ -30,6 +30,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.apache.http.client.config.RequestConfig;
+import xyz.ar06.disx.config.DisxConfigHandler;
 
 import javax.sound.sampled.AudioInputStream;
 import java.io.ByteArrayInputStream;
@@ -40,8 +41,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class DisxAudioStreamingNode {
     public static AudioDataFormat FORMAT = StandardAudioDataFormats.COMMON_PCM_S16_BE;
-    private static DefaultAudioPlayerManager playerManager;
-    private static YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager(false, new Client[] {new Tv(), new TvHtml5Embedded()});
+    private static DefaultAudioPlayerManager playerManager = new DefaultAudioPlayerManager();
+    private static final YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager(false, new Client[] {new Tv(), new TvHtml5Embedded()});;
     private static double streamInterval = 5;
     private AudioPlayer audioPlayer = new DefaultAudioPlayer(playerManager);
     private AudioInputStream inputStream = AudioPlayerInputStream.createStream(audioPlayer, FORMAT, 99999999L, true);
@@ -364,7 +365,7 @@ public class DisxAudioStreamingNode {
     }
 
     public static void initPlayerManager(MinecraftServer server){
-        playerManager = new DefaultAudioPlayerManager();
+        DisxLogger.debug("Initializing audio player manager object");
         playerManager.setHttpRequestConfigurator(requestConfig -> RequestConfig.copy(requestConfig)
                 .setSocketTimeout(20000)
                 .setConnectTimeout(20000)

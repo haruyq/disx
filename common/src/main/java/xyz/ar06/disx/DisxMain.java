@@ -3,6 +3,7 @@ package xyz.ar06.disx;
 import dev.architectury.event.events.common.*;
 import dev.architectury.registry.fuel.FuelRegistry;
 import dev.architectury.utils.Env;
+import net.minecraft.client.Minecraft;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockItem;
@@ -133,7 +134,6 @@ public class DisxMain {
         LifecycleEvent.SERVER_STARTED.register(DisxSystemMessages::forcingDisxYtSrcApi);
 
         LifecycleEvent.SERVER_STARTED.register(DisxSystemMessages::forcingLiveYtSrc);
-
 
         LifecycleEvent.SERVER_STARTED.register((server) -> {
             if (DisxModInfo.isTESTTRACK()){

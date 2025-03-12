@@ -73,6 +73,8 @@ public class DisxConfigHandler {
             DisxModInfo.setDEBUG(Boolean.parseBoolean(properties.getProperty("debug_mode")));
             DisxModInfo.setUseYtsrc(Boolean.parseBoolean(properties.getProperty("use_live_ytsrc")));
             DisxModInfo.setRefreshToken(properties.getProperty("refresh_token"));
+            DisxModInfo.setAudioRadius(Integer.parseInt(properties.getProperty("audio_radius")));
+            DisxModInfo.setSoundParticles(Boolean.parseBoolean(properties.getProperty("sound_particles")));
             //JSON Check/Create/Initialization
             //Player Use Whitelist JSON
             File dir2 = new File(useWhitelistJsonPath);
@@ -171,6 +173,11 @@ public class DisxConfigHandler {
                 updateProperty("config_version", "2");
                 updateProperty("refresh_token","");
             }
+            if (config_version < 3){
+                updateProperty("audio_radius", "25");
+                updateProperty("sound_particles", "true");
+                updateProperty("config_version", "3");
+            }
         }
 
         public static String getProperty(String key){
@@ -182,6 +189,9 @@ public class DisxConfigHandler {
             DisxModInfo.setDEBUG(Boolean.parseBoolean(properties.getProperty("debug_mode")));
             DisxModInfo.setUseYtsrc(Boolean.parseBoolean(properties.getProperty("use_live_ytsrc")));
             DisxModInfo.setRefreshToken(properties.getProperty("refresh_token"));
+            DisxModInfo.setSoundParticles(Boolean.parseBoolean(properties.getProperty("sound_particles")));
+            DisxModInfo.setAudioRadius(Integer.parseInt(properties.getProperty("audio_radius")));
+            DisxServerPacketIndex.ServerPackets.serverConfigSendAll();
             updateConfigFile();
         }
 

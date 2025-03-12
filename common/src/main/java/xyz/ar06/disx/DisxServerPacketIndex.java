@@ -25,7 +25,7 @@ public class DisxServerPacketIndex {
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","videoidselection"), ServerPacketReceivers::onVideoIdPushRequest);
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","singleplayertrackend"), ServerPacketReceivers::onSingleplayerTrackEnd);
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","scrolledcheckhit"), ServerPacketReceivers::onScrolledHitCheck);
-
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, new ResourceLocation("disx","requestconfiginfo"), ServerPacketReceivers::onServerConfigRequest);
     }
 
     public class ServerPacketReceivers {
@@ -99,18 +99,22 @@ public class DisxServerPacketIndex {
             Player player = context.getPlayer();
             if (entityUuid.equals(new UUID(0L, 0L))){
                 Vec3 vec3 = new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
-                if (player.position().distanceTo(vec3) <= 25){
+                if (player.position().distanceTo(vec3) <= 15){
                     DisxServerAudioRegistry.incrementVolume(blockPos, player.level().dimension(), amount);
                 }
             } else {
                 ServerLevel serverLevel = (ServerLevel) context.getPlayer().level();
                 blockPos = serverLevel.getEntity(entityUuid).getOnPos();
                 Vec3 vec3 = new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
-                if (player.position().distanceTo(vec3) <= 25){
+                if (player.position().distanceTo(vec3) <= 15){
                     DisxServerAudioRegistry.incrementVolume(entityUuid, amount);
                 }
             }
 
+        }
+
+        public static void onServerConfigRequest(FriendlyByteBuf buf, NetworkManager.PacketContext context){
+            ServerPackets.serverConfigSend(context.getPlayer());
         }
     }
 
@@ -225,6 +229,24 @@ public class DisxServerPacketIndex {
                     new ResourceLocation("disx", "pausemsg"),
                     buf
             );
+        }
+
+        public static void serverConfigSend(Player player){
+            DisxLogger.debug("Sending server config to " + player.getName().getString());
+            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+            buf.writeInt(DisxModInfo.getAudioRadius());
+            buf.writeBoolean(DisxModInfo.getSoundParticles());
+            NetworkManager.sendToPlayer(
+                    (ServerPlayer) player,
+                    new ResourceLocation("disx", "configinfo"),
+                    buf
+            );
+        }
+
+        public static void serverConfigSendAll(){
+            for (Player p : DisxServerAudioRegistry.getMcPlayers()){
+                serverConfigSend(p);
+            }
         }
     }
 

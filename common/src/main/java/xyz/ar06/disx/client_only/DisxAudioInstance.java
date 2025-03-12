@@ -226,7 +226,7 @@ public class DisxAudioInstance {
                                 Vec3 currentpos = Minecraft.getInstance().getCameraEntity().getPosition(0.01f);
                                 Vec3 blockPosVec = new Vec3(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
                                 double distance = currentpos.distanceTo(blockPosVec);
-                                double maxDistance = 25.00;
+                                double maxDistance = (double) DisxConfigRecordS2C.getAudioRadius();
                                 double plrVolumeConfig_RECORDS = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.RECORDS).get();
                                 double plrVolumeConfig_MASTER = Minecraft.getInstance().options.getSoundSourceOptionInstance(SoundSource.MASTER).get();
                                 double volumeCalc = Math.max(0.0f, 1.0f - (distance / maxDistance));

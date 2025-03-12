@@ -243,4 +243,22 @@ public class DisxAudioInstanceRegistry {
         }
         return -1;
     }
+
+    public static boolean isNodeAtLocation(BlockPos blockPos, ResourceLocation dimension){
+        for (DisxAudioInstance instance : registry){
+            if (instance.getBlockPos().equals(blockPos) && instance.getDimension().equals(dimension) && instance.getMotionType().equals(DisxAudioMotionType.STATIC)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isNodeOnEntity(UUID entityUuid){
+        for (DisxAudioInstance instance : registry){
+            if (instance.getEntityUuid().equals(entityUuid) && instance.getMotionType().equals(DisxAudioMotionType.LIVE)){
+                return true;
+            }
+        }
+        return false;
+    }
 }

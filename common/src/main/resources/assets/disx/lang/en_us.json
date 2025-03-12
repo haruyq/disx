@@ -30,7 +30,7 @@
   "sysmsg.disx.error_dimension_blacklisted": "Disx Error: You are not allowed to play audio in this dimension, per server administration!",
   "sysmsg.disx.error_max_audio_count": "Disx Error: Maximum number of audio instances reached in this server! Please contact a server admin if you believe this to be an error.",
   "sysmsg.disx.error_bad_duration": "Disx Error: Video length too long! (Max Length: %s min)",
-  "sysmsg.disx.error_oauth": "Oauth2 Error: YouTube thinks you're a bot. Have you setup a refresh token yet?",
+  "sysmsg.disx.error_oauth": "Oauth2 Error: YouTube thinks you're a bot. Has a server administrator setup a refresh token yet?",
   "sysmsg.disx.error_stat403": "Error: Received status code 403 from YouTube",
   "sysmsg.disx.loading_video": "Loading Video '%s'",
   "sysmsg.disx.playing_video": "Video '%s'",
