@@ -50,6 +50,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.ar06.disx.*;
 import xyz.ar06.disx.blocks.DisxAdvancedJukebox;
 import xyz.ar06.disx.client_only.DisxAudioInstanceRegistry;
+import xyz.ar06.disx.client_only.DisxConfigRecordS2C;
 import xyz.ar06.disx.items.DisxAdvancedJukeboxMinecartItem;
 import xyz.ar06.disx.items.DisxCustomDisc;
 import xyz.ar06.disx.utils.DisxYoutubeInfoScraper;
@@ -346,7 +347,7 @@ public class DisxAdvancedJukeboxMinecart extends Minecart implements ContainerEn
         if (this.level().isClientSide()){
             particleTickCount++;
             if (particleTickCount == 9){
-                if (DisxAudioInstanceRegistry.isNodeOnEntity(this.getUUID())){
+                if (DisxAudioInstanceRegistry.isNodeOnEntity(this.getUUID())&& DisxConfigRecordS2C.getSoundParticles()) {
                     BlockPos blockPos = this.getOnPos();
                     Level level = this.level();
                     float noteColor = level.random.nextInt(25) / 24.0f;
