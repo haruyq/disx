@@ -1,5 +1,6 @@
 package xyz.ar06.disx;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -175,7 +176,6 @@ public class DisxServerAudioRegistry {
         for (DisxAudioStreamingNode node : registry){
             node.deconstruct();
         }
-        DisxAudioStreamingNode.shutdownPlayerManager();
         registry.clear();
     }
 

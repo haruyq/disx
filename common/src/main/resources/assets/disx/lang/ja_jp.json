@@ -106,7 +106,7 @@
   "sysmsg.disx.debug_disabled": "Disx デバッグモードが無効になりました。",
   "item.disx.advanced_jukebox_minecart": "アドバンスド・ジュークボックス・マインカート",
   "block.disx.ender_advanced_jukebox": "エンダー・アドバンスド・ジュークボックス",
-  "sysmsg.disx.error_oauth": "Oauth2エラー： YouTubeはあなたをボットだと思っています。リフレッシュトークンの設定はお済みですか？",
+  "sysmsg.disx.error_oauth": "Oauth2エラー： YouTubeはあなたをボットだと思っています。サーバー管理者がリフレッシュトークンを設定しましたか？",
   "sysmsg.disx.error_stat403": "エラー YouTubeからステータスコード403を受け取りました。",
   "sysmsg.disx.updated_disc_name": "[%s]: ディスクのビデオ名が更新されました！",
   "sysmsg.disx.updated_disc_name.name": "名前： %s",

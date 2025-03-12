@@ -33,7 +33,7 @@ public class DisxClientPacketIndex  {
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","loadingvidmsg"), ClientPacketReceivers::receiveLoadingMsgEvent);
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","loopmsg"), ClientPacketReceivers::receiveLoopMsg);
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx","pausemsg"), ClientPacketReceivers::receivePauseMsg);
-
+        NetworkManager.registerReceiver(NetworkManager.Side.S2C, new ResourceLocation("disx", "configinfo"), ClientPacketReceivers::receiveConfigInfo);
     }
 
     public class ClientPacketReceivers{
@@ -151,6 +151,12 @@ public class DisxClientPacketIndex  {
             DisxSystemMessages.pauseStatusMsg(b);
         }
 
+        public static void receiveConfigInfo(FriendlyByteBuf buf, NetworkManager.PacketContext context){
+            int audioRadius = buf.readInt();
+            boolean soundParticles = buf.readBoolean();
+            DisxConfigRecordS2C.setDetails(audioRadius, soundParticles);
+        }
+
     }
 
     public class ClientPackets{
@@ -196,6 +202,14 @@ public class DisxClientPacketIndex  {
             buf.writeUUID(entityUuid);
             NetworkManager.sendToServer(
                     new ResourceLocation("disx","scrolledcheckhit"),
+                    buf
+            );
+        }
+
+        public static void getServerConfig(){
+            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+            NetworkManager.sendToServer(
+                    new ResourceLocation("disx","requestconfiginfo"),
                     buf
             );
         }

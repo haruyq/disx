@@ -39,8 +39,11 @@ public class DisxModInfo {
     private static boolean FORCE_LIVEYTSRC = false;
     private static boolean FORCE_DISXYTSRCAPI = false;
     private static String REFRESH_TOKEN = "";
+    private static boolean SOUND_PARTICLES = true;
     private static Boolean isUpToDate = true;
     private static int versionsOutdated = 0;
+
+    private static int AUDIO_RADIUS = 25;
 
     public static void pullLatestVersion(){
         try {
@@ -217,14 +220,28 @@ public class DisxModInfo {
 
     public static void setRefreshToken(String refreshToken) {
         REFRESH_TOKEN = refreshToken;
-        try {
-            DisxAudioStreamingNode.getYoutubeAudioSourceManager().useOauth2(refreshToken, true);
-        } catch (Exception e){
-            e.printStackTrace();
+        if (REFRESH_TOKEN != null && !REFRESH_TOKEN.isEmpty()){
+            try {
+                DisxAudioStreamingNode.getYoutubeAudioSourceManager().useOauth2(refreshToken, true);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 
-    public static String getRefreshToken() {
-        return REFRESH_TOKEN;
+    public static int getAudioRadius() {
+        return AUDIO_RADIUS;
+    }
+
+    public static void setAudioRadius(int audioRadius) {
+        AUDIO_RADIUS = audioRadius;
+    }
+
+    public static void setSoundParticles(boolean soundParticles) {
+        SOUND_PARTICLES = soundParticles;
+    }
+
+    public static boolean getSoundParticles(){
+        return SOUND_PARTICLES;
     }
 }

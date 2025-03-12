@@ -43,6 +43,7 @@ public class DisxClientMain {
             ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player -> DisxAudioInstanceRegistry.clearAllRegisteredInstances());
             ClientLifecycleEvent.CLIENT_STOPPING.register(instance -> DisxAudioInstanceRegistry.clearAllRegisteredInstances());
             ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(player -> DisxAudioInstanceRegistry.grabServerRegistry());
+            ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(player -> DisxClientPacketIndex.ClientPackets.getServerConfig());
             /*
             ClientPlayerEvent.CLIENT_PLAYER_JOIN.register((player -> ClientTickEvent.CLIENT_POST.register(plr -> {
                 if (Minecraft.getInstance().isPaused() && Minecraft.getInstance().isSingleplayer()){

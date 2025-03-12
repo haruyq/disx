@@ -8,10 +8,12 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.Container;
@@ -47,6 +49,7 @@ import net.minecraft.world.ticks.ContainerSingleItem;
 import org.jetbrains.annotations.Nullable;
 import xyz.ar06.disx.*;
 import xyz.ar06.disx.blocks.DisxAdvancedJukebox;
+import xyz.ar06.disx.client_only.DisxAudioInstanceRegistry;
 import xyz.ar06.disx.items.DisxAdvancedJukeboxMinecartItem;
 import xyz.ar06.disx.items.DisxCustomDisc;
 import xyz.ar06.disx.utils.DisxYoutubeInfoScraper;
@@ -83,17 +86,20 @@ public class DisxAdvancedJukeboxMinecart extends Minecart implements ContainerEn
                     String videoId = tag.getString("videoId");
                     DisxServerPacketIndex.ServerPackets.loadingVideoIdMessage(videoId, player);
                     handStack.setCount(handStack.getCount() - 1);
+                    this.level().playSound(null, this, SoundEvents.CHICKEN_EGG, SoundSource.BLOCKS, 1.0F, 1.0F);
                     CompletableFuture.runAsync(() -> this.tryGetUpdatedDiscName(player));
                 } else {
                     DisxLogger.debug("Has record, taking out and putting in inventory");
                     ItemStack stack = this.items.get(0).copyWithCount(1);
                     removeItem(0, 1);
+                    this.level().playSound(null, this, SoundEvents.CHAIN_STEP, SoundSource.BLOCKS, 1.0F, 1.0F);
                     player.getInventory().add(stack);
                 }
             } else if (handStack.isEmpty()) {
                 if (isHas_Record()){
                     DisxLogger.debug("Has record, taking out and putting in inventory");
                     ItemStack stack = this.items.get(0).copyWithCount(1);
+                    this.level().playSound(null, this, SoundEvents.CHAIN_STEP, SoundSource.BLOCKS, 1.0F, 1.0F);
                     removeItem(0, 1);
                     player.getInventory().add(stack);
                 }
@@ -334,11 +340,29 @@ public class DisxAdvancedJukeboxMinecart extends Minecart implements ContainerEn
         this.setDeltaMovement(this.getDeltaMovement().multiply((double)f, 0.0, (double)f));
     }
 
+    private int particleTickCount = 0;
     @Override
     public void tick() {
-        DisxServerAudioRegistry.modifyEntryLoop(this.getUUID(), this.level().getBestNeighborSignal(this.getOnPos()) > 0);
-        super.tick();
+        if (this.level().isClientSide()){
+            particleTickCount++;
+            if (particleTickCount == 9){
+                if (DisxAudioInstanceRegistry.isNodeOnEntity(this.getUUID())){
+                    BlockPos blockPos = this.getOnPos();
+                    Level level = this.level();
+                    float noteColor = level.random.nextInt(25) / 24.0f;
+                    level.addParticle(ParticleTypes.NOTE,
+                            blockPos.getX() + 0.5,
+                            blockPos.getY() + 1.1,
+                            blockPos.getZ() + 0.5,
+                            noteColor, 0, 0);
+                }
+                particleTickCount = 0;
+            }
 
+        } else {
+            DisxServerAudioRegistry.modifyEntryLoop(this.getUUID(), this.level().getBestNeighborSignal(this.getOnPos()) > 0);
+        }
+        super.tick();
     }
 
     @Nullable

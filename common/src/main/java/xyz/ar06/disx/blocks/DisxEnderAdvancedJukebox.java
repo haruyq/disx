@@ -10,6 +10,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
@@ -82,6 +84,7 @@ public class DisxEnderAdvancedJukebox extends Block{
                             DisxServerAudioRegistry.addToRegistry(blockPos, videoId, player, level.dimension(), false, DisxAudioMotionType.LIVE, player.getUUID());
                             helper.disx$setEnderAdvancedJukeboxInventory(ContainerHelper.saveAllItems(new CompoundTag(), invList));
                             handStack.shrink(1);
+                            level.playSound(null, blockPos, SoundEvents.ENDER_EYE_LAUNCH, SoundSource.BLOCKS, 1.0F, 1.0F);
                             CompletableFuture.runAsync(() -> tryGetUpdatedDiscName(player));
                         }
                     } else {
@@ -92,7 +95,7 @@ public class DisxEnderAdvancedJukebox extends Block{
                         DisxServerAudioRegistry.removeFromRegistry(blockPos, level.dimension(), player.getUUID(), DisxAudioMotionType.LIVE);
                         player.addItem(returnStack);
                         helper.disx$setEnderAdvancedJukeboxInventory(ContainerHelper.saveAllItems(new CompoundTag(), invList));
-
+                        level.playSound(null, blockPos, SoundEvents.ENDER_EYE_DEATH, SoundSource.BLOCKS, 1.0F, 1.0F);
                     }
                     debounce = false;
                     return InteractionResult.SUCCESS;
@@ -115,6 +118,7 @@ public class DisxEnderAdvancedJukebox extends Block{
                         DisxServerAudioRegistry.removeFromRegistry(blockPos, level.dimension(), player.getUUID(), DisxAudioMotionType.LIVE);
                         player.addItem(returnStack);
                         helper.disx$setEnderAdvancedJukeboxInventory(ContainerHelper.saveAllItems(new CompoundTag(), invList));
+                        level.playSound(null, blockPos, SoundEvents.ENDER_EYE_DEATH, SoundSource.BLOCKS, 1.0F, 1.0F);
                     }
                     debounce = false;
                     return InteractionResult.SUCCESS;

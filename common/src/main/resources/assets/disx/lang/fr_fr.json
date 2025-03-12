@@ -115,7 +115,7 @@
   "sysmsg.disx.configcmd.generaterefreshtokeninstructions": "Générateur de Jetons de Rafraîchissement: Veuillez vous rendre à l'URL suivante sur un compte Google BURNER et entrer le code fourni.",
   "sysmsg.disx.configcmd.generaterefreshtokencode": "Code (cliquez dessus pour le copier): ",
   "sysmsg.disx.configcmd.clearedrefreshtoken": "Le jeton a été effacé!",
-  "sysmsg.disx.error_oauth": "Erreur Oauth2: YouTube pense que vous êtes un robot. Avez-vous déjà configuré un jeton de rafraîchissement?",
+  "sysmsg.disx.error_oauth": "Erreur Oauth2: YouTube pense que vous êtes un robot. Un administrateur de serveur a-t-il déjà configuré un jeton de rafraîchissement?",
   "sysmsg.disx.error_stat403": "Erreur: Code d'état 403 de YouTube",
   "block.disx.ender_advanced_jukebox": "Jukebox Avancé de L'Ender"
 }
