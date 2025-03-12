@@ -11,12 +11,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import xyz.ar06.disx.DisxAudioMotionType;
-import xyz.ar06.disx.DisxAudioStreamingNode;
 import xyz.ar06.disx.DisxLogger;
-import xyz.ar06.disx.entities.vehicle.DisxAdvancedJukeboxMinecart;
 
 import javax.sound.sampled.*;
 import java.util.ConcurrentModificationException;
@@ -24,7 +21,6 @@ import java.util.LinkedList;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-@Environment(EnvType.CLIENT)
 public class DisxAudioInstance {
     private static final AudioFormat audioFormat = new AudioFormat(
             AudioFormat.Encoding.PCM_SIGNED,     // PCM signed encoding

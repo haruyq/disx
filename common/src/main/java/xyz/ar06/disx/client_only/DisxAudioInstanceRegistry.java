@@ -17,7 +17,6 @@ import java.util.*;
 
 import static xyz.ar06.disx.DisxAudioStreamingNode.FORMAT;
 
-@Environment(EnvType.CLIENT)
 public class DisxAudioInstanceRegistry {
 
     public static LinkedList<DisxAudioInstance> registry = new LinkedList<>();
