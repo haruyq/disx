@@ -17,9 +17,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import dev.lavalink.youtube.YoutubeSource;
-import dev.lavalink.youtube.clients.AndroidMusic;
-import dev.lavalink.youtube.clients.Tv;
-import dev.lavalink.youtube.clients.TvHtml5Embedded;
+import dev.lavalink.youtube.clients.*;
 import dev.lavalink.youtube.clients.skeleton.Client;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
@@ -42,7 +40,7 @@ import java.util.concurrent.CompletableFuture;
 public class DisxAudioStreamingNode {
     public static AudioDataFormat FORMAT = StandardAudioDataFormats.COMMON_PCM_S16_BE;
     private static DefaultAudioPlayerManager playerManager = new DefaultAudioPlayerManager();
-    private static final YoutubeAudioSourceManager youtubeAudioSourceManager = new YoutubeAudioSourceManager(false, new Client[] {new Tv(), new TvHtml5Embedded()});;
+    private static final YoutubeAudioSourceManager youtubeAudioSourceManager = buildYoutubeAudioSourceManager();
     private static double streamInterval = 5;
     private AudioPlayer audioPlayer = new DefaultAudioPlayer(playerManager);
     private AudioInputStream inputStream = AudioPlayerInputStream.createStream(audioPlayer, FORMAT, 99999999L, true);
@@ -62,6 +60,16 @@ public class DisxAudioStreamingNode {
 
     private DisxAudioMotionType motionType;
     private UUID entityUuid;
+
+    private static YoutubeAudioSourceManager buildYoutubeAudioSourceManager(){
+        ClientOptions clientOptions = new ClientOptions();
+        clientOptions.setVideoLoading(true);
+        clientOptions.setSearching(false);
+        clientOptions.setPlayback(true);
+        clientOptions.setPlaylistLoading(false);
+        Client[] clients = new Client[]{new Tv(clientOptions), new TvHtml5Embedded(clientOptions)};
+        return new YoutubeAudioSourceManager(false, clients);
+    }
 
     public DisxAudioStreamingNode(String videoId, BlockPos blockPos, ResourceLocation dimension, Player nodeOwner, boolean loop, int startTime, DisxAudioMotionType motionType, UUID entityUuid){
         DisxLogger.debug("New Audio Streaming Node called for; setting details (MOTION TYPE: " + motionType.name() + ")");

@@ -17,5 +17,11 @@ public class DisxMainForge {
         DisxMain.init();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(DisxClientForge::onClientInitialize);
         FMLJavaModLoadingContext.get().getModEventBus().register(DisxForgeEventHandler.class);
+        try {
+            Class.forName("rhino.javascript.Callable");
+            System.out.println("Class found!");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Class not found: " + e.getMessage());
+        }
     }
 }
