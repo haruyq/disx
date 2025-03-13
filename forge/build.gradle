@@ -131,8 +131,8 @@ dependencies {
     //shadowDependencies 'dev.arbjerg:lavaplayer:+'
     //shadowDependencies 'dev.arbjerg:lavaplayer-natives:+'
     //shadowDependencies 'dev.arbjerg:lava-common:+'
-    //shadowDependencies 'org.mozilla:rhino:+'
-    //shadowDependencies 'org.mozilla:rhino-engine:+'
+    shadowDependencies 'org.mozilla:rhino:+'
+    shadowDependencies 'org.mozilla:rhino-engine:+'
     shadowDependencies 'com.fasterxml.jackson.core:jackson-annotations:2.18.3'
     shadowDependencies 'com.fasterxml.jackson.core:jackson-core:2.18.3'
     shadowDependencies 'com.fasterxml.jackson.core:jackson-databind:2.18.3'
@@ -153,10 +153,10 @@ shadowJar {
     exclude "architectury.common.json"
 
     relocate 'org.apache', 'disxshadowed.org.apache'
-    //relocate 'org.mozilla', 'disxshadowed.rhino'
+    relocate 'org.mozilla', 'disxshadowed.rhino'
     relocate 'com.fasterxml', 'disxshadowed.com.fasterxml'
     relocate 'com.grack', 'disxshadowed.com.grack'
-    //relocate 'org.mozilla.javascript', 'disxshadowed.rhino'
+    relocate 'org.mozilla.javascript', 'disxshadowed.rhino'
 
     configurations = [project.configurations.shadowCommon, project.configurations.shadowDependencies]
 
