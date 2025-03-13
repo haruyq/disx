@@ -3,6 +3,7 @@ package xyz.ar06.disx.commands.suggestionProviders;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import dev.architectury.platform.Platform;
 import net.minecraft.commands.CommandSourceStack;
 
 import java.util.concurrent.CompletableFuture;
@@ -13,7 +14,9 @@ public class DisxPropertyTypeSuggestionProvider {
         suggestionsBuilder.suggest("video_existence_check");
         suggestionsBuilder.suggest("max_audio_players");
         suggestionsBuilder.suggest("debug_mode");
-        suggestionsBuilder.suggest("use_live_ytsrc");
+        if (!Platform.isForge()){
+            suggestionsBuilder.suggest("use_live_ytsrc");
+        }
         suggestionsBuilder.suggest("audio_radius");
         suggestionsBuilder.suggest("sound_particles");
         //suggestionsBuilder.suggest("refresh_token");

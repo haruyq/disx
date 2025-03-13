@@ -1,5 +1,6 @@
 package xyz.ar06.disx.commands;
 
+import dev.architectury.platform.Platform;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Style;
@@ -87,6 +88,10 @@ public class DisxConfigCommand {
             if (DisxConfigHandler.SERVER.getProperty(property) == null || property.equals("refresh_token")){
                 context.getSource().sendFailure(Component.translatable("sysmsg.disx.configcmd_invalid_property"));
             } else {
+                if (property.equals("use_live_ytsrc") && Platform.isForge()) {
+                    context.getSource().sendFailure(Component.literal("This feature is currently only available on Fabric and Quilt."));
+                    return 1;
+                }
                 DisxConfigHandler.SERVER.updateProperty(property, value);
                 context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.configcmd_property_changed", property, value));
             }
@@ -279,6 +284,10 @@ public class DisxConfigCommand {
         if (!context.getSource().hasPermission(1)){
             context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
         } else {
+            if (Platform.isForge()){
+                context.getSource().sendFailure(Component.literal("This feature is currently only available on Fabric and Quilt."));
+                return 1;
+            }
             YoutubeAudioSourceManager youtubeAudioSourceManager = DisxAudioStreamingNode.getYoutubeAudioSourceManager();
             String authCode = youtubeAudioSourceManager.getOauth2Handler().initializeAccessToken(context.getSource());
             context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.configcmd.generaterefreshtokeninstructions")
@@ -304,6 +313,10 @@ public class DisxConfigCommand {
         if (!context.getSource().hasPermission(1)){
             context.getSource().sendFailure(Component.translatable("sysmsg.disx.cmd_no_permission"));
         } else {
+            if (Platform.isForge()){
+                context.getSource().sendFailure(Component.literal("This feature is currently only available on Fabric and Quilt."));
+                return 1;
+            }
             DisxConfigHandler.SERVER.updateProperty("refresh_token","");
             context.getSource().sendSystemMessage(Component.translatable("sysmsg.disx.configcmd.clearedrefreshtoken"));
         }
