@@ -238,7 +238,7 @@ public class DisxAudioInstance {
                                 if (volumeCalc_line > 6.0206) {
                                     volumeCalc_line = 6.0206f;
                                 }
-                                volumeControl.setValue(volumeCalc_line);
+                                if (volumeControl != null) volumeControl.setValue(volumeCalc_line);
 
                                 if (volumeCalc_line <= -80f) {
                                     playerCanHear = false;
@@ -256,12 +256,12 @@ public class DisxAudioInstance {
                                     }
                                 }
                             } else {
-                                volumeControl.setValue(-80f);
+                                if (volumeControl != null) volumeControl.setValue(-80f);
                                 playerCanHear = false;
                             }
                         }
                     } else {
-                        volumeControl.setValue(-80f);
+                        if (volumeControl != null) volumeControl.setValue(-80f);
                         playerCanHear = false;
                     }
 

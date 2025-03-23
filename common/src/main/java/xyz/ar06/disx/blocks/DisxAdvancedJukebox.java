@@ -96,8 +96,9 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                 debounce = true;
                 DisxLogger.debug("does have record, taking it out");
                 DisxJukeboxUsageCooldownManager.updateCooldown(blockPos, level.dimension());
-                ItemStack newItemStack = entity.removeItem(0, 1);
-                player.getInventory().add(newItemStack);
+                ItemStack stackCopy = entity.getItem(0).copyWithCount(1);
+                entity.removeItem(0, 1);
+                player.getInventory().add(stackCopy);
                 entity.setChanged();
                 DisxLogger.debug("[advanced jukebox] current has record value: " + entity.isHas_record());
                 level.playSound(null, blockPos, SoundEvents.CHAIN_STEP, SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -120,8 +121,9 @@ public class DisxAdvancedJukebox extends BaseEntityBlock {
                             stack.setTag(updatedTag);
                         }
                         //player.getCooldowns().addCooldown(item, 999999999);
-                        entity.setItem(0, stack.copy(), player);
+                        ItemStack stackCopy = stack.copy();
                         stack.setCount(stack.getCount() - 1);
+                        entity.setItem(0, stackCopy, player);
                         DisxJukeboxUsageCooldownManager.updateCooldown(blockPos, level.dimension());
                         DisxServerPacketIndex.ServerPackets.loadingVideoIdMessage(videoId, player);
                         DisxLogger.debug("[advanced jukebox] current has record value: " + entity.isHas_record());

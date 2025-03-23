@@ -82,11 +82,12 @@ public class DisxAdvancedJukeboxMinecart extends Minecart implements ContainerEn
             if (handStack.getItem() instanceof DisxCustomDisc){
                 if (!isHas_Record()){
                     DisxLogger.debug("Does not have record, taking and putting in");
-                    setItem(0, handStack.copyWithCount(1), player);
+                    ItemStack stackCopy = handStack.copyWithCount(1);
+                    handStack.setCount(handStack.getCount() - 1);
+                    setItem(0, stackCopy, player);
                     CompoundTag tag = handStack.getTag();
                     String videoId = tag.getString("videoId");
                     DisxServerPacketIndex.ServerPackets.loadingVideoIdMessage(videoId, player);
-                    handStack.setCount(handStack.getCount() - 1);
                     this.level().playSound(null, this, SoundEvents.CHICKEN_EGG, SoundSource.BLOCKS, 1.0F, 1.0F);
                     CompletableFuture.runAsync(() -> this.tryGetUpdatedDiscName(player));
                 } else {
@@ -168,6 +169,7 @@ public class DisxAdvancedJukeboxMinecart extends Minecart implements ContainerEn
 
     @Override
     public void remove(RemovalReason removalReason) {
+        DisxServerAudioRegistry.removeFromRegistry(BlockPos.ZERO, this.level().dimension(), this.getUUID(), DisxAudioMotionType.LIVE);
         ItemStack stack = getItem(0);
         if (!stack.isEmpty()){
             ItemStack drop = stack.copyWithCount(1);
@@ -395,16 +397,20 @@ public class DisxAdvancedJukeboxMinecart extends Minecart implements ContainerEn
 
     private boolean pauseResumeDebounce = false;
 
+    /*
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
         if (!this.level().isClientSide() && !pauseResumeDebounce) {
             boolean audioExists = DisxServerAudioRegistry.isNodeOnEntity(this.getUUID());
-            if (audioExists){
+            boolean fromPlayer = damageSource.is(DamageTypes.PLAYER_ATTACK);
+            if (audioExists && !fromPlayer){
                 pauseResumeDebounce = true;
                 boolean paused = DisxServerAudioRegistry.pauseOrPlayNode(this.getUUID());
-                if (damageSource.getEntity().getType().equals(EntityType.PLAYER) && audioExists) {
-                    ServerPlayer player = this.level().getServer().getPlayerList().getPlayer(damageSource.getEntity().getUUID());
-                    DisxServerPacketIndex.ServerPackets.pauseMsg(player, paused);
+                if (damageSource.getEntity() != null){
+                    if (damageSource.getEntity().getType().equals(EntityType.PLAYER) && audioExists) {
+                        ServerPlayer player = this.level().getServer().getPlayerList().getPlayer(damageSource.getEntity().getUUID());
+                        DisxServerPacketIndex.ServerPackets.pauseMsg(player, paused);
+                    }
                 }
                 if (paused){
                     DisxLogger.debug("Playing static sound?");
@@ -422,6 +428,7 @@ public class DisxAdvancedJukeboxMinecart extends Minecart implements ContainerEn
         }
         return super.hurt(damageSource, f);
     }
+     */
 
     @Override
     public boolean isEmpty() {
