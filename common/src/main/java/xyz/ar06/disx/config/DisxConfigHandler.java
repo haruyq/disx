@@ -186,11 +186,11 @@ public class DisxConfigHandler {
 
         public static void updateProperty(String key, String value){
             properties.setProperty(key, value);
-            DisxModInfo.setDEBUG(Boolean.parseBoolean(properties.getProperty("debug_mode")));
-            DisxModInfo.setUseYtsrc(Boolean.parseBoolean(properties.getProperty("use_live_ytsrc")));
-            DisxModInfo.setRefreshToken(properties.getProperty("refresh_token"));
-            DisxModInfo.setSoundParticles(Boolean.parseBoolean(properties.getProperty("sound_particles")));
-            DisxModInfo.setAudioRadius(Integer.parseInt(properties.getProperty("audio_radius")));
+            DisxModInfo.setDEBUG(Boolean.parseBoolean(properties.getProperty("debug_mode", "false")));
+            DisxModInfo.setUseYtsrc(Boolean.parseBoolean(properties.getProperty("use_live_ytsrc", "false")));
+            DisxModInfo.setRefreshToken(properties.getProperty("refresh_token", ""));
+            DisxModInfo.setSoundParticles(Boolean.parseBoolean(properties.getProperty("sound_particles", "true")));
+            DisxModInfo.setAudioRadius(Integer.parseInt(properties.getProperty("audio_radius", "25")));
             DisxServerPacketIndex.ServerPackets.serverConfigSendAll();
             updateConfigFile();
         }

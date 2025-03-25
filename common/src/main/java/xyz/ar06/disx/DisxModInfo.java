@@ -12,7 +12,8 @@ import java.net.http.HttpResponse;
 import java.util.HashMap;
 
 public class DisxModInfo {
-    private static final String VERSION = "0.3.1-dev-";
+    //MANUAL MANIPULATIVES
+    private static final String VERSION = "0.3.1-dev-be006e9d";
     private static final boolean DEV_BUILD = true;
     private static final boolean FORCE_DEBUG = true;
     private static final String[] debugKeys = new String[]{
@@ -21,6 +22,7 @@ public class DisxModInfo {
     };
     private static final boolean TEST_TRACK_ENABLED = false;
 
+    //URLS
     private static final String DISCORD_URL = "http://discord.ar06.xyz";
     private static final String MODRINTH_URL = "https://modrinth.com/mod/disx";
     private static final String CURSEFORGE_URL = "https://www.curseforge.com/minecraft/mc-mods/disx";
@@ -30,9 +32,11 @@ public class DisxModInfo {
     private static final String LATEST_VERSION_URL = "https://raw.githubusercontent.com/AviatorRob/disx/master/LATEST_VERSION.json";
     private static final String FORCE_SETTINGS_URL = "https://raw.githubusercontent.com/AviatorRob/disx/refs/heads/master/FORCE_SETTINGS.json";
 
+    //MOD CONFLICT INFO
     private static final String[] potentialModConflicts = {"carryon"};
     private static final String CARRYON_CONFIG_INSTRUCTIONS_URL = "https://github.com/Tschipp/CarryOn/wiki/Black---and-Whitelist-Config";
 
+    //DYNAMIC INFORMATION STORES
     private static boolean DEBUG = false;
     private static boolean USE_YTSRC = false;
     private static String LATEST_VERSION = "N/A - NO INTERNET";
