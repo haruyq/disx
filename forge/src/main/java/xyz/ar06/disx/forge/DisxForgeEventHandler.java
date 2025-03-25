@@ -9,7 +9,6 @@ import xyz.ar06.disx.DisxMain;
 import xyz.ar06.disx.blocks.DisxLacquerBlock;
 import xyz.ar06.disx.items.DisxLacquerDrop;
 
-@Mod(DisxMain.MOD_ID)
 public class DisxForgeEventHandler {
     @SubscribeEvent
     public static void setup(FMLCommonSetupEvent event) {

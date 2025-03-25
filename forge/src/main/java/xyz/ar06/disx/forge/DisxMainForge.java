@@ -12,16 +12,9 @@ import xyz.ar06.disx.forge.client.DisxClientForge;
 public class DisxMainForge {
     public DisxMainForge() {
         // Submit our event bus to let architectury register our content on the right time
-        Logger LOGGER = LoggerFactory.getLogger("disx");
         EventBuses.registerModEventBus(DisxMain.MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
         DisxMain.init();
         FMLJavaModLoadingContext.get().getModEventBus().addListener(DisxClientForge::onClientInitialize);
         FMLJavaModLoadingContext.get().getModEventBus().register(DisxForgeEventHandler.class);
-        try {
-            Class.forName("rhino.javascript.Callable");
-            System.out.println("Class found!");
-        } catch (ClassNotFoundException e) {
-            System.out.println("Class not found: " + e.getMessage());
-        }
     }
 }
