@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 public class DisxModInfo {
     //MANUAL MANIPULATIVES
-    private static final String VERSION = "0.3.1-dev-be006e9d";
+    private static final String VERSION = "0.3.1-dev-a0707fed";
     private static final boolean DEV_BUILD = true;
     private static final boolean FORCE_DEBUG = true;
     private static final String[] debugKeys = new String[]{
