@@ -141,6 +141,8 @@ public class DisxMain {
             }
         });
 
+        LifecycleEvent.SERVER_STARTING.register(DisxTmpHandler::onServerStart);
+
         InteractionEvent.RIGHT_CLICK_BLOCK.register(DisxAdvancedJukebox::leverListener);
 
         //Register Server Packets

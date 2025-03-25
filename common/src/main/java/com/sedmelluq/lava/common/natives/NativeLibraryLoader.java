@@ -156,6 +156,7 @@ public class NativeLibraryLoader {
     }
 
     private Path detectExtractionBaseDirectory() {
+        System.out.println("running detect extraction blah");
         String explicitExtractionBase = properties.getExtractionPath();
 
         if (explicitExtractionBase != null) {
@@ -163,8 +164,10 @@ public class NativeLibraryLoader {
             return Paths.get(explicitExtractionBase).toAbsolutePath();
         }
 
-        Path path = Paths.get(System.getProperty("java.io.tmpdir", "/tmp"), "lava-jni-natives")
+        Path path = Paths.get(".disx-tmp", "/lava-jni-natives")
             .toAbsolutePath();
+
+        System.out.println("path: " + path);
 
         log.debug("Native library {}: detected {} as base directory for extraction.", libraryName, path);
         return path;
