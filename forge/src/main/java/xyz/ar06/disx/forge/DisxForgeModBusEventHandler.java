@@ -3,13 +3,11 @@ package xyz.ar06.disx.forge;
 import dev.architectury.registry.fuel.FuelRegistry;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import xyz.ar06.disx.DisxMain;
 import xyz.ar06.disx.blocks.DisxLacquerBlock;
 import xyz.ar06.disx.items.DisxLacquerDrop;
 
-public class DisxForgeEventHandler {
+public class DisxForgeModBusEventHandler {
     @SubscribeEvent
     public static void setup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
